@@ -61,7 +61,9 @@ export function initRealtimeNotifier() {
   supabase
     .channel('global-system')
     .on('broadcast', { event: 'notification' }, (payload) => {
-      const { message, event_id } = payload.payload;
+      console.log('⚡ Received Broadcast:', payload);
+      const { message, event_id } = payload;
+      
       if (event_id === user.event_id) {
         Notifier.modal({
           title: 'Broadcast from Admin',

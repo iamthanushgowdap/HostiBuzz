@@ -225,24 +225,28 @@ export async function renderAdmin(container) {
       broadcastBtn.innerHTML = '<span class="material-symbols-outlined animate-spin text-sm">refresh</span>';
       
       const channel = supabase.channel('global-system');
-      await channel.send({
-        type: 'broadcast',
-        event: 'notification',
-        payload: { message: msg, event_id: selectedEventId }
+      channel.subscribe(async (status) => {
+        if (status === 'SUBSCRIBED') {
+          await channel.send({
+            type: 'broadcast',
+            event: 'notification',
+            payload: { message: msg, event_id: selectedEventId }
+          });
+          
+          document.getElementById('broadcast-msg').value = '';
+          broadcastBtn.disabled = false;
+          broadcastBtn.innerHTML = 'Send Now';
+          
+          const prevClass = broadcastBtn.className;
+          broadcastBtn.className = 'w-full py-2 bg-secondary text-surface rounded-xl font-headline font-bold text-xs uppercase tracking-widest transition-all text-center';
+          broadcastBtn.innerHTML = 'Sent!';
+          setTimeout(() => {
+            broadcastBtn.className = prevClass;
+            broadcastBtn.innerHTML = 'Send Now';
+            broadcastPopup.classList.add('hidden');
+          }, 2000);
+        }
       });
-      
-      document.getElementById('broadcast-msg').value = '';
-      broadcastBtn.disabled = false;
-      broadcastBtn.innerHTML = 'Send Now';
-      
-      const prevClass = broadcastBtn.className;
-      broadcastBtn.className = 'w-full py-2 bg-secondary text-surface rounded-xl font-headline font-bold text-xs uppercase tracking-widest transition-all text-center';
-      broadcastBtn.innerHTML = 'Sent!';
-      setTimeout(() => {
-        broadcastBtn.className = prevClass;
-        broadcastBtn.innerHTML = 'Send Now';
-        broadcastPopup.classList.add('hidden');
-      }, 2000);
     });
   }
 
