@@ -4,13 +4,17 @@ import { renderNavbar, bindNavbarEvents } from '../components/navbar.js';
 import { Timer, renderPreRoundCountdown } from '../services/timer.js';
 import { startAntiCheat, stopAntiCheat } from '../services/anti-cheat.js';
 import { navigate } from '../router.js';
+import { ActivityBroadcast } from '../services/activity-broadcast.js';
+import { Ticker } from '../components/ticker.js';
 
 let timer = null;
 
-export async function renderQuizRound(container, params, search = {}) {
-  const isPreview = search.mode === 'preview';
+export async function renderQuizRound(container, params, search = {}, mockUser = null) {
+  const isPreview = search.mode === 'preview' || !!mockUser;
   const previewRoundId = search.roundId;
-  const user = getState('user');
+  const user = mockUser || getState('user');
+  
+  Ticker.init(container);
   
   if (!user && !isPreview) {
     navigate('/login');
@@ -197,6 +201,10 @@ export async function renderQuizRound(container, params, search = {}) {
     }, { onConflict: 'team_id,round_id' });
 
     stopAntiCheat();
+    
+    // Broadcast submission to ticker
+    ActivityBroadcast.push('activity', `Team "${user.team_name}" just submitted for ${round.title}!`);
+    
     alert(`Quiz submitted! Result: ${score}/${maxScore}`);
     navigate('/dashboard');
   }

@@ -1,10 +1,14 @@
 import { supabase } from '../config/supabase.js';
 import { getState } from '../services/state.js';
+import { socketService } from '../services/socket.js';
 import { renderNavbar, bindNavbarEvents } from '../components/navbar.js';
 import { navigate } from '../router.js';
 import { Notifier } from '../services/notifier.js';
 import { jsPDF } from 'jspdf';
 import { renderDashboard } from './dashboard.js';
+import { Ticker } from '../components/ticker.js';
+import { ActivityBroadcast } from '../services/activity-broadcast.js';
+import { AIEvaluator } from '../services/ai-evaluator.js';
 import Prism from 'prismjs';
 import 'prismjs/themes/prism-tomorrow.css'; 
 import 'prismjs/components/prism-javascript';
@@ -19,42 +23,59 @@ function generateSlug(name) {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 }
 
-export async function renderAdmin(container) {
-  const user = getState('user');
-  let onlineTeams = new Set();
-  
-  // Initialize Presence
-  const presenceChannel = supabase.channel('online-teams');
-  presenceChannel
-    .on('presence', { event: 'sync' }, () => {
-      const state = presenceChannel.presenceState();
-      onlineTeams.clear();
-      Object.values(state).forEach(presences => {
-        presences.forEach(p => {
-          if (p.team_id) onlineTeams.add(p.team_id);
-        });
-      });
-      refreshSidebarPresence();
-    })
-    .subscribe();
+// Global Singletons for Real-Time Services
+let presenceChannel = null;
+let broadcastChannel = null;
+let onlineTeams = new Set();
+let currentAdminContainer = null;
 
-  function refreshSidebarPresence() {
-    container.querySelectorAll('.presence-dot').forEach(dot => {
-      const teamId = dot.dataset.teamId;
-      if (onlineTeams.has(teamId)) {
-        dot.classList.remove('bg-outline');
-        dot.classList.add('bg-secondary', 'animate-pulse');
-      } else {
-        dot.classList.remove('bg-secondary', 'animate-pulse');
-        dot.classList.add('bg-outline');
-      }
-    });
+/**
+ * Global update for presence dots across any rendered container.
+ */
+function refreshSidebarPresence() {
+  if (!currentAdminContainer) return;
+  currentAdminContainer.querySelectorAll('.presence-dot').forEach(dot => {
+    const teamId = dot.dataset.teamId;
+    if (onlineTeams.has(teamId)) {
+      dot.classList.add('bg-secondary', 'animate-pulse');
+      dot.classList.remove('bg-outline');
+    } else {
+      dot.classList.remove('bg-secondary', 'animate-pulse');
+      dot.classList.add('bg-outline');
+    }
+  });
+}
+
+export async function renderAdmin(container, params = {}, search = {}, mockUser = null) {
+  currentAdminContainer = container;
+  const user = getState('user');
+  
+  // Initialize Global Services Once (Persistent Connection)
+  if (!presenceChannel) {
+    Ticker.init(); 
+    presenceChannel = supabase.channel('online-teams');
+    presenceChannel
+      .on('presence', { event: 'sync' }, () => {
+        const state = presenceChannel.presenceState();
+        onlineTeams.clear();
+        Object.values(state).forEach(presences => {
+          presences.forEach(p => {
+            if (p.team_id) onlineTeams.add(p.team_id);
+          });
+        });
+        refreshSidebarPresence();
+      })
+      .subscribe();
   }
 
-  // Fetch all events
+  if (!broadcastChannel) {
+    broadcastChannel = supabase.channel('global-system').subscribe();
+  }
+
+  // Fetch all events for the context
   const { data: events } = await supabase.from('events').select('*').order('created_at', { ascending: false });
 
-  // Fetch all teams if an event is selected
+  // Render Skeleton Shell
   let teams = [];
   if (selectedEventId) {
     const { data } = await supabase.from('teams').select('*').eq('event_id', selectedEventId).order('team_name');
@@ -82,7 +103,8 @@ export async function renderAdmin(container) {
               <option value="">Select Team to Preview...</option>
               ${teams.map(t => `<option value="${t.id}">${t.team_name}</option>`).join('')}
             </select>
-            <button id="launch-preview" class="w-full py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white font-headline font-bold text-[10px] uppercase tracking-widest border border-white/10 transition-all">
+            <button id="launch-preview" class="w-full py-2 rounded-lg bg-primary/20 hover:bg-primary/30 text-primary font-headline font-bold text-[10px] uppercase tracking-widest border border-primary/20 transition-all flex items-center justify-center gap-2">
+              <span class="material-symbols-outlined text-sm">rocket_launch</span>
               Launch Live Preview
             </button>
           </div>
@@ -164,6 +186,12 @@ export async function renderAdmin(container) {
       </main>
     </div>
 
+    <!-- Real-Time Pulse Authorization -->
+    ${selectedEventId ? (() => {
+      socketService.joinRoom(selectedEventId, 'admin');
+      return '';
+    })() : ''}
+
     <!-- Create Event Modal -->
     <div id="create-event-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-6">
       <div class="glass-panel p-8 rounded-3xl max-w-lg w-full border border-white/10 space-y-6">
@@ -203,12 +231,33 @@ export async function renderAdmin(container) {
   bindNavbarEvents();
 
   // ========================================
+  // PREVIEW ENGINE
+  // ========================================
+  // ========================================
+  // PREVIEW ENGINE
+  // ========================================
+  const launchBtn = document.getElementById('launch-preview');
+  if (launchBtn) {
+    launchBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const teamSelect = document.getElementById('preview-team-select');
+      const teamId = teamSelect.value;
+      if (!teamId) return Notifier.toast('Please select a team to preview', 'warning');
+      
+      console.log('[Admin] Previewing Team:', teamId);
+      sessionStorage.setItem('admin_return', 'true');
+      navigate(`/dashboard?preview_team_id=${teamId}`);
+    });
+  }
+
+  // ========================================
   // EVENT SIDEBAR: select an event
   // ========================================
   container.querySelectorAll('.event-select').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
       selectedEventId = btn.dataset.eventId;
-      renderAdmin(container);
+      renderAdmin(currentAdminContainer, params, search, mockUser);
     });
   });
 
@@ -248,7 +297,26 @@ export async function renderAdmin(container) {
     }
 
     selectedEventId = data.id;
-    renderAdmin(container);
+    renderAdmin(container, params, search, mockUser);
+  });
+
+  // ========================================
+  // ROUND AUDITION
+  // ========================================
+  container.addEventListener('click', (e) => {
+    const btn = e.target.closest('#audition-round');
+    if (!btn) return;
+    
+    const { roundId, roundType } = btn.dataset;
+    const teamId = document.getElementById('preview-team-select').value;
+    
+    if (!teamId) {
+      return Notifier.toast('Select a team in the Sidebar Preview Engine to use as a diagnostic vessel.', 'info');
+    }
+    
+    // Launch audition: Dashboard -> Round
+    sessionStorage.setItem('admin_return', 'true');
+    window.location.hash = `/round/${roundType}?preview_team_id=${teamId}`;
   });
 
   // ========================================
@@ -273,11 +341,12 @@ export async function renderAdmin(container) {
   const broadcastBtn = document.getElementById('send-broadcast');
   const broadcastInput = document.getElementById('broadcast-msg');
 
-  // Pre-initialize channel for faster sending
-  const broadcastChannel = supabase.channel('global-system').subscribe();
+  // Channels are now managed at module level
 
+  // Global Broadcast Handlers
   if (broadcastToggle && broadcastPopup) {
-    broadcastToggle.addEventListener('click', () => {
+    broadcastToggle.addEventListener('click', (e) => {
+      e.stopPropagation();
       broadcastPopup.classList.toggle('hidden');
       if (!broadcastPopup.classList.contains('hidden')) {
         broadcastInput.focus();
@@ -315,6 +384,11 @@ export async function renderAdmin(container) {
 
         // Success state
         clearTimeout(safetyTimeout);
+        ActivityBroadcast.push('news', `BREAKING NEWS: ${msg}`);
+        
+        // Instant Socket Pulse
+        socketService.emit('admin:announcement', { message: msg });
+        
         broadcastInput.value = '';
         broadcastBtn.disabled = false;
         
@@ -380,9 +454,10 @@ export async function renderAdmin(container) {
 
     document.getElementById('welcome-create-event')?.addEventListener('click', openModal);
     el.querySelectorAll('.pick-event').forEach(btn => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
         selectedEventId = btn.dataset.pickEvent;
-        renderAdmin(container);
+        renderAdmin(currentAdminContainer, params, search, mockUser);
       });
     });
   }
@@ -504,6 +579,9 @@ export async function renderAdmin(container) {
         } else if (round.round_type === 'logo') {
           const { data: logos } = await supabase.from('logo_assets').select('*').eq('round_id', roundId).order('order_index');
           context.logos = logos || [];
+        } else if (round.round_type === 'prompt') {
+          const { data: prompts } = await supabase.from('prompt_images').select('*').eq('round_id', roundId).order('order_index');
+          context.prompts = prompts || [];
         } else if (round.round_type === 'debate') {
           const { data: topic } = await supabase.from('debate_topics').select('*').eq('round_id', roundId).maybeSingle();
           context.debate = topic || {};
@@ -513,10 +591,42 @@ export async function renderAdmin(container) {
           event: { name: event.name, id: event.id },
           round: { title: round.title, type: round.round_type, number: round.round_number, id: round.id },
           context: context,
+          scoring_weights: {
+            round_max_score: round.max_score || 100,
+            asset_points: [
+              ...(context.questions?.map(q => ({ label: `Q${q.order_index}`, id: q.id, points: q.points || 1 })) || []),
+              ...(context.logos?.map(l => ({ label: `Logo ${l.order_index}`, id: l.id, points: l.points || 1 })) || []),
+              ...(context.prompts?.map(p => ({ label: `Prompt ${p.order_index}`, id: p.id, points: p.points || 1, master_prompt: p.seed_description })) || []),
+              ...(context.debate?.id ? [{ label: 'Debate Topic', id: context.debate.id, points: context.debate.points || 10 }] : [])
+            ]
+          },
           instructions_for_ai: {
             role: "You are an expert evaluator",
             task: `Evaluate ${round.title}`,
-            scoring_schema: { total: "<score>" }
+            evaluation_rules: {
+              prompt_round: "For prompt rounds, you are provided with a 'master_prompt' for each image. Compare the team's' submission to this master prompt. Award higher marks for similar technical keywords, lighting descriptions, and visual elements.",
+              quiz_round: "Check for exact matches against the master key.",
+              logo_round: "Verify the team's brand identification against the correct_answer."
+            },
+            scoring_schema: { 
+              total: round.max_score || 100,
+              note: "Respect the specific marks/points defined for each individual question/logo."
+            },
+            required_output_format: {
+              format: "JSON Object",
+              structure: {
+                scores: [
+                  {
+                    team_id: "Unique Team ID from the submission list",
+                    team_name: "Name of the team",
+                    score: "Numerical total score for the round",
+                    max_score: round.max_score || 100,
+                    reasoning: "Brief explanation of the score based on the context and weights provided"
+                  }
+                ]
+              },
+              important: "Return ONLY the JSON object. Do not include markdown code blocks or conversational text. This format is required for the automated score importer."
+            }
           },
           submissions: (subs || []).map(s => {
             const team = teams.find(t => t.id === s.team_id);
@@ -556,6 +666,7 @@ export async function renderAdmin(container) {
                   <tr>
                     <th class="p-3 font-bold uppercase tracking-widest text-on-surface-variant">Team</th>
                     <th class="p-3 font-bold uppercase tracking-widest text-on-surface-variant text-center">Score</th>
+                    <th class="p-3 font-bold uppercase tracking-widest text-on-surface-variant">Reasoning Snippet</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-white/5">
@@ -566,12 +677,13 @@ export async function renderAdmin(container) {
               <tr>
                 <td class="p-3 text-white font-headline">${s.team_name || 'Unknown'} <span class="text-[10px] text-on-surface-variant opacity-50">(${s.team_id})</span></td>
                 <td class="p-3 text-primary font-bold text-center">${s.total || s.score || 0}</td>
+                <td class="p-3 text-[10px] text-on-surface-variant italic truncate max-w-xs">${s.reasoning || 'No reasoning provided'}</td>
               </tr>
             `;
           });
 
           if (scoresArr.length > 10) {
-            tableHtml += `<tr><td colspan="2" class="p-3 text-center text-on-surface-variant italic">... and ${scoresArr.length - 10} more entries</td></tr>`;
+            tableHtml += `<tr><td colspan="3" class="p-3 text-center text-on-surface-variant italic">... and ${scoresArr.length - 10} more entries</td></tr>`;
           }
           tableHtml += `</tbody></table></div>`;
 
@@ -597,7 +709,8 @@ export async function renderAdmin(container) {
                     team_id: team.id,
                     round_id: roundId,
                     score: pointValue,
-                    max_score: s.max_score || 30,
+                    max_score: round.max_score || 100,
+                    evaluator_notes: s.reasoning || '',
                     evaluated_at: new Date().toISOString()
                   }, { onConflict: 'team_id,round_id' });
                   imported++;
@@ -738,6 +851,27 @@ export async function renderAdmin(container) {
           </button>
         </div>
 
+        <div class="glass-panel p-6 rounded-2xl space-y-4 glow-accent">
+          <h3 class="font-headline font-bold text-white text-lg flex items-center gap-2">
+            <span class="material-symbols-outlined text-secondary">psychology</span>
+            System Intelligence
+          </h3>
+          <div class="space-y-1">
+            <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Gemini Pro API Key</label>
+            <div class="p-3 bg-secondary/10 border border-secondary/20 rounded-xl mb-4">
+              <p class="text-[10px] text-secondary font-bold uppercase tracking-widest flex items-center gap-2">
+                <span class="material-symbols-outlined text-sm">psychology</span>
+                AI Evaluator (Coming Soon)
+              </p>
+              <p class="text-[10px] text-on-surface-variant mt-1">Direct scoring via Gemini AI is currently being optimized.</p>
+            </div>
+            <input id="edit-gemini-key" type="password" value="${event.config?.gemini_api_key || ''}" disabled placeholder="AI Configuration Locked..." class="w-full bg-surface-container-lowest/50 border-none rounded-xl py-3 px-4 text-on-surface-variant cursor-not-allowed font-mono text-xs" />
+          </div>
+          <button id="save-ai-config" class="w-full py-3 rounded-xl bg-secondary/20 text-secondary font-headline font-bold text-xs uppercase tracking-widest hover:bg-secondary/30 transition-all flex items-center justify-center gap-2">
+            <span class="material-symbols-outlined text-sm">save</span> Save AI Key
+          </button>
+        </div>
+
         <div class="glass-panel p-6 rounded-2xl space-y-4">
           <h3 class="font-headline font-bold text-white text-lg flex items-center gap-2">
             <span class="material-symbols-outlined text-secondary">bolt</span>
@@ -839,6 +973,20 @@ export async function renderAdmin(container) {
         setTimeout(() => renderAdmin(container), 800);
       }
     });
+
+    // Save AI Config
+    document.getElementById('save-ai-config')?.addEventListener('click', async () => {
+      const key = document.getElementById('edit-gemini-key').value.trim();
+      const currentConfig = typeof event.config === 'string' ? JSON.parse(event.config) : (event.config || {});
+      const newConfig = { ...currentConfig, gemini_api_key: key };
+      
+      const { error } = await supabase.from('events').update({ config: newConfig }).eq('id', event.id);
+      if (error) Notifier.toast('Error saving AI key', 'error');
+      else {
+        Notifier.toast('AI Intelligence Activated', 'success');
+        renderAdmin(container);
+      }
+    });
   }
 
   // ========================================
@@ -880,11 +1028,15 @@ export async function renderAdmin(container) {
               ${roundTypes.map(t => `<option value="${t.value}">${t.label}</option>`).join('')}
             </select>
           </div>
-          <div class="md:col-span-2">
-            <label class="text-[10px] font-bold tracking-widest text-on-surface-variant uppercase block mb-1">Duration (min)</label>
-            <input id="add-round-duration" type="number" min="1" value="40" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white" />
+          <div class="md:col-span-1">
+            <label class="text-[10px] font-bold tracking-widest text-on-surface-variant uppercase block mb-1">Duration</label>
+            <input id="add-round-duration" type="number" min="1" value="40" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-3 text-white text-center" />
           </div>
-          <div class="md:col-span-2 flex items-end">
+          <div class="md:col-span-1">
+            <label class="text-[10px] font-bold tracking-widest text-on-surface-variant uppercase block mb-1">Max Score</label>
+            <input id="add-round-max-score" type="number" min="1" value="100" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-3 text-white text-center font-bold text-secondary" />
+          </div>
+          <div class="md:col-span-1 flex items-end">
             <button id="confirm-add-round" class="w-full py-3 rounded-xl kinetic-gradient text-on-primary-fixed font-headline font-bold text-sm hover:scale-105 active:scale-95 transition-transform flex items-center justify-center gap-2">
               <span class="material-symbols-outlined text-sm">add</span> Add
             </button>
@@ -907,7 +1059,11 @@ export async function renderAdmin(container) {
                     <span class="text-xs font-bold text-on-surface-variant/40 font-headline">R${r.round_number}</span>
                     <h4 class="font-headline font-bold text-white">${r.title}</h4>
                   </div>
-                  <div class="text-[10px] text-on-surface-variant capitalize">${typeInfo.label || r.round_type} • ${r.duration_minutes} min • ${r.status} ${r.status === 'active' && r.started_at ? `(Since: ${new Date(r.started_at).toLocaleTimeString()})` : ''} ${r.status === 'paused' ? '<span class="text-warning font-bold underline animate-pulse ml-2">LOCKED - NO TEAM ACTION ALLOWED</span>' : ''}</div>
+                  <div class="text-[10px] text-on-surface-variant capitalize">
+                    ${typeInfo.label || r.round_type} • ${r.duration_minutes} min • <span class="text-secondary font-bold">Max: ${r.max_score || 100} pts</span>
+                    ${r.status === 'active' && r.started_at ? ` • Since: ${new Date(r.started_at).toLocaleTimeString()}` : ''}
+                    ${r.status === 'paused' ? '<span class="text-warning font-bold underline animate-pulse ml-2">LOCKED</span>' : ''}
+                  </div>
                 </div>
               </div>
                 <div class="flex items-center flex-wrap gap-2">
@@ -922,14 +1078,17 @@ export async function renderAdmin(container) {
                     <button data-round-action="restart" data-round-id="${r.id}" class="round-ctrl px-3 py-1.5 rounded-lg bg-primary/10 text-primary font-headline font-bold text-xs border border-primary/20 hover:bg-primary/30 transition-colors">🔄 RESTART</button>
                   ` : ''}
                   ${r.status === 'completed' ? `
+                    <button data-round-action="manage-intel" data-round-id="${r.id}" class="round-ctrl px-3 py-1.5 rounded-lg bg-secondary/10 text-secondary font-headline font-bold text-xs border border-secondary/20 hover:bg-secondary/30 transition-colors flex items-center gap-1">
+                      <span class="material-symbols-outlined text-xs">manage_search</span> REVIEW
+                    </button>
                     <button data-round-action="restart" data-round-id="${r.id}" class="round-ctrl px-3 py-1.5 rounded-lg bg-primary/10 text-primary font-headline font-bold text-xs border border-primary/20 hover:bg-primary/30 transition-colors">🔄 RESTART FRESH</button>
                   ` : ''}
 
                   <div class="w-px h-6 bg-white/10 mx-2 hidden sm:block"></div>
                   <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${r.status === 'active' ? 'bg-secondary/10 text-secondary' : r.status === 'paused' ? 'bg-warning/10 text-warning' : r.status === 'completed' ? 'bg-primary/10 text-primary' : 'bg-surface-container-highest text-on-surface-variant'}">${r.status}</span>
-                  <button data-round-action="preview" data-round-id="${r.id}" class="round-preview w-8 h-8 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center hover:bg-secondary/20 transition-colors shrink-0" title="Preview Participant View"><span class="material-symbols-outlined text-sm">visibility</span></button>
-                  <button data-edit-round="${r.id}" class="edit-round w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center hover:bg-primary/20 transition-colors shrink-0"><span class="material-symbols-outlined text-sm">edit</span></button>
-                  <button data-del-round="${r.id}" class="del-round w-8 h-8 rounded-lg bg-error/10 text-error flex items-center justify-center hover:bg-error/20 transition-colors shrink-0"><span class="material-symbols-outlined text-sm">delete</span></button>
+                  <button type="button" data-round-action="preview" data-round-id="${r.id}" class="round-ctrl round-preview w-8 h-8 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center hover:bg-secondary/20 transition-colors shrink-0" title="Preview Participant View"><span class="material-symbols-outlined text-sm">visibility</span></button>
+                  <button type="button" data-edit-round="${r.id}" class="edit-round w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center hover:bg-primary/20 transition-colors shrink-0"><span class="material-symbols-outlined text-sm">edit</span></button>
+                  <button type="button" data-del-round="${r.id}" class="del-round w-8 h-8 rounded-lg bg-error/10 text-error flex items-center justify-center hover:bg-error/20 transition-colors shrink-0"><span class="material-symbols-outlined text-sm">delete</span></button>
                 </div>
             </div>
           `;
@@ -957,8 +1116,8 @@ export async function renderAdmin(container) {
                 <input id="edit-round-title" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white focus:ring-1 focus:ring-secondary/40 font-headline" />
               </div>
             </div>
-            <div class="grid grid-cols-2 gap-4">
-              <div>
+            <div class="grid grid-cols-3 gap-4">
+              <div class="col-span-2">
                 <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block mb-1">Type</label>
                 <select id="edit-round-type" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white">
                   ${roundTypes.map(t => `<option value="${t.value}">${t.label}</option>`).join('')}
@@ -968,6 +1127,10 @@ export async function renderAdmin(container) {
                 <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block mb-1">Duration (min)</label>
                 <input id="edit-round-duration" type="number" min="1" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white" />
               </div>
+            </div>
+            <div>
+              <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block mb-1">Max Round Score (Marks)</label>
+              <input id="edit-round-max-score" type="number" min="1" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-secondary font-headline font-black text-xl" />
             </div>
           </div>
           <button id="save-edit-round" class="kinetic-gradient w-full py-4 rounded-xl font-headline font-bold text-on-primary-fixed flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-transform">
@@ -987,7 +1150,8 @@ export async function renderAdmin(container) {
         round_number: parseInt(document.getElementById('add-round-number').value) || (rounds.length + 1),
         round_type: document.getElementById('add-round-type').value,
         title,
-        duration_minutes: parseInt(document.getElementById('add-round-duration').value) || 40
+        duration_minutes: parseInt(document.getElementById('add-round-duration').value) || 40,
+        max_score: parseInt(document.getElementById('add-round-max-score').value) || 100
       });
 
       if (error) return alert('Error: ' + error.message);
@@ -1005,6 +1169,7 @@ export async function renderAdmin(container) {
         document.getElementById('edit-round-title').value = round.title;
         document.getElementById('edit-round-type').value = round.round_type;
         document.getElementById('edit-round-duration').value = round.duration_minutes;
+        document.getElementById('edit-round-max-score').value = round.max_score || 100;
         document.getElementById('edit-round-modal').classList.remove('hidden');
       });
     });
@@ -1022,7 +1187,8 @@ export async function renderAdmin(container) {
         round_number: parseInt(document.getElementById('edit-round-number').value),
         title,
         round_type: document.getElementById('edit-round-type').value,
-        duration_minutes: parseInt(document.getElementById('edit-round-duration').value) || 40
+        duration_minutes: parseInt(document.getElementById('edit-round-duration').value) || 40,
+        max_score: parseInt(document.getElementById('edit-round-max-score').value) || 100
       }).eq('id', roundId);
 
       if (error) return alert('Error: ' + error.message);
@@ -1047,9 +1213,15 @@ export async function renderAdmin(container) {
         const round = rounds.find(r => r.id === roundId);
         if (!round) return;
 
+        if (action === 'manage-intel') {
+          renderRoundIntelligence(el, event, round, teams);
+          return;
+        }
+
         if (action === 'preview') {
-          // Preview mode: Redirect to the round engine with a preview flag
-          navigate(`/round/${round.round_type}?mode=preview&roundId=${round.id}`);
+          // Use first team as a persona for the preview if no specific team is selected
+          const teamPersona = teams[0] || { id: 'preview-team', team_name: 'Audit Mode' };
+          renderPreviewModal('round', teamPersona, round);
           return;
         }
 
@@ -1063,6 +1235,15 @@ export async function renderAdmin(container) {
           updates.status = 'active';
           updates.started_at = new Date().toISOString();
           await supabase.from('events').update({ current_round_id: roundId }).eq('id', event.id);
+          
+          // Instant Socket Trigger
+          socketService.emit('admin:round_start', { 
+            eventId: event.id, 
+            roundId: roundId, 
+            startedAt: updates.started_at,
+            roundNumber: round.round_number,
+            roundTitle: round.title
+          });
         } else if (action === 'pause') {
           updates.status = 'paused';
           updates.config = { ...currentConfig, paused_at: new Date().toISOString() };
@@ -1111,6 +1292,26 @@ export async function renderAdmin(container) {
         }
 
         await supabase.from('rounds').update(updates).eq('id', roundId);
+        
+        // Instant Socket Trigger
+        socketService.emit('admin:status_update', { 
+           eventId: event.id, 
+           roundId: roundId, 
+           status: updates.status,
+           action: action,
+           roundTitle: round.title
+        });
+        
+        // BROADCAST TO LIVE TICKER
+        let tickerMsg = '';
+        if (action === 'start') tickerMsg = `Round ${round.round_number}: ${round.title} is now LIVE!`;
+        if (action === 'pause') tickerMsg = `Round ${round.round_number} HAS BEEN PAUSED BY ADMIN.`;
+        if (action === 'resume') tickerMsg = `Round ${round.round_number} IS BACK ONLINE. Time resumed.`;
+        if (action === 'complete') tickerMsg = `Round ${round.round_number} HAS ENDED. Submissions closed.`;
+        if (action === 'restart') tickerMsg = `Round ${round.round_number} HAS BEEN RESET for a fresh start.`;
+        
+        if (tickerMsg) ActivityBroadcast.push('status', tickerMsg);
+
         renderTabContent('rounds');
       });
     });
@@ -1203,6 +1404,8 @@ export async function renderAdmin(container) {
         await supabase.from('teams').update({ status: newStatus }).eq('id', btn.dataset.team);
         if (newStatus === 'eliminated') {
           await supabase.from('eliminations').insert({ event_id: event.id, team_id: btn.dataset.team });
+          // Instant Socket Trigger
+          socketService.emit('admin:eliminate', { teamIds: [btn.dataset.team] });
         }
         renderAdmin(container);
       });
@@ -1226,6 +1429,10 @@ export async function renderAdmin(container) {
         await supabase.from('eliminations').insert({ event_id: event.id, team_id: t.id });
       }
       alert(`${toEliminate.length} team(s) eliminated.`);
+      
+      // Instant Socket Trigger
+      socketService.emit('admin:eliminate', { teamIds: toEliminate.map(t => t.id) });
+      
       renderAdmin(container);
     });
 
@@ -1305,6 +1512,270 @@ export async function renderAdmin(container) {
     document.getElementById('admin-verify-pw').addEventListener('keypress', e => e.key === 'Enter' && verify());
   }
 
+  async function fetchRoundAssets(roundId, type) {
+    try {
+      if (type === 'quiz') {
+        const { data } = await supabase.from('questions').select('*').eq('round_id', roundId).order('order_index');
+        return data;
+      } else if (type === 'logo') {
+        const { data } = await supabase.from('logo_assets').select('*').eq('round_id', roundId).order('order_index');
+        return data;
+      } else if (type === 'prompt') {
+        const { data } = await supabase.from('prompt_images').select('*').eq('round_id', roundId);
+        return data;
+      } else if (type === 'debate') {
+        const { data } = await supabase.from('debate_topics').select('*').eq('round_id', roundId).maybeSingle();
+        return data;
+      }
+      return null;
+    } catch (e) {
+      console.error('Error fetching assets:', e);
+      return null;
+    }
+  }
+
+  // ========================================
+  // ROUND INTELLIGENCE AUDITOR
+  // ========================================
+  async function renderRoundIntelligence(el, event, round, teams) {
+    const apiKey = event.config?.gemini_api_key;
+    
+    // Fetch all submissions and reference assets for this round
+    const { data: submissions } = await supabase.from('submissions').select('*').eq('round_id', round.id);
+    const { data: existingScores } = await supabase.from('scores').select('*').eq('round_id', round.id);
+    const assets = await fetchRoundAssets(round.id, round.round_type);
+    
+    // Local state for pending verified scores
+    let pendingScores = submissions?.reduce((acc, sub) => {
+      const existing = existingScores?.find(s => s.team_id === sub.team_id);
+      acc[sub.team_id] = {
+        score: existing ? existing.score : 0,
+        feedback: existing ? (JSON.parse(existing.evaluator_notes || '{}').feedback || '') : '',
+        subId: sub.id,
+        status: existing ? 'final' : 'pending'
+      };
+      return acc;
+    }, {}) || {};
+
+    async function commitScoresToDb() {
+       const btn = document.getElementById('batch-commit-scores');
+       if (!btn) return;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-sm">refresh</span> Committing...';
+        
+        try {
+          for (const tid in pendingScores) {
+            const p = pendingScores[tid];
+            await supabase.from('scores').upsert({
+              team_id: tid,
+              round_id: round.id,
+              score: p.score,
+              evaluator_notes: JSON.stringify({ ai: true, feedback: p.feedback }),
+              evaluated_at: new Date().toISOString()
+            }, { onConflict: 'team_id,round_id' });
+          }
+          Notifier.toast('Leaderboard Synchronized', 'success');
+          
+          // Instant Socket Trigger
+          console.log(`🏆 Pulse: Leaderboard Sync -> Event: ${event.id}`);
+          socketService.emit('admin:leaderboard_update', { eventId: event.id });
+          
+          renderTabContent('rounds');
+        } catch (e) {
+          Notifier.toast('Commit failed: ' + e.message, 'error');
+          btn.disabled = false;
+          btn.innerHTML = '<span class="material-symbols-outlined text-sm">cloud_upload</span> Commit All Scores';
+        }
+    }
+
+    function renderAuditUI() {
+      // Background operation to re-attach listeners after re-render
+      setTimeout(() => {
+        document.getElementById('back-to-rounds')?.addEventListener('click', () => renderTabContent('rounds'));
+        
+        el.querySelectorAll('.audit-score-input').forEach(inp => {
+          inp.addEventListener('input', (e) => {
+            pendingScores[e.target.dataset.team].score = e.target.value;
+            pendingScores[e.target.dataset.team].status = 'verified';
+          });
+        });
+
+        el.querySelectorAll('.audit-feedback-input').forEach(inp => {
+          inp.addEventListener('input', (e) => {
+            pendingScores[e.target.dataset.team].feedback = e.target.value;
+            pendingScores[e.target.dataset.team].status = 'verified';
+          });
+        });
+
+        document.getElementById('batch-commit-scores')?.addEventListener('click', commitScoresToDb);
+      }, 50);
+
+      el.innerHTML = `
+        <div class="flex items-center justify-between mb-8">
+          <div>
+            <button id="back-to-rounds" class="flex items-center gap-2 text-on-surface-variant hover:text-white mb-2 transition-colors">
+              <span class="material-symbols-outlined text-sm">arrow_back</span>
+              <span class="text-xs font-bold uppercase tracking-widest">Back</span>
+            </button>
+            <h1 class="text-3xl font-headline font-bold text-white">Round Review</h1>
+            <p class="text-on-surface-variant text-sm mt-1">Audit Mode: ${round.title} (${submissions?.length || 0} Submissions)</p>
+          </div>
+            <div class="flex items-center gap-3">
+             <button disabled class="px-6 py-3 rounded-2xl bg-white/5 text-on-surface-variant font-headline font-bold text-xs uppercase tracking-widest border border-white/5 cursor-not-allowed flex items-center gap-3">
+              <span class="material-symbols-outlined text-sm opacity-50">psychology</span> AI Insights (Soon)
+            </button>
+            <button id="batch-commit-scores" class="px-6 py-3 rounded-2xl kinetic-gradient text-on-primary-fixed font-headline font-bold text-xs uppercase tracking-widest flex items-center gap-3">
+              <span class="material-symbols-outlined text-sm">cloud_upload</span> Import Score
+            </button>
+          </div>
+        </div>
+
+        <div class="mb-8 p-6 rounded-3xl bg-primary/5 border border-primary/10">
+          <div class="flex items-center gap-3 mb-4">
+            <span class="material-symbols-outlined text-primary">fact_check</span>
+            <h3 class="font-headline font-bold text-white text-sm uppercase tracking-widest">Master Reference Key</h3>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto max-h-48 custom-scrollbar pr-2">
+            ${assets ? assets.map(a => `
+              <div class="p-3 rounded-2xl bg-white/5 border border-white/5 hover:border-primary/30 transition-all flex flex-col gap-2">
+                ${a.image_url ? `
+                  <div class="rounded-xl overflow-hidden border border-white/10 aspect-video bg-black/40 flex items-center justify-center">
+                    <img src="${a.image_url}" class="max-w-full max-h-full object-contain" />
+                  </div>
+                ` : ''}
+                <div>
+                  <div class="text-[10px] text-on-surface-variant uppercase font-black tracking-widest mb-1">
+                    ${round.round_type === 'quiz' ? `Question Reference` : round.round_type === 'logo' ? `Logo Mastery` : `Master Objective`}
+                  </div>
+                  ${round.round_type === 'quiz' ? `
+                    <div class="text-[11px] text-white/90 font-medium mb-1">${a.question_text || 'Unknown Question'}</div>
+                    <div class="text-xs text-primary font-bold flex items-center gap-1">
+                      <span class="material-symbols-outlined text-sm">check_circle</span>
+                      ${a.correct_answer || 'N/A'}
+                    </div>
+                  ` : round.round_type === 'logo' ? `
+                    <div class="text-[11px] text-white/90 font-bold">${a.company_name || 'Generic Tech'}</div>
+                    <div class="text-[10px] text-secondary/80 italic line-clamp-2">${a.requirements || 'Follow industry standards'}</div>
+                  ` : `
+                    <div class="text-[11px] text-white/90 font-bold">${a.title || a.company_name || 'Standard Asset'}</div>
+                    <div class="text-[10px] text-on-surface-variant/70 italic line-clamp-2">${a.content || a.description || a.requirements || 'Verify accuracy'}</div>
+                  `}
+                </div>
+              </div>
+            `).join('') : '<p class="text-xs text-on-surface-variant">No reference assets uploaded for this round.</p>'}
+          </div>
+        </div>
+
+        <div class="glass-panel rounded-3xl overflow-hidden border border-white/5">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-white/5 text-on-surface-variant font-headline text-[10px] uppercase tracking-widest">
+                <th class="px-6 py-4">Team</th>
+                <th class="px-6 py-4">Submission Context</th>
+                <th class="px-6 py-4 w-24 text-center">Score</th>
+                <th class="px-6 py-4">AI Prediction / Feedback</th>
+                <th class="px-6 py-4 w-20">Status</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-white/5">
+              ${teams.map(t => {
+                const sub = submissions?.find(s => s.team_id === t.id);
+                if (!sub) return '';
+                const p = pendingScores[t.id];
+                
+                // Formatted submission display
+                let contextHtml = '';
+                const answers = sub.answers ? (typeof sub.answers === 'string' ? JSON.parse(sub.answers) : sub.answers) : null;
+
+                if (round.round_type === 'quiz' && answers) {
+                  contextHtml = Object.entries(answers).map(([qid, ans]) => {
+                    const quest = assets?.find(q => q.id === qid);
+                    const isCorrect = quest && String(ans).toLowerCase().trim() === String(quest.correct_answer).toLowerCase().trim();
+                    return `
+                      <div class="mb-2 last:mb-0 p-2 rounded-xl bg-black/20 border ${isCorrect ? 'border-secondary/20' : 'border-error/20'}">
+                        <div class="text-[9px] text-on-surface-variant font-bold uppercase tracking-widest">${quest?.question_text || 'Question ' + qid}</div>
+                        <div class="flex items-center gap-2 mt-1">
+                          <span class="text-xs font-bold ${isCorrect ? 'text-secondary' : 'text-error'}">${ans}</span>
+                          ${!isCorrect ? `<span class="text-[10px] text-on-surface-variant italic opacity-60">Master: ${quest?.correct_answer || '?'}</span>` : ''}
+                        </div>
+                      </div>
+                    `;
+                  }).join('');
+                } else {
+                  // Non-quiz rich display
+                  contextHtml = `
+                    <div class="space-y-3">
+                      ${sub.text_content ? `
+                        <div class="p-3 rounded-xl bg-white/5 border border-white/5 text-[11px] text-white/80 leading-relaxed whitespace-pre-wrap">
+                          ${sub.text_content}
+                        </div>
+                      ` : ''}
+                      
+                      ${answers?.imageUrl ? `
+                        <div class="rounded-xl overflow-hidden border border-white/10 bg-black/40 max-h-32 flex items-center justify-center group relative cursor-pointer" onclick="window.open('${answers.imageUrl}', '_blank')">
+                          <img src="${answers.imageUrl}" class="max-w-full max-h-full object-contain" />
+                          <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <span class="material-symbols-outlined text-white">zoom_in</span>
+                          </div>
+                        </div>
+                      ` : ''}
+
+                      <div class="flex flex-wrap gap-2">
+                        ${sub.github_link ? `
+                          <a href="${sub.github_link}" target="_blank" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container-high border border-white/5 text-[10px] text-on-surface hover:bg-white/10 transition-all">
+                            <span class="material-symbols-outlined text-[14px]">code</span> GitHub
+                          </a>
+                        ` : ''}
+                        ${sub.live_link ? `
+                          <a href="${sub.live_link}" target="_blank" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-secondary/10 border border-secondary/20 text-[10px] text-secondary hover:bg-secondary/20 transition-all">
+                            <span class="material-symbols-outlined text-[14px]">language</span> Live Link
+                          </a>
+                        ` : ''}
+                        ${sub.drive_link ? `
+                          <a href="${sub.drive_link}" target="_blank" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-tertiary/10 border border-tertiary/20 text-[10px] text-tertiary hover:bg-tertiary/20 transition-all">
+                            <span class="material-symbols-outlined text-[14px]">folder</span> Assets
+                          </a>
+                        ` : ''}
+                      </div>
+
+                      ${!sub.text_content && !answers?.imageUrl && !sub.github_link && !sub.live_link && !sub.drive_link ? `
+                        <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest opacity-40 px-2">No media detected</div>
+                      ` : ''}
+                    </div>
+                  `;
+                }
+
+                return `
+                  <tr class="hover:bg-white/5 transition-all">
+                    <td class="px-6 py-5">
+                      <div class="font-headline font-bold text-white text-sm">${t.team_name}</div>
+                    </td>
+                    <td class="px-6 py-5">
+                      <div class="max-h-48 overflow-y-auto pr-2 custom-scrollbar">
+                        ${contextHtml}
+                      </div>
+                    </td>
+                    <td class="px-6 py-5">
+                      <input type="number" data-team="${t.id}" class="audit-score-input w-20 bg-surface-container-lowest border border-white/5 rounded-xl py-2 px-2 text-center text-sm text-primary" value="${p.score}" />
+                    </td>
+                    <td class="px-6 py-5">
+                      <textarea data-team="${t.id}" class="audit-feedback-input w-full bg-surface-container-lowest border border-white/5 rounded-xl py-2 px-3 text-xs text-secondary h-12 resize-none">${p.feedback}</textarea>
+                    </td>
+                    <td class="px-6 py-5 text-center">
+                      <span class="text-[8px] font-bold uppercase tracking-widest px-2 py-1 rounded-lg ${p.status === 'suggested' ? 'bg-secondary/20 text-secondary animate-pulse' : p.status === 'final' ? 'bg-primary/20 text-primary' : 'bg-white/5 text-on-surface-variant'}">${p.status}</span>
+                    </td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    renderAuditUI();
+  }
+
   // ========================================
   // SCORES TAB
   // ========================================
@@ -1327,8 +1798,8 @@ export async function renderAdmin(container) {
             <tr class="bg-surface-container-high/50 text-on-surface-variant font-headline text-[10px] uppercase tracking-widest">
               <th class="px-5 py-4 sticky left-0 bg-surface-container-high/50">Team</th>
               ${rounds.map(r => `<th class="px-5 py-4 text-center">R${r.round_number}</th>`).join('')}
-              <th class="px-5 py-4 text-center">Review</th>
-              <th class="px-5 py-4 text-center">Total</th>
+              <th class="px-5 py-4 text-center font-bold">Total</th>
+              <th class="px-5 py-4 text-center w-10">Review</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-outline-variant/10">
@@ -1348,12 +1819,13 @@ export async function renderAdmin(container) {
                       </td>
                     `;
                   }).join('')}
+                  <td class="px-5 py-3 text-center font-headline font-bold text-primary">${total}</td>
                   <td class="px-5 py-3 text-center">
-                    <button data-review-team="${t.id}" class="review-submission-btn p-2 rounded-lg bg-white/5 text-on-surface-variant hover:text-primary hover:bg-primary/10 transition-all">
+                    <button class="review-submission-btn w-8 h-8 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center hover:bg-secondary/20 transition-all" 
+                            data-review-team="${t.id}">
                       <span class="material-symbols-outlined text-sm">visibility</span>
                     </button>
                   </td>
-                  <td class="px-5 py-3 text-center font-headline font-bold text-primary">${total}</td>
                 </tr>
               `;
             }).join('')}
@@ -1362,34 +1834,6 @@ export async function renderAdmin(container) {
       </div>
     `;
 
-    el.querySelectorAll('.inline-score-input').forEach(input => {
-      input.addEventListener('change', async (e) => {
-        const teamId = e.target.dataset.teamId;
-        const roundId = e.target.dataset.roundId;
-        const rawValue = e.target.value.trim();
-        
-        if (rawValue === '') return;
-        
-        const score = parseFloat(rawValue);
-        if (isNaN(score)) return Notifier.toast('Enter a valid numerical score', 'error');
-
-        input.classList.add('animate-pulse', 'text-primary');
-        
-        const { error } = await supabase.from('scores').upsert({
-          team_id: teamId, round_id: roundId, score, max_score: 100, evaluated_at: new Date().toISOString()
-        }, { onConflict: 'team_id,round_id' });
-        
-        if (error) {
-          Notifier.toast('Error saving score: ' + error.message, 'error');
-          input.classList.remove('animate-pulse', 'text-primary');
-        } else {
-          renderTabContent('scores');
-          Notifier.toast('Score saved', 'success');
-        }
-      });
-    });
-
-    // Review Submission logic
     el.querySelectorAll('.review-submission-btn').forEach(btn => {
       btn.addEventListener('click', async () => {
         const teamId = btn.dataset.reviewTeam;
@@ -1406,75 +1850,176 @@ export async function renderAdmin(container) {
           return Notifier.toast("No submissions found for this team.", "info");
         }
 
+        // Fetch all assets for these rounds to get labels
+        const [qData, lData, pData] = await Promise.all([
+          supabase.from('questions').select('*').in('round_id', roundIds).order('order_index'),
+          supabase.from('logo_assets').select('*').in('round_id', roundIds).order('order_index'),
+          supabase.from('prompt_images').select('*').in('round_id', roundIds).order('order_index')
+        ]);
+        const allAssets = [...(qData.data || []), ...(lData.data || []), ...(pData.data || [])];
+
+        // Group by Round
+        const sortedSubmissions = rounds.map(r => ({
+          round: r,
+          submission: submissions.find(s => s.round_id === r.id)
+        })).filter(item => item.submission);
+
         let bodyHtml = `
-          <div class="space-y-6 text-left max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar submission-intelligence">
-            ${submissions.map(s => `
-              <div class="p-6 rounded-3xl bg-white/5 border border-white/5 space-y-4 hover:border-primary/30 transition-all">
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-3">
-                    <span class="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                      <span class="material-symbols-outlined text-sm">
-                        ${s.round.round_type === 'quiz' ? 'quiz' : s.round.round_type === 'webdev' ? 'code' : 'image'}
-                      </span>
-                    </span>
-                    <div>
-                      <span class="text-[10px] font-bold uppercase tracking-widest text-primary">Round ${s.round.round_number}: ${s.round.title}</span>
-                      <div class="text-[10px] text-on-surface-variant font-mono">${new Date(s.submission_time).toLocaleString()}</div>
-                    </div>
-                  </div>
-                </div>
-                
-                ${s.text_content ? `
-                  <div class="space-y-2">
-                    <label class="text-[10px] uppercase text-on-surface-variant font-bold flex items-center gap-2">
-                       <span class="material-symbols-outlined text-xs">notes</span> Submitted Content
-                    </label>
-                    <div class="bg-black/30 rounded-2xl overflow-hidden border border-white/5">
-                      ${s.round.round_type === 'webdev' ? `
-                        <pre class="p-4 text-xs font-mono !bg-transparent"><code class="language-javascript">${s.text_content.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</code></pre>
-                      ` : `
-                        <div class="p-4 text-sm text-white whitespace-pre-wrap leading-relaxed">${s.text_content}</div>
-                      `}
-                    </div>
-                  </div>
-                ` : ''}
+          <div class="space-y-4 text-left max-h-[65vh] overflow-y-auto pr-2 custom-scrollbar submission-intelligence">
+            ${sortedSubmissions.map((item, sIdx) => {
+              const s = item.submission;
+              const r = item.round;
+              const answers = s.answers ? (typeof s.answers === 'string' ? JSON.parse(s.answers) : s.answers) : null;
+              const roundAssets = allAssets.filter(a => a.round_id === r.id);
 
-                ${s.answers ? `
-                   <div class="space-y-2">
-                    <label class="text-[10px] uppercase text-on-surface-variant font-bold flex items-center gap-2">
-                      <span class="material-symbols-outlined text-xs">analytics</span> Performance Data
-                    </label>
-                    <div class="bg-black/30 p-4 rounded-2xl border border-white/5 overflow-hidden">
-                      ${(() => {
-                        const a = s.answers;
-                        if (a.imageUrl) {
-                          return `<div class="mb-4 rounded-xl overflow-hidden border border-white/10 max-h-48 flex items-center justify-center bg-black/40"><img src="${a.imageUrl}" class="max-w-full max-h-full object-contain" /></div>`;
+              // Formatting
+              let formattedContent = '';
+              const isQuizLike = ['quiz', 'logo', 'prompt'].includes(r.round_type);
+              
+              if (isQuizLike && answers) {
+                formattedContent = `
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 mb-4">
+                    ${roundAssets.map((asset, index) => {
+                      const ans = answers[asset.id];
+                      if (ans === undefined || ans === null) return ''; 
+                      
+                      const assetIdx = index + 1;
+                      const typeLabel = r.round_type === 'quiz' ? 'Question' : r.round_type === 'logo' ? 'Logo Option' : 'Prompt';
+                      const label = `${typeLabel} ${assetIdx}`;
+                      
+                      const rawMaster = asset.correct_answer !== undefined ? asset.correct_answer : asset.answer;
+                      
+                      // Helper to map 0,1,2 to a,b,c if it's a quiz
+                      const formatScoreVal = (v) => {
+                        if (v === undefined || v === null || v === '') return '—';
+                        if (r.round_type === 'quiz') {
+                          const n = parseInt(v);
+                          if (!isNaN(n) && n >= 0 && n <= 25) return String.fromCharCode(97 + n).toUpperCase(); // UPPERCASE for clarity
                         }
-                        return `<pre class="text-[10px] font-mono text-secondary !bg-transparent">${JSON.stringify(a, null, 2)}</pre>`;
-                      })()}
-                    </div>
-                  </div>
-                ` : ''}
+                        return v;
+                      };
 
-                <div class="flex flex-wrap gap-2 pt-2">
-                  ${s.github_link ? `<a href="${s.github_link}" target="_blank" class="px-3 py-1.5 rounded-xl bg-white/5 border border-white/5 text-[10px] text-white hover:bg-primary/20 transition-all flex items-center gap-2"><span class="material-symbols-outlined text-sm">code</span> Repository</a>` : ''}
-                  ${s.live_link ? `<a href="${s.live_link}" target="_blank" class="px-3 py-1.5 rounded-xl bg-white/5 border border-white/5 text-[10px] text-white hover:bg-secondary/20 transition-all flex items-center gap-2"><span class="material-symbols-outlined text-sm">language</span> Preview Link</a>` : ''}
-                  ${s.drive_link ? `<a href="${s.drive_link}" target="_blank" class="px-3 py-1.5 rounded-xl bg-white/5 border border-white/5 text-[10px] text-white hover:bg-tertiary/20 transition-all flex items-center gap-2"><span class="material-symbols-outlined text-sm">folder</span> Assets</a>` : ''}
+                      const displayAns = formatScoreVal(ans);
+                      const displayMaster = formatScoreVal(rawMaster);
+                      const isCorrect = rawMaster !== undefined && String(ans).toLowerCase().trim() === String(rawMaster).toLowerCase().trim();
+                      const pointsValue = asset.points || 1;
+
+                      return `
+                        <div class="p-3 bg-black/40 border ${isCorrect ? 'border-secondary/30' : 'border-white/5'} rounded-2xl space-y-2 group/asset hover:border-primary/30 transition-all">
+                          <div class="flex justify-between items-start text-[10px] text-on-surface-variant">
+                            <div>
+                               <span class="font-bold uppercase tracking-tighter block">${label}:</span>
+                               <span class="text-[8px] bg-secondary/10 text-secondary px-1.5 py-0.5 rounded border border-secondary/20 mt-1 inline-block uppercase font-black">${pointsValue} Marks</span>
+                            </div>
+                            <span class="text-white font-headline font-bold text-xs">${displayAns}</span>
+                          </div>
+                          ${rawMaster !== undefined && rawMaster !== null ? `
+                            <div class="flex items-center gap-2 pt-2 border-t border-white/5">
+                              <span class="text-[9px] font-black text-secondary uppercase tracking-widest">Master Key:</span>
+                              <span class="text-[10px] text-secondary font-bold">${displayMaster}</span>
+                              ${isCorrect ? `<span class="material-symbols-outlined text-[14px] text-secondary">check_circle</span>` : ''}
+                            </div>
+                          ` : ''}
+                        </div>
+                      `;
+                    }).join('')}
+                  </div>
+                `;
+              }
+
+              formattedContent += `
+                <div class="space-y-4">
+                  ${s.text_content ? `
+                    <div class="p-4 rounded-2xl bg-white/5 border border-white/5 text-sm text-white/80 leading-relaxed italic">
+                      "${s.text_content}"
+                    </div>
+                  ` : ''}
+                  
+                  ${answers?.imageUrl ? `
+                    <div class="max-w-md rounded-2xl overflow-hidden border border-white/10 bg-black/40 group relative cursor-pointer" onclick="window.open('${answers.imageUrl}', '_blank')">
+                      <img src="${answers.imageUrl}" class="w-full h-auto object-contain max-h-64" />
+                      <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <span class="material-symbols-outlined text-white text-3xl">zoom_in</span>
+                      </div>
+                    </div>
+                  ` : ''}
+
+                  <div class="flex flex-wrap gap-3">
+                    ${s.github_link ? `<a href="${s.github_link}" target="_blank" class="px-4 py-2 bg-white/5 border border-white/5 rounded-xl text-xs text-on-surface flex items-center gap-2 hover:bg-white/10 transition-all font-bold"><span class="material-symbols-outlined text-sm">code</span> Repository</a>` : ''}
+                    ${s.live_link ? `<a href="${s.live_link}" target="_blank" class="px-4 py-2 bg-secondary/10 border border-secondary/20 rounded-xl text-xs text-secondary flex items-center gap-2 hover:bg-secondary/20 transition-all font-bold"><span class="material-symbols-outlined text-sm">language</span> Live Site</a>` : ''}
+                    ${s.drive_link ? `<a href="${s.drive_link}" target="_blank" class="px-4 py-2 bg-tertiary/10 border border-tertiary/20 rounded-xl text-xs text-tertiary flex items-center gap-2 hover:bg-tertiary/20 transition-all font-bold"><span class="material-symbols-outlined text-sm">folder</span> Assets</a>` : ''}
+                  </div>
                 </div>
-              </div>
-            `).join('')}
+              `;
+
+              return `
+                <details class="group bg-white/5 border border-white/5 rounded-[24px] overflow-hidden transition-all duration-300" ${sIdx === 0 ? 'open' : ''}>
+                  <summary class="flex items-center justify-between p-5 list-none cursor-pointer hover:bg-white/10 transition-all group-open:bg-white/5">
+                    <div class="flex items-center gap-4">
+                      <div class="w-10 h-10 rounded-xl bg-primary/20 text-primary flex items-center justify-center font-headline font-black text-sm border border-primary/20">
+                        ${r.round_number}
+                      </div>
+                      <div>
+                        <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-[0.2em] mb-0.5">Round Data // ${r.round_type}</div>
+                        <div class="text-sm font-headline font-black text-white uppercase tracking-wider">${r.title}</div>
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-4">
+                      <span class="text-[10px] text-on-surface-variant font-mono bg-black/20 px-3 py-1 rounded-full border border-white/5">
+                        ${new Date(s.submission_time).toLocaleTimeString()}
+                      </span>
+                      <span class="material-symbols-outlined text-on-surface-variant group-open:rotate-180 transition-transform duration-300">expand_more</span>
+                    </div>
+                  </summary>
+                  <div class="p-6 border-t border-white/5 bg-black/20">
+                    ${formattedContent}
+                  </div>
+                </details>
+              `;
+            }).join('')}
           </div>
         `;
 
         Notifier.modal({
-          title: `Submission Intel: ${team.team_name}`,
+          title: team.team_name,
           icon: 'intelligence',
           type: 'info',
-          body: bodyHtml
+          body: bodyHtml,
+          size: 'wide'
         });
+      });
+    });
 
-        // Trigger Syntax Highlighting
-        setTimeout(() => Prism.highlightAll(), 100);
+    el.querySelectorAll('.inline-score-input').forEach(input => {
+      input.addEventListener('change', async (e) => {
+        const teamId = e.target.dataset.teamId;
+        const roundId = e.target.dataset.roundId;
+        const rawValue = e.target.value.trim();
+        
+        if (rawValue === '') return;
+        
+        const score = parseFloat(rawValue);
+        if (isNaN(score)) return Notifier.toast('Enter a valid numerical score', 'error');
+
+        input.classList.add('animate-pulse', 'text-primary');
+        
+        const round = rounds.find(r => r.id === roundId);
+        
+        const { error } = await supabase.from('scores').upsert({
+          team_id: teamId, 
+          round_id: roundId, 
+          score, 
+          max_score: round?.max_score || 100, 
+          evaluated_at: new Date().toISOString()
+        }, { onConflict: 'team_id,round_id' });
+        
+        if (error) {
+          Notifier.toast('Error saving score: ' + error.message, 'error');
+          input.classList.remove('animate-pulse', 'text-primary');
+        } else {
+          renderTabContent('scores');
+          Notifier.toast('Score saved', 'success');
+        }
       });
     });
   }
@@ -1502,7 +2047,7 @@ export async function renderAdmin(container) {
         const { data } = await supabase.from('logo_assets').select('*').eq('round_id', selectedRound.id).order('order_index');
         assets = data || [];
       } else if (selectedRound.round_type === 'prompt') {
-        const { data } = await supabase.from('prompt_images').select('*').eq('round_id', selectedRound.id);
+        const { data } = await supabase.from('prompt_images').select('*').eq('round_id', selectedRound.id).order('order_index');
         assets = data || [];
       } else if (selectedRound.round_type === 'debate') {
         const { data } = await supabase.from('debate_topics').select('*').eq('round_id', selectedRound.id).maybeSingle();
@@ -1511,15 +2056,20 @@ export async function renderAdmin(container) {
     }
 
     el.innerHTML = `
-      <div class="flex items-end justify-between mb-8">
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
         <div>
           <h1 class="text-3xl font-headline font-bold text-white">Round Assets</h1>
           <p class="text-on-surface-variant text-sm mt-1">${assetRounds.length} asset-based round(s) configured</p>
         </div>
+        ${selectedRound ? `
+          <button id="audition-round" data-round-id="${selectedRound.id}" data-round-type="${selectedRound.round_type}" class="px-6 py-3 bg-primary/10 text-primary border border-primary/20 rounded-xl font-headline font-bold text-xs uppercase tracking-widest hover:bg-primary/20 transition-all flex items-center gap-2">
+            <span class="material-symbols-outlined text-sm">visibility</span>
+            Audition Round Content
+          </button>
+        ` : ''}
       </div>
 
       ${assetRounds.length === 0 ? '<div class="text-center py-12"><p class="text-on-surface-variant">No asset-based rounds added yet.</p></div>' : `
-        <!-- Round Selector -->
         <div class="glass-panel p-6 rounded-2xl mb-8">
           <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-3">Select Round to Manage Configuration</label>
           <select id="bank-round-select" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white font-headline">
@@ -1550,6 +2100,10 @@ export async function renderAdmin(container) {
                   <option value="2">Correct: C</option>
                   <option value="3">Correct: D</option>
                 </select>
+                <div class="flex flex-col">
+                  <label class="text-[8px] font-bold text-on-surface-variant uppercase ml-2 mb-1">Award Marks</label>
+                  <input id="q-points" type="number" min="1" value="1" class="w-24 bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white text-center font-headline font-bold text-secondary" />
+                </div>
                 <button id="add-q" class="px-6 py-3 rounded-xl kinetic-gradient text-on-primary-fixed font-headline font-bold text-sm hover:scale-105 active:scale-95 transition-transform">Add Question</button>
               </div>
             </div>
@@ -1563,7 +2117,8 @@ export async function renderAdmin(container) {
   {
     "question": "What is 2+2?",
     "options": ["1", "2", "3", "4"],
-    "correct": 3
+    "correct": 3,
+    "points": 5
   }
 ]</pre>
               </div>
@@ -1575,24 +2130,25 @@ export async function renderAdmin(container) {
           <!-- QUIZ LIST -->
           <div class="space-y-3 mb-8">
             ${assets.length === 0 ? '<p class="text-on-surface-variant text-center py-4">No questions added yet.</p>' : assets.map((q, i) => `
-              <div class="bg-surface-container-low p-4 rounded-xl group hover:bg-surface-container transition-colors">
-                <div class="flex justify-between items-start">
-                  <div>
-                    <span class="text-[10px] text-on-surface-variant font-headline font-bold">Q${i + 1}</span>
-                    <p class="text-sm text-white mt-1">${q.question_text}</p>
-                    <div class="flex gap-2 mt-2 flex-wrap">
-                      ${(() => {
-                        const opts = typeof q.options === 'string' && q.options.startsWith('[') ? JSON.parse(q.options) : (q.options || []);
-                        return opts.map((opt, j) => `
-                          <span class="text-[10px] px-2 py-0.5 rounded ${j === q.correct_answer ? 'bg-secondary/20 text-secondary font-bold' : 'bg-surface-container-highest text-on-surface-variant'}">${String.fromCharCode(65 + j)}: ${opt}</span>
-                        `).join('');
-                      })()}
-                    </div>
+              <div class="bg-surface-container-low p-4 rounded-xl group hover:bg-surface-container transition-colors flex items-center justify-between">
+                <div class="flex-1">
+                  <div class="flex items-center gap-2">
+                    <span class="text-[10px] text-on-surface-variant font-headline font-bold uppercase tracking-widest">Q${i + 1}</span>
+                    <span class="px-2 py-0.5 rounded-full bg-secondary/10 text-secondary text-[8px] font-black uppercase tracking-widest border border-secondary/20">${q.points || 1} Marks</span>
                   </div>
-                  <button data-del-q="${q.id}" class="del-q w-7 h-7 rounded-lg bg-error/10 text-error flex items-center justify-center hover:bg-error/20 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <span class="material-symbols-outlined text-sm">delete</span>
-                  </button>
+                  <p class="text-sm text-white mt-1">${q.question_text}</p>
+                  <div class="flex gap-2 mt-2 flex-wrap text-left">
+                    ${(() => {
+                      const opts = typeof q.options === 'string' && q.options.startsWith('[') ? JSON.parse(q.options) : (q.options || []);
+                      return opts.map((opt, j) => `
+                        <span class="text-[10px] px-2 py-0.5 rounded ${j === q.correct_answer ? 'bg-secondary/20 text-secondary font-bold border border-secondary/20' : 'bg-surface-container-highest text-on-surface-variant'}">${String.fromCharCode(65 + j)}: ${opt}</span>
+                      `).join('');
+                    })()}
+                  </div>
                 </div>
+                <button data-del-q="${q.id}" class="del-q w-8 h-8 rounded-lg bg-error/10 text-error flex items-center justify-center hover:bg-error/20 transition-all flex-shrink-0 ml-4">
+                  <span class="material-symbols-outlined text-sm">delete</span>
+                </button>
               </div>
             `).join('')}
           </div>
@@ -1645,25 +2201,35 @@ export async function renderAdmin(container) {
           <div class="glass-panel p-6 rounded-2xl mb-8 space-y-4 glow-accent">
             <h3 class="font-headline font-bold text-white">Add Prompt Target to: <span class="text-primary">${selectedRound?.title}</span></h3>
             <p class="text-xs text-on-surface-variant">Upload an Image file and enter how many seconds it should be clearly visible before applying a blur overlay. For projector mode, leave the file blank.</p>
-            <div class="flex max-md:flex-col gap-3 items-center">
-              <input type="file" id="p-file" accept="image/*" class="flex-1 bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-on-primary-fixed hover:file:bg-primary/80" />
-              <input id="p-duration" type="number" value="30" class="w-32 bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white text-center" placeholder="Time (s)" />
-              <button id="add-prompt" class="px-6 py-3 rounded-xl kinetic-gradient text-on-primary-fixed font-headline font-bold text-sm hover:scale-105 active:scale-95 transition-transform flex-shrink-0 disabled:opacity-50 flex items-center gap-2">Add Image</button>
+            <div class="flex max-md:flex-col gap-3 items-start">
+              <div class="flex-1 space-y-3 w-full">
+                <input type="file" id="p-file" accept="image/*" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-on-primary-fixed hover:file:bg-primary/80" />
+                <textarea id="p-seed" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white text-sm placeholder:text-slate-600 font-mono h-24" placeholder="Enter Master Prompt (The exact description used to generate this image)..."></textarea>
+              </div>
+              <div class="flex flex-col gap-3 w-full md:w-auto">
+                <input id="p-duration" type="number" value="30" class="w-full md:w-32 bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white text-center font-bold" placeholder="Time (s)" />
+                <input id="p-marks" type="number" value="1" class="w-full md:w-32 bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white text-center font-bold text-secondary" placeholder="Marks" />
+                <button id="add-prompt" class="px-6 py-3 rounded-xl kinetic-gradient text-on-primary-fixed font-headline font-bold text-sm hover:scale-105 active:scale-95 transition-transform flex-shrink-0 disabled:opacity-50 flex items-center justify-center gap-2">Add Image</button>
+              </div>
             </div>
           </div>
 
           <!-- PROMPT LIST -->
           <div class="space-y-3 mb-8">
             ${assets.length === 0 ? '<p class="text-on-surface-variant text-center py-4">No prompt images added yet.</p>' : assets.map((l, i) => `
-              <div class="bg-surface-container-low p-4 rounded-xl group flex items-center justify-between border border-transparent">
+              <div class="bg-surface-container-low p-4 rounded-xl group flex items-center justify-between border border-transparent hover:border-white/5 transition-all">
                 <div class="flex items-center gap-4">
-                  ${l.image_url ? `<img src="${l.image_url}" class="w-20 h-12 rounded object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all"/>` : `<div class="w-20 h-12 rounded bg-surface-container-highest flex items-center justify-center"><span class="material-symbols-outlined text-on-surface-variant/40">image_not_supported</span></div>`}
+                  ${l.image_url ? `<img src="${l.image_url}" class="w-20 h-12 rounded object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all border border-white/10"/>` : `<div class="w-20 h-12 rounded bg-surface-container-highest flex items-center justify-center"><span class="material-symbols-outlined text-on-surface-variant/40">image_not_supported</span></div>`}
                   <div>
-                    <span class="text-xs text-on-surface-variant tracking-widest uppercase">Target Image</span>
-                    <h4 class="font-headline font-bold text-white uppercase tracking-widest text-sm">Visible for: ${l.display_duration_seconds}s</h4>
+                    <div class="flex items-center gap-2">
+                       <span class="text-[10px] text-on-surface-variant font-headline font-bold uppercase tracking-widest">P${i + 1}</span>
+                       <span class="px-2 py-0.5 rounded-full bg-secondary/10 text-secondary text-[8px] font-black uppercase tracking-widest border border-secondary/20">${l.points || 1} Marks</span>
+                    </div>
+                    <h4 class="font-headline font-bold text-white uppercase tracking-widest text-sm">Timer: ${l.display_duration_seconds}s</h4>
+                    <p class="text-[10px] text-on-surface-variant mt-1 line-clamp-1 italic max-w-sm">${l.seed_description || 'No Master Prompt'}</p>
                   </div>
                 </div>
-                <button data-del-prompt="${l.id}" class="del-prompt w-8 h-8 rounded-lg bg-error/10 text-error flex items-center justify-center hover:bg-error/20 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button data-del-prompt="${l.id}" class="del-prompt w-8 h-8 rounded-lg bg-error/10 text-error flex items-center justify-center hover:bg-error/20 transition-all flex-shrink-0">
                   <span class="material-symbols-outlined text-sm">delete</span>
                 </button>
               </div>
@@ -1746,6 +2312,7 @@ export async function renderAdmin(container) {
             <div class="flex max-md:flex-col gap-3 items-center">
               <input id="l-brand" class="flex-1 bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white placeholder:text-slate-600 font-headline uppercase" placeholder="Correct Brand Name (e.g. Tesla)" />
               <input type="file" id="l-file" accept="image/*" class="flex-1 bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-on-primary-fixed hover:file:bg-primary/80" />
+              <input id="l-marks" type="number" value="1" class="w-24 bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white text-center" placeholder="Marks" />
               <button id="add-logo" class="px-6 py-3 rounded-xl kinetic-gradient text-on-primary-fixed font-headline font-bold text-sm hover:scale-105 active:scale-95 transition-transform flex-shrink-0 disabled:opacity-50 flex items-center gap-2">Add Logo Target</button>
             </div>
           </div>
@@ -1755,14 +2322,16 @@ export async function renderAdmin(container) {
             ${assets.length === 0 ? '<p class="text-on-surface-variant text-center py-4">No logos added yet.</p>' : assets.map((l, i) => `
               <div class="bg-surface-container-low p-4 rounded-xl group hover:border-primary/30 transition-colors flex items-center justify-between border border-transparent">
                 <div class="flex items-center gap-4">
-                  <span class="w-8 h-8 rounded-lg bg-surface-container-highest flex items-center justify-center font-headline font-bold text-on-surface-variant">${i + 1}</span>
-                  ${l.image_url ? `<img src="${l.image_url}" class="w-12 h-12 rounded object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all"/>` : `<div class="w-12 h-12 rounded bg-surface-container-highest flex items-center justify-center"><span class="material-symbols-outlined text-on-surface-variant/40">image_not_supported</span></div>`}
+                  ${l.image_url ? `<img src="${l.image_url}" class="w-12 h-12 rounded-lg object-contain bg-white/5 p-1 border border-white/5 group-hover:border-primary/50 transition-all"/>` : `<div class="w-12 h-12 rounded-lg bg-surface-container-highest flex items-center justify-center"><span class="material-symbols-outlined text-on-surface-variant/40">image_not_supported</span></div>`}
                   <div>
-                    <span class="text-xs text-on-surface-variant tracking-widest uppercase">Target Brand</span>
-                    <h4 class="font-headline font-bold text-white uppercase tracking-widest text-lg">${l.correct_answer}</h4>
+                    <div class="flex items-center gap-2">
+                      <span class="text-[10px] text-primary font-black uppercase tracking-widest font-headline">${l.correct_answer}</span>
+                      <span class="px-2 py-0.5 rounded-full bg-secondary/10 text-secondary text-[8px] font-black uppercase tracking-widest border border-secondary/20">${l.points || 1} Marks</span>
+                    </div>
+                    <div class="text-[8px] text-on-surface-variant uppercase mt-0.5">Asset ID: ${l.id.slice(0,8)}...</div>
                   </div>
                 </div>
-                <button data-del-logo="${l.id}" class="del-logo w-8 h-8 rounded-lg bg-error/10 text-error flex items-center justify-center hover:bg-error/20 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button data-del-logo="${l.id}" class="del-logo w-8 h-8 rounded-lg bg-error/10 text-error flex items-center justify-center hover:bg-error/20 transition-all">
                   <span class="material-symbols-outlined text-sm">delete</span>
                 </button>
               </div>
@@ -1789,6 +2358,7 @@ export async function renderAdmin(container) {
         question_text: text,
         options,
         correct_answer: parseInt(document.getElementById('q-correct').value),
+        points: parseInt(document.getElementById('q-points').value) || 1,
         order_index: assets.length + 1
       });
       renderTabContent('assets');
@@ -1828,6 +2398,7 @@ export async function renderAdmin(container) {
           question_text: q.question,
           options: q.options,
           correct_answer: q.correct,
+          points: q.points || 1,
           order_index: assets.length + idx + 1
         }));
 
@@ -2030,6 +2601,7 @@ export async function renderAdmin(container) {
           round_id: selectedRound.id,
           correct_answer: brand,
           image_url: url || null,
+          points: parseInt(document.getElementById('l-marks')?.value) || 1,
           order_index: assets.length + 1
         });
         renderTabContent('assets');
@@ -2038,7 +2610,6 @@ export async function renderAdmin(container) {
         btn.disabled = false;
       }
     });
-
     el.querySelectorAll('.del-logo').forEach(btn => {
       btn.addEventListener('click', async () => {
         if (!confirm('Delete this logo target?')) return;
@@ -2048,25 +2619,34 @@ export async function renderAdmin(container) {
       });
     });
 
-    // Handle Prompt Addition
     document.getElementById('add-prompt')?.addEventListener('click', async (e) => {
-      let duration = parseInt(document.getElementById('p-duration').value.trim()) || 30;
-
       const btn = e.currentTarget;
       const originalText = btn.innerHTML;
       try {
         btn.innerHTML = `<span class="material-symbols-outlined animate-spin text-sm">refresh</span> Uploading...`;
         btn.disabled = true;
 
-        let url = await uploadAsset('p-file');
-
-        await supabase.from('prompt_images').insert({
+        const url = await uploadAsset('p-file');
+        const duration = parseInt(document.getElementById('p-duration').value.trim()) || 30;
+        const seedPrompt = document.getElementById('p-seed').value.trim();
+        const marks = parseInt(document.getElementById('p-marks').value.trim()) || 1;
+        
+        const { error } = await supabase.from('prompt_images').insert({
           round_id: selectedRound.id,
           image_url: url || null,
-          display_duration_seconds: duration
+          display_duration_seconds: duration,
+          seed_description: seedPrompt,
+          points: marks,
+          order_index: assets.length + 1
         });
+        
+        if (error) throw error;
+        
         renderTabContent('assets');
+        Notifier.toast('Prompt asset added successfully', 'success');
       } catch (err) {
+        console.error("Error adding prompt:", err);
+        Notifier.toast("Failed to add prompt: " + (err.message || "Unknown error"), "error");
         btn.innerHTML = originalText;
         btn.disabled = false;
       }
@@ -2177,11 +2757,9 @@ export async function renderAdmin(container) {
           <h1 class="text-3xl font-headline font-bold text-white">Registration Page</h1>
           <p class="text-on-surface-variant text-sm mt-1">${event.name} · Customize what participants see when registering</p>
         </div>
-        ${event.registration_open ? `
-          <a href="#/register/${event.slug || ''}" target="_blank" class="px-4 py-2 rounded-xl bg-secondary/10 text-secondary font-headline font-bold text-xs border border-secondary/20 hover:bg-secondary/20 flex items-center gap-2">
-            <span class="material-symbols-outlined text-sm">open_in_new</span> Preview Page
-          </a>
-        ` : ''}
+        <button type="button" onclick="sessionStorage.setItem('admin_return','true');window.location.hash='/register/${event.slug || ''}'" class="px-4 py-2 rounded-xl bg-secondary/10 text-secondary font-headline font-bold text-xs border border-secondary/20 hover:bg-secondary/20 flex items-center gap-2">
+          <span class="material-symbols-outlined text-sm">visibility</span> Preview Page
+        </button>
       </div>
 
       <!-- Banner Section -->
@@ -2392,68 +2970,5 @@ export async function renderAdmin(container) {
       }
     });
   }
-
-  // ========================================
-  // PREVIEW ENGINE LOGIC
-  // ========================================
-  const launchBtn = document.getElementById('launch-preview');
-  const teamSelect = document.getElementById('preview-team-select');
-
-  if (launchBtn && teamSelect) {
-    launchBtn.addEventListener('click', async () => {
-      const teamId = teamSelect.value;
-      if (!teamId) return Notifier.toast('Select a team first', 'error');
-
-      const team = teams.find(t => t.id === teamId);
-      if (!team) return;
-
-      renderPreviewModal(team);
-    });
-  }
-
-  function renderPreviewModal(team) {
-    const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 bg-surface z-[100] flex flex-col slide-in-bottom';
-    modal.innerHTML = `
-      <div class="bg-black text-white px-6 py-2 flex items-center justify-between border-b border-primary/20">
-        <div class="flex items-center gap-4">
-          <div class="flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
-            <span class="text-[10px] font-bold uppercase tracking-widest text-secondary">Admin Live Preview</span>
-          </div>
-          <div class="h-4 w-px bg-white/10"></div>
-          <div class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Viewing as: <span class="text-white">${team.team_name}</span></div>
-        </div>
-        <button id="close-preview" class="px-4 py-1.5 rounded-lg bg-error/20 text-error hover:bg-error/30 text-[10px] font-bold uppercase tracking-widest transition-all">Close Preview</button>
-      </div>
-      <div id="preview-viewport" class="flex-1 overflow-auto bg-surface">
-        <div class="p-12 text-center text-on-surface-variant flex flex-col items-center justify-center h-full">
-          <span class="material-symbols-outlined animate-spin text-4xl mb-4">refresh</span>
-          <p class="font-headline tracking-widest uppercase text-xs">Simulating Neural Connection...</p>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(modal);
-
-    const viewport = modal.querySelector('#preview-viewport');
-    
-    // Mock user object for dashboard
-    const mockUser = {
-      id: team.id,
-      team_id: team.team_id,
-      team_name: team.team_name,
-      role: 'participant',
-      event_id: team.event_id,
-      members: team.members || []
-    };
-
-    // Render dashboard with mock user
-    setTimeout(() => {
-      renderDashboard(viewport, mockUser);
-    }, 500);
-
-    document.getElementById('close-preview').addEventListener('click', () => {
-      modal.remove();
-    });
-  }
 }
+

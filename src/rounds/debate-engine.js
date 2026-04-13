@@ -275,6 +275,7 @@ export async function renderDebateRound(container, params, search = {}) {
       body: "This will lock your argument for judging. You cannot edit after submission.",
       type: "warning",
       icon: "gavel",
+      showConfirm: true,
       confirmText: "Submit Now",
       onConfirm: async () => {
         await save(true);

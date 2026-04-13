@@ -182,6 +182,7 @@ export async function renderVideoRound(container, params, search = {}) {
         body: "This will lock your video submission for judging. Ensure sharing settings are correct.",
         icon: "upload",
         type: "warning",
+        showConfirm: true,
         confirmText: "Submit Video",
         onConfirm: async () => {
           await save(true);

@@ -4,11 +4,15 @@ import { renderNavbar, bindNavbarEvents } from '../components/navbar.js';
 import { Timer, renderPreRoundCountdown } from '../services/timer.js';
 import { navigate } from '../router.js';
 import { startAntiCheat, stopAntiCheat } from '../services/anti-cheat.js';
+import { ActivityBroadcast } from '../services/activity-broadcast.js';
+import { Ticker } from '../components/ticker.js';
 
 export async function renderPromptRound(container, params, search = {}) {
   const isPreview = search.mode === 'preview';
   const previewRoundId = search.roundId;
   const user = getState('user');
+  
+  Ticker.init(container);
   
   if (!user && !isPreview) {
     navigate('/login');
@@ -169,12 +173,24 @@ export async function renderPromptRound(container, params, search = {}) {
       return Notifier.toast("Submission Disabled in Preview Mode", "info");
     }
 
-    await supabase.from('submissions').upsert({
-      team_id: user.id, round_id: round.id, text_content: textarea.value, is_final: true, submission_time: new Date().toISOString()
-    }, { onConflict: 'team_id,round_id' });
-    stopAntiCheat();
-    Notifier.toast('Prompt submitted!', 'success');
-    navigate('/dashboard');
+    Notifier.modal({
+      title: "Finalize Prompt?",
+      body: "This will submit your creative description for AI evaluation. You cannot edit after this.",
+      type: "warning",
+      icon: "history_edu",
+      showConfirm: true,
+      confirmText: "Submit Prompt",
+      onConfirm: async () => {
+        await supabase.from('submissions').upsert({
+          team_id: user.id, round_id: round.id, text_content: textarea.value, is_final: true, submission_time: new Date().toISOString()
+        }, { onConflict: 'team_id,round_id' });
+        stopAntiCheat();
+        
+        ActivityBroadcast.push('activity', `Team "${user.team_name}" just submitted their AI Prompt for Round ${round.round_number}!`);
+        Notifier.toast('Prompt submitted!', 'success');
+        navigate('/dashboard');
+      }
+    });
   });
 
   // Timer and Observer Logic
@@ -212,6 +228,10 @@ export async function renderPromptRound(container, params, search = {}) {
           if (!existing?.is_final) {
             await supabase.from('submissions').upsert({ team_id: user.id, round_id: round.id, text_content: textarea.value, is_final: true, submission_time: new Date().toISOString() }, { onConflict: 'team_id,round_id' });
             stopAntiCheat();
+            
+            // Broadcast auto-submission
+            ActivityBroadcast.push('activity', `Team "${user.team_name}" was auto-submitted as time expired for Round ${round.round_number}.`);
+
             alert('Time up! Auto-submitted.'); 
             navigate('/dashboard');
           }

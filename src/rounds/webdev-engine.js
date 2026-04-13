@@ -4,11 +4,14 @@ import { renderNavbar, bindNavbarEvents } from '../components/navbar.js';
 import { Timer, renderPreRoundCountdown } from '../services/timer.js';
 import { navigate } from '../router.js';
 import { startAntiCheat, stopAntiCheat } from '../services/anti-cheat.js';
+import { ActivityBroadcast } from '../services/activity-broadcast.js';
+import { Ticker } from '../components/ticker.js';
 
 export async function renderWebdevRound(container, params, search = {}) {
   const isPreview = search.mode === 'preview';
   const previewRoundId = search.roundId;
   const user = getState('user');
+  Ticker.init(container);
   
   if (!user && !isPreview) {
     navigate('/login');
@@ -275,6 +278,10 @@ export async function renderWebdevRound(container, params, search = {}) {
       
       if (isFinal) {
         stopAntiCheat();
+        
+        // Broadcast submission
+        ActivityBroadcast.push('activity', `Team "${user.team_name}" just finalized their Web Project for Round ${round.round_number}!`);
+
         const { Notifier } = await import('../services/notifier.js');
         Notifier.toast('Project Finalized Successfully!', 'success');
         renderWebdevRound(container, params, search); // Re-render to show locked state
@@ -296,6 +303,7 @@ export async function renderWebdevRound(container, params, search = {}) {
         body: "This will lock your project for judging. Ensure everything is correct.",
         icon: "rocket_launch",
         type: "warning",
+        showConfirm: true,
         confirmText: "Finalize & Submit",
         onConfirm: async () => {
           await save(true);

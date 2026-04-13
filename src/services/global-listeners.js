@@ -1,5 +1,6 @@
 import { supabase } from '../config/supabase.js';
-import { getState, setState, saveAuth, clearAuth } from './state.js';
+import { getState, setState, saveAuth, clearAuth, subscribe } from './state.js';
+import { socketService } from './socket.js';
 import { navigate } from '../router.js';
 
 let isListening = false;
@@ -7,6 +8,13 @@ let isListening = false;
 export function initGlobalListeners() {
   if (isListening) return;
   isListening = true;
+
+  // Real-time Socket Bridge
+  subscribe('user', (user) => {
+    if (user && user.event_id) {
+      socketService.joinRoom(user.event_id, user.role);
+    }
+  });
 
   // Render container for notifications
   const notifContainer = document.createElement('div');

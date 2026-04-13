@@ -1,8 +1,12 @@
 import { registerRoute, initRouter } from './router.js';
 import { loadAuth } from './services/state.js';
 import { initGlobalListeners } from './services/global-listeners.js';
-import { Notifier } from './services/notifier.js';
 import { supabase } from './config/supabase.js';
+import { ActivityBroadcast } from './services/activity-broadcast.js';
+import './components/ticker.css';
+
+// Initialize global real-time pulse
+ActivityBroadcast.init();
 
 // Pages
 import { renderLanding } from './pages/landing.js';
@@ -51,6 +55,9 @@ initRouter();
 // Start live systems
 import { initRealtimeNotifier } from './services/realtime-notifier.js';
 initRealtimeNotifier();
+
+import { socketService } from './services/socket.js';
+socketService.init();
 
 console.log('%c⚡ HostiBuzz v1.0', 'color: #a7a5ff; font-size: 16px; font-weight: bold; font-family: "Space Grotesk"');
 console.log('%cOpen Source Technical Event Hosting Platform', 'color: #53ddfc; font-size: 12px');

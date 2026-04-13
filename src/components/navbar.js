@@ -83,6 +83,27 @@ export function bindNavbarEvents() {
     initGlowNav(glowNavInner);
   }
 
+  // Show "Back to Admin" button if previewing from admin
+  if (sessionStorage.getItem('admin_return') === 'true') {
+    // Only show if we're NOT on the admin page itself
+    if (!window.location.hash.includes('/admin')) {
+      const backBtnId = 'admin-return-path';
+      if (!document.getElementById(backBtnId)) {
+        const backBtn = document.createElement('button');
+        backBtn.id = backBtnId;
+        backBtn.innerHTML = '<span style="font-size:18px;">←</span> Back to Admin Panel';
+        backBtn.style.cssText = 'position:fixed;top:16px;right:16px;z-index:9999;padding:10px 20px;border-radius:12px;background:rgba(167,165,255,0.15);color:#a7a5ff;border:1px solid rgba(167,165,255,0.3);font-size:12px;font-weight:700;cursor:pointer;backdrop-filter:blur(12px);text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;gap:8px;transition:all 0.2s;';
+        backBtn.onmouseenter = () => backBtn.style.background = 'rgba(167,165,255,0.25)';
+        backBtn.onmouseleave = () => backBtn.style.background = 'rgba(167,165,255,0.15)';
+        backBtn.addEventListener('click', () => {
+          sessionStorage.removeItem('admin_return');
+          window.location.hash = '/admin';
+        });
+        document.body.appendChild(backBtn);
+      }
+    }
+  }
+
   // Creepy Eye Button on nav
   const navRegBtn = document.getElementById('nav-register-btn');
   if (navRegBtn) {

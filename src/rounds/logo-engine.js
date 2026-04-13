@@ -4,11 +4,15 @@ import { renderNavbar, bindNavbarEvents } from '../components/navbar.js';
 import { Timer, renderPreRoundCountdown } from '../services/timer.js';
 import { startAntiCheat, stopAntiCheat } from '../services/anti-cheat.js';
 import { navigate } from '../router.js';
+import { ActivityBroadcast } from '../services/activity-broadcast.js';
+import { Ticker } from '../components/ticker.js';
 
-export async function renderLogoRound(container, params, search = {}) {
-  const isPreview = search.mode === 'preview';
+export async function renderLogoRound(container, params, search = {}, mockUser = null) {
+  const isPreview = search.mode === 'preview' || !!mockUser;
   const previewRoundId = search.roundId;
-  const user = getState('user');
+  const user = mockUser || getState('user');
+  
+  Ticker.init(container);
   
   if (!user && !isPreview) {
     navigate('/login');
@@ -120,13 +124,27 @@ export async function renderLogoRound(container, params, search = {}) {
       Notifier.toast("Submission Disabled in Preview Mode", "info");
       return;
     }
-    isFinal = true;
-    await supabase.from('submissions').upsert({
-      team_id: user.id, round_id: round.id, answers, is_final: true, submission_time: new Date().toISOString()
-    }, { onConflict: 'team_id,round_id' });
-    
-    stopAntiCheat();
-    renderPhase(); // Trigger re-render to lock fields
+
+    const { Notifier } = await import('../services/notifier.js');
+    Notifier.modal({
+      title: "Finalize Logo Entry?",
+      body: "This will lock your answers for evaluation. Ensure everything is matched correctly.",
+      type: "warning",
+      icon: "task_alt",
+      showConfirm: true,
+      confirmText: "Finalize & Submit",
+      onConfirm: async () => {
+        isFinal = true;
+        await supabase.from('submissions').upsert({
+          team_id: user.id, round_id: round.id, answers, is_final: true, submission_time: new Date().toISOString()
+        }, { onConflict: 'team_id,round_id' });
+        
+        stopAntiCheat();
+        ActivityBroadcast.push('activity', `Team "${user.team_name}" just identified all brands in Round ${round.round_number}!`);
+        Notifier.toast('Submission successful!', 'success');
+        renderPhase();
+      }
+    });
   }
 
   // Bind inputs mapping (used in both phases)

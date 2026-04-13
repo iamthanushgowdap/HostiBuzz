@@ -24,12 +24,42 @@ class NotifierService {
   }
 
   /**
+   * Internal sound engine for notification feedback
+   */
+  playSound() {
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+
+      oscillator.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+
+      oscillator.type = 'sine';
+      oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // A5
+      gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+      gainNode.gain.linearRampToValueAtTime(0.1, audioCtx.currentTime + 0.01);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+
+      oscillator.start();
+      oscillator.stop(audioCtx.currentTime + 0.5);
+    } catch (e) {
+      // Audio likely blocked by browser interaction policy
+    }
+  }
+
+  /**
    * Show a temporary toast notification
    * @param {string} msg - Message to display
    * @param {'info'|'success'|'error'|'kinetic'} type - Type of toast
-   * @param {number} duration - Time in ms before auto-dismiss (0 = manual)
+   * @param {Object} options - extra config (duration, sound)
    */
-  toast(msg, type = 'info', duration = 4000) {
+  toast(msg, type = 'info', options = {}) {
+    const duration = options.duration !== undefined ? options.duration : 4000;
+    const playSound = options.sound !== undefined ? options.sound : true;
+
+    if (playSound) this.playSound();
+
     const container = document.getElementById('toast-container');
     if (!container) return;
 
@@ -89,12 +119,14 @@ class NotifierService {
    * Show a persistent modal dialog
    * @param {Object} options - Modal configuration
    */
-  modal({ title, body, icon, type, showConfirm = false, confirmText = 'Confirm', onConfirm, onCancel }) {
+  modal({ title, body, icon, type, showConfirm = false, confirmText = 'Confirm', onConfirm, onCancel, size = 'standard' }) {
     const container = document.getElementById('modal-container');
     if (!container) return;
 
+    const sizeClass = size === 'wide' ? 'max-w-5xl' : 'max-w-lg';
+
     container.innerHTML = `
-      <div class="glass-panel p-8 rounded-[32px] max-w-lg w-full border border-white/10 shadow-[0_30px_70px_rgba(0,0,0,0.5)] scale-95 opacity-0 transition-all duration-300">
+      <div class="glass-panel p-8 rounded-[32px] ${sizeClass} w-full border border-white/10 shadow-[0_30px_70px_rgba(0,0,0,0.5)] scale-95 opacity-0 transition-all duration-300">
         <div class="flex flex-col items-center text-center gap-6">
           <div class="w-20 h-20 rounded-3xl bg-white/5 flex items-center justify-center relative glow-accent">
             <span class="material-symbols-outlined text-4xl ${type === 'error' ? 'text-error' : type === 'success' ? 'text-primary' : 'text-secondary'}">${icon || 'info'}</span>

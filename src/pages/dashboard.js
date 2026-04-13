@@ -3,11 +3,16 @@ import { getState } from '../services/state.js';
 import { renderNavbar, bindNavbarEvents } from '../components/navbar.js';
 import { Timer } from '../services/timer.js';
 import { navigate } from '../router.js';
+import { Ticker } from '../components/ticker.js';
+import { ActivityBroadcast } from '../services/activity-broadcast.js';
+import { socketService } from '../services/socket.js';
+import { Notifier } from '../services/notifier.js';
 
 let roundTimer = null;
 
-export async function renderDashboard(container, mockUser = null) {
+export async function renderDashboard(container, params = {}, search = {}, mockUser = null) {
   const user = mockUser || getState('user');
+  Ticker.init(container);
   
   // Admin Redirection (Skip if mockUser is provided for preview)
   if (!mockUser && user.role === 'admin') {
@@ -41,15 +46,27 @@ export async function renderDashboard(container, mockUser = null) {
 
   container.innerHTML = `
     ${renderNavbar({ activeLink: 'dashboard' })}
-    <main class="min-h-[calc(100vh-76px)] p-6 lg:p-12 max-w-7xl mx-auto relative">
+    ${mockUser ? `
+      <div class="fixed top-[76px] left-0 right-0 bg-secondary/20 backdrop-blur-md border-b border-secondary/30 py-2 z-[60] flex items-center justify-center gap-3">
+        <span class="material-symbols-outlined text-secondary animate-pulse text-sm">settings_input_composite</span>
+        <span class="text-[10px] font-black text-secondary uppercase tracking-[0.3em]">Diagnostic Mode // Live Audit of ${user.team_name}</span>
+      </div>
+    ` : ''}
+    <main class="min-h-[calc(100vh-76px)] p-6 lg:p-12 max-w-7xl mx-auto relative ${mockUser ? 'pt-20' : ''}">
       <div class="absolute top-0 right-0 w-[400px] h-[400px] bg-primary/5 blur-[120px] rounded-full pointer-events-none"></div>
       
       <!-- Header -->
       <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6 mb-12">
         <div>
-          <div class="flex items-center gap-2 text-primary text-xs font-headline tracking-[0.2em] uppercase mb-3">
-            <span class="material-symbols-outlined text-sm">satellite_alt</span>
-            <span>Event Command Center</span>
+          <div class="flex items-center gap-4 text-primary text-xs font-headline tracking-[0.2em] uppercase mb-3">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-sm">satellite_alt</span>
+              <span>Event Command Center</span>
+            </div>
+            <div id="socket-pulse-wrap" class="flex items-center gap-2 pl-4 border-l border-white/10">
+               <div id="socket-pulse-dot" class="w-1.5 h-1.5 rounded-full bg-white/20"></div>
+               <span id="socket-pulse-text" class="text-[8px] font-bold text-on-surface-variant/60">Pulse Syncing...</span>
+            </div>
           </div>
           <div class="flex items-center gap-4">
             <h1 class="text-4xl md:text-5xl font-headline font-bold tracking-tighter text-white">${user.team_name}</h1>
@@ -227,21 +244,150 @@ export async function renderDashboard(container, mockUser = null) {
   }
 
   // Enter round button
-  const enterBtn = document.getElementById('enter-round');
+  const enterBtn = container.querySelector('#enter-round');
   if (enterBtn && currentRound) {
     enterBtn.addEventListener('click', () => {
       navigate(`/round/${currentRound.round_type}`);
     });
   }
 
+  // Handle Feedback Modal
+  container.querySelectorAll('.view-feedback-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const fid = btn.dataset.feedbackId;
+      const score = scores.find(s => s.id === fid);
+      if (!score) return;
+
+      let notes = {};
+      try {
+        notes = typeof score.evaluator_notes === 'string' ? JSON.parse(score.evaluator_notes) : (score.evaluator_notes || {});
+      } catch (e) {
+        notes = { feedback: score.evaluator_notes };
+      }
+
+      Notifier.modal({
+        title: 'Performance Intelligence',
+        icon: 'analytics',
+        type: 'info',
+        body: `
+          <div class="space-y-6">
+            <div class="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/10">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                  <span class="material-symbols-outlined text-sm">leaderboard</span>
+                </div>
+                <div>
+                  <div class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Validated Score</div>
+                  <div class="text-xl font-headline font-bold text-white">${score.score} <span class="text-xs font-normal text-on-surface-variant">/ ${score.max_score}</span></div>
+                </div>
+              </div>
+              ${notes.ai ? `
+                <div class="px-3 py-1 rounded-full bg-secondary/10 border border-secondary/20 flex items-center gap-2">
+                  <span class="material-symbols-outlined text-[10px] text-secondary">psychology</span>
+                  <span class="text-[8px] font-bold uppercase tracking-widest text-secondary">Aura Intel</span>
+                </div>
+              ` : ''}
+            </div>
+
+            <div class="space-y-2">
+              <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Technical Review</label>
+              <div class="p-5 rounded-3xl bg-surface-container-highest border border-white/5 text-sm text-white italic leading-relaxed">
+                "${notes.feedback || 'No detailed feedback provided yet.'}"
+              </div>
+            </div>
+
+            <p class="text-[10px] text-on-surface-variant italic text-center">Evaluated at ${new Date(score.evaluated_at).toLocaleString()}</p>
+          </div>
+        `
+      });
+    });
+  });
+
+  const refresh = () => {
+    setTimeout(() => {
+      renderDashboard(container, params, search, mockUser);
+    }, 500);
+  };
+
+  // HYBRID REAL-TIME ENGINE
+  // 1. Supabase (Reliability Fallback)
   let channel = supabase.getChannels().find(c => c.topic === 'realtime:round-updates');
   if (!channel) {
     channel = supabase.channel('round-updates')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'rounds' }, () => {
-        renderDashboard(container); // Re-render on round change
-      })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'rounds' }, refresh)
       .subscribe();
   }
+
+  // 2. Socket.IO (Instant Trigger)
+  const unsubs = [
+    socketService.on('round_started', (data) => {
+      const title = data.roundTitle || 'New Round';
+      Notifier.toast(`🔥 ROUND STARTED: ${title}`, 'success', { duration: 5000 });
+      Notifier.modal({
+        title: 'Round Started!',
+        body: `<p class="text-xl font-headline text-white mb-2">${title}</p><p class="text-sm text-on-surface-variant">Synchronizing round assets and starting the synchronized clock. Good luck, Team!</p>`,
+        icon: 'rocket_launch',
+        type: 'success'
+      });
+      refresh();
+    }),
+    socketService.on('leaderboard_updated', () => {
+      Notifier.toast('🏆 Leaderboard Synchronized', 'info');
+      refresh();
+    }),
+    socketService.on('round_status_updated', (data) => {
+      const title = data.roundTitle || 'Round';
+      const status = data.status === 'active' ? 'RESUMED' : data.status.toUpperCase();
+      const type = data.status === 'completed' ? 'info' : 'warning';
+      const verb = data.status === 'active' ? 'Resumed' : data.status === 'paused' ? 'Paused' : 'Completed';
+      
+      Notifier.toast(`📢 ${title} ${status}`, type, { duration: 5000 });
+      
+      if (data.status === 'paused' || data.status === 'completed') {
+        Notifier.modal({
+          title: `Round ${verb}`,
+          body: `<p class="text-xl font-headline text-white mb-2">${title}</p><p class="text-sm text-on-surface-variant">The administration has ${verb.toLowerCase()} this round. Please standby for further instructions.</p>`,
+          icon: data.status === 'paused' ? 'pause_circle' : 'task_alt',
+          type: type
+        });
+      }
+      refresh();
+    }),
+    socketService.on('team_eliminated', (data) => {
+      if (data.teamIds.includes(user.id)) {
+        navigate('/eliminated');
+      } else {
+        refresh();
+      }
+    })
+  ];
+
+  // 3. Pulse Status Monitor
+  const updatePulseUI = (status) => {
+    const dot = document.getElementById('socket-pulse-dot');
+    const text = document.getElementById('socket-pulse-text');
+    if (!dot || !text) return;
+
+    const statusMap = {
+      offline: { color: 'bg-red-500', label: 'Pulse Offline', glow: 'shadow-[0_0_8px_rgba(239,68,68,0.5)]' },
+      connecting: { color: 'bg-blue-400', label: 'Pulse Localizing...', glow: 'shadow-[0_0_8px_rgba(96,165,250,0.5)]' },
+      connected: { color: 'bg-yellow-400', label: 'Pulse Synced', glow: 'shadow-[0_0_8px_rgba(250,204,21,0.5)]' },
+      joined: { color: 'bg-green-400', label: 'Pulse Live', glow: 'shadow-[0_0_12px_rgba(74,222,128,0.6)]' }
+    };
+
+    const config = statusMap[status] || statusMap.offline;
+    dot.className = `w-1.5 h-1.5 rounded-full ${config.color} ${config.glow} transition-all duration-300`;
+    text.innerText = config.label;
+    text.className = `text-[8px] font-bold uppercase tracking-widest transition-colors duration-300 ${status === 'joined' ? 'text-green-400' : 'text-on-surface-variant/60'}`;
+  };
+
+  unsubs.push(socketService.onStatusChange(updatePulseUI));
+
+  // Store cleanup on the container for subsequent renders
+  if (container._cleanupRealtime) container._cleanupRealtime();
+  container._cleanupRealtime = () => {
+    unsubs.forEach(unsub => unsub());
+  };
 
   // Feedback Modal (Event Delegation)
   container.addEventListener('click', (e) => {
@@ -259,7 +405,10 @@ export async function renderDashboard(container, mockUser = null) {
         <div class="absolute -top-20 -right-20 w-40 h-40 bg-primary/10 blur-[60px] rounded-full"></div>
         
         <div class="flex justify-between items-center mb-6">
-          <h2 class="text-2xl font-headline font-bold text-white uppercase tracking-tighter">Evaluation Breakdown</h2>
+          <div>
+            <h2 class="text-2xl font-headline font-bold text-white uppercase tracking-tighter">Performance Analysis</h2>
+            <div class="text-[10px] font-bold text-secondary uppercase tracking-[0.2em] mt-1">${score.rounds?.title} Evaluation</div>
+          </div>
           <button id="close-feedback" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-on-surface-variant hover:text-white hover:bg-white/10 transition-all">
             <span class="material-symbols-outlined">close</span>
           </button>
@@ -311,28 +460,37 @@ export async function renderDashboard(container, mockUser = null) {
                   </div>
                 `).join('');
               }
-            } catch (e) { /* Not JSON, fallback to legacy */ }
+            } catch (e) { /* Not JSON, use fallback below */ }
 
-            return rawNotes.split('\n\n').map(note => {
-              let title = "", content = note;
-              if (note.includes('\n')) {
-                [title, ...content] = note.split('\n');
-                content = content.join('\n');
-              } else if (note.includes(': ')) {
-                [title, ...content] = note.split(': ');
-                content = content.join(': ');
-              }
-
-              if (title) {
-                return `
-                  <div class="space-y-2">
-                    <div class="text-[10px] font-bold text-secondary uppercase tracking-widest">${title}</div>
-                    <p class="text-sm text-on-surface-variant leading-relaxed bg-white/5 p-4 rounded-xl border border-white/5 shadow-inner whitespace-pre-line">${content}</p>
+            return `
+              <div class="space-y-4">
+                <div class="p-6 rounded-3xl bg-surface-container-highest border border-white/5 text-on-surface-variant italic leading-relaxed relative overflow-hidden group">
+                  <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                    <span class="material-symbols-outlined text-4xl">format_quote</span>
                   </div>
-                `;
-              }
-              return `<p class="text-sm text-on-surface-variant leading-relaxed p-4 bg-white/5 rounded-xl border border-white/5 whitespace-pre-line">${note}</p>`;
-            }).join('');
+                  <div class="text-[10px] font-bold text-secondary uppercase tracking-widest mb-3 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-sm">psychology</span>
+                    Judge's Strategic Review
+                  </div>
+                  <div class="relative z-10 text-white selection:bg-primary/30">
+                    ${rawNotes.replace(/\n/g, '<br>')}
+                  </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                   <div class="p-4 rounded-2xl bg-white/5 border border-white/5">
+                      <div class="text-[8px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Scoring Metric</div>
+                      <div class="text-xs text-white font-headline">Audit-Based Manual Evaluation</div>
+                   </div>
+                   <div class="p-4 rounded-2xl bg-white/5 border border-white/5 text-right">
+                      <div class="text-[8px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Status</div>
+                      <div class="text-xs text-secondary font-headline flex items-center justify-end gap-1">
+                        <span class="material-symbols-outlined text-sm">verified</span> Verified
+                      </div>
+                   </div>
+                </div>
+              </div>
+            `;
           })()}
         </div>
 

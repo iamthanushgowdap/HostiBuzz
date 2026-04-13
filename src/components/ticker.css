@@ -1,0 +1,44 @@
+/* src/components/ticker.css */
+#system-ticker {
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.4);
+}
+
+.animate-ticker {
+  animation: ticker-scroll 30s linear infinite;
+  min-width: 100%;
+}
+
+@keyframes ticker-scroll {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.ticker-item {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* Ensure ticker doesn't hide content */
+body {
+  padding-bottom: 40px;
+}
+
+.slide-in-bottom {
+  animation: slideInBottom 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+@keyframes slideInBottom {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

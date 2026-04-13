@@ -1,3 +1,4 @@
+import { supabase } from './config/supabase.js';
 import { getState, isAdmin, isLoggedIn } from './services/state.js';
 import { renderFooter, initFooterClock } from './components/footer.js';
 
@@ -25,7 +26,7 @@ function matchRoute(hash) {
   const search = Object.fromEntries(searchParams.entries());
   
   // Exact match
-  if (routes[path]) return { handler: routes[path], params: {} };
+  if (routes[path]) return { handler: routes[path], params: {}, search };
   
   // Pattern match (e.g., /round/:type)
   for (const [pattern, handler] of Object.entries(routes)) {
@@ -75,7 +76,9 @@ function checkAuth(path) {
 
 export async function handleRoute() {
   const hash = window.location.hash || '#/';
-  const path = hash.slice(1) || '/';
+  const fullPath = hash.slice(1) || '/';
+  const parts = fullPath.split('?');
+  const path = parts[0] || '/';
   
   if (!checkAuth(path)) return;
   
@@ -85,7 +88,30 @@ export async function handleRoute() {
   if (result) {
     app.innerHTML = '';
     app.className = 'page-enter';
-    await result.handler(app, result.params, result.search);
+
+    let mockUser = null;
+    const teamId = result.search?.preview_team_id;
+    if (teamId && teamId !== 'undefined' && teamId !== 'null') {
+      try {
+        console.log('[Router] Preview Mode - Fetching team:', teamId);
+        const { data, error } = await supabase.from('teams').select('*').eq('id', teamId).single();
+        if (error) {
+          console.error('[Router] Team fetch error:', error.message);
+        } else if (data) {
+          mockUser = data;
+          console.log('[Router] Preview data injected for:', data.team_name);
+        }
+      } catch (err) {
+        console.error('[Router] Unexpected error in preview fetch:', err);
+      }
+    }
+
+    try {
+      await result.handler(app, result.params, result.search, mockUser);
+    } catch (handlerErr) {
+      console.error('[Router] Handler execution failed:', handlerErr);
+      app.innerHTML = `<div class="p-10 text-red-400">Error rendering page: ${handlerErr.message}</div>`;
+    }
     // Inject global footer after every page
     const footerEl = document.createElement('div');
     footerEl.innerHTML = renderFooter();
