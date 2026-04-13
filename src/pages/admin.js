@@ -26,6 +26,7 @@ function generateSlug(name) {
 // Global Singletons for Real-Time Services
 let presenceChannel = null;
 let broadcastChannel = null;
+let socketStatusUnsubscribe = null;
 let onlineTeams = new Set();
 let currentAdminContainer = null;
 
@@ -87,9 +88,17 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
     <div class="flex min-h-[calc(100vh-76px)]">
       <!-- Sidebar -->
       <aside class="hidden lg:flex flex-col w-72 bg-surface-container-low/80 backdrop-blur-lg border-r border-white/5">
-        <div class="p-6">
-          <h3 class="text-lg font-black text-white font-headline">Control Panel</h3>
-          <p class="text-[10px] text-on-surface-variant uppercase tracking-widest">Administrator // ${user.username}</p>
+        <div class="p-6 flex items-start justify-between">
+          <div>
+            <h3 class="text-lg font-black text-white font-headline leading-tight">Control Panel</h3>
+            <p class="text-[10px] text-on-surface-variant uppercase tracking-[0.2em]">ADMIN // ${user.username}</p>
+          </div>
+          
+          <!-- ELITE: Pulse Monitor Indicator -->
+          <div id="pulse-monitor" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 glass-panel shadow-lg transition-all">
+            <span id="pulse-dot" class="w-2 h-2 rounded-full bg-outline"></span>
+            <span id="pulse-text" class="text-[9px] font-bold uppercase tracking-widest text-on-surface-variant">Link Offline</span>
+          </div>
         </div>
 
         <!-- NEW: Preview Engine -->
@@ -299,6 +308,47 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
     selectedEventId = data.id;
     renderAdmin(container, params, search, mockUser);
   });
+
+  // ========================================
+  // PULSE MONITOR: Real-time Status Sync
+  // ========================================
+  const updatePulseUI = (status) => {
+    const monitor = document.getElementById('pulse-monitor');
+    const dot = document.getElementById('pulse-dot');
+    const text = document.getElementById('pulse-text');
+    if (!monitor || !dot || !text) return;
+
+    // Reset animations
+    dot.classList.remove('animate-pulse', 'bg-secondary', 'bg-primary', 'bg-error', 'bg-outline');
+    monitor.classList.remove('border-secondary/30', 'border-primary/30', 'border-error/30');
+
+    switch (status) {
+      case 'joined':
+        dot.classList.add('bg-secondary', 'animate-pulse');
+        monitor.classList.add('border-secondary/30');
+        text.innerText = 'Live Pulse';
+        text.className = 'text-[9px] font-bold uppercase tracking-widest text-secondary';
+        break;
+      case 'connected':
+      case 'connecting':
+        dot.classList.add('bg-primary', 'animate-pulse');
+        monitor.classList.add('border-primary/30');
+        text.innerText = 'Syncing...';
+        text.className = 'text-[9px] font-bold uppercase tracking-widest text-primary';
+        break;
+      case 'offline':
+      default:
+        dot.classList.add('bg-error');
+        monitor.classList.add('border-error/30');
+        text.innerText = 'Link Offline';
+        text.className = 'text-[9px] font-bold uppercase tracking-widest text-error';
+        break;
+    }
+  };
+
+  // Subscribe to status changes
+  if (socketStatusUnsubscribe) socketStatusUnsubscribe();
+  socketStatusUnsubscribe = socketService.onStatusChange(updatePulseUI);
 
   // ========================================
   // ROUND AUDITION
