@@ -4,6 +4,7 @@ import { renderNavbar, bindNavbarEvents } from '../components/navbar.js';
 import { Timer, renderPreRoundCountdown } from '../services/timer.js';
 import { navigate } from '../router.js';
 import { startAntiCheat, stopAntiCheat } from '../services/anti-cheat.js';
+import { Notifier } from '../services/notifier.js';
 
 export async function renderVideoRound(container, params, search = {}) {
   const isPreview = search.mode === 'preview';
@@ -143,7 +144,6 @@ export async function renderVideoRound(container, params, search = {}) {
   bindNavbarEvents();
 
   async function save(isFinal) {
-    const { Notifier } = await import('../services/notifier.js');
     const link = document.getElementById('video-link').value.trim();
     if (isFinal && !link) return Notifier.toast('Please enter a video link.', 'error');
 
@@ -176,7 +176,6 @@ export async function renderVideoRound(container, params, search = {}) {
   const submitBtn = document.getElementById('submit-video');
   if (submitBtn) {
     submitBtn.addEventListener('click', async () => {
-      const { Notifier } = await import('../services/notifier.js');
       Notifier.modal({
         title: "Finalize Submission?",
         body: "This will lock your video submission for judging. Ensure sharing settings are correct.",
@@ -200,7 +199,7 @@ export async function renderVideoRound(container, params, search = {}) {
       onComplete: async () => { 
         const link = document.getElementById('video-link').value.trim();
         if (link) await save(true); 
-        alert('Time up! Submission closed.'); 
+        Notifier.toast('Time is up! Video submission finalized.', 'warning'); 
         renderVideoRound(container);
       }
     }).startFromServer(round.started_at, round.duration_minutes);

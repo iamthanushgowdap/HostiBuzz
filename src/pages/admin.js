@@ -1154,7 +1154,8 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
         max_score: parseInt(document.getElementById('add-round-max-score').value) || 100
       });
 
-      if (error) return alert('Error: ' + error.message);
+      if (error) return Notifier.toast('Error: ' + error.message, 'error');
+      Notifier.toast('Round added successfully', 'success');
       renderAdmin(container);
     });
 
@@ -1181,7 +1182,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
     document.getElementById('save-edit-round')?.addEventListener('click', async () => {
       const roundId = document.getElementById('edit-round-id').value;
       const title = document.getElementById('edit-round-title').value.trim();
-      if (!title) return alert('Round title is required');
+      if (!title) return Notifier.toast('Round title is required', 'warning');
 
       const { error } = await supabase.from('rounds').update({
         round_number: parseInt(document.getElementById('edit-round-number').value),
@@ -1191,17 +1192,24 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
         max_score: parseInt(document.getElementById('edit-round-max-score').value) || 100
       }).eq('id', roundId);
 
-      if (error) return alert('Error: ' + error.message);
+      if (error) return Notifier.toast('Error: ' + error.message, 'error');
       document.getElementById('edit-round-modal').classList.add('hidden');
       renderAdmin(container);
     });
 
     // Delete round
     el.querySelectorAll('.del-round').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        if (!confirm('Delete this round?')) return;
-        await supabase.from('rounds').delete().eq('id', btn.dataset.delRound);
-        renderAdmin(container);
+      btn.addEventListener('click', () => {
+        Notifier.confirm(
+          'Delete Round',
+          'Are you sure you want to PERMANENTLY delete this round? This cannot be undone.',
+          async () => {
+            await supabase.from('rounds').delete().eq('id', btn.dataset.delRound);
+            Notifier.toast('Round deleted', 'info');
+            renderAdmin(container);
+          },
+          { type: 'error', icon: 'delete_forever' }
+        );
       });
     });
 
@@ -1266,29 +1274,39 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
           updates.status = 'completed';
           updates.ended_at = new Date().toISOString();
         } else if (action === 'restart') {
-          if (!confirm('Are you sure you want to RESTART this round? This will DELETE ALL SCORES, SUBMISSIONS, and LOGS for this round.')) return;
-          
-          btn.innerHTML = 'Resetting...';
-          btn.disabled = true;
+          Notifier.confirm(
+            'High-Risk Action',
+            'Are you sure you want to RESTART this round? This will PERMANENTLY DELETE all scores, submissions, and anti-cheat logs for this round.',
+            async () => {
+              btn.innerHTML = 'Resetting...';
+              btn.disabled = true;
 
-          // Perform full wipe for this round
-          const [scoreRes, subRes, logRes] = await Promise.all([
-            supabase.from('scores').delete().eq('round_id', roundId),
-            supabase.from('submissions').delete().eq('round_id', roundId),
-            supabase.from('anti_cheat_logs').delete().eq('round_id', roundId)
-          ]);
+              const [scoreRes, subRes, logRes] = await Promise.all([
+                supabase.from('scores').delete().eq('round_id', roundId),
+                supabase.from('submissions').delete().eq('round_id', roundId),
+                supabase.from('anti_cheat_logs').delete().eq('round_id', roundId)
+              ]);
 
-          if (scoreRes.error || subRes.error || logRes.error) {
-            alert('Error during restart: ' + (scoreRes.error?.message || subRes.error?.message || logRes.error?.message));
-            btn.innerHTML = 'Retry Restart';
-            btn.disabled = false;
-            return;
-          }
+              if (scoreRes.error || subRes.error || logRes.error) {
+                Notifier.toast('Error during restart: ' + (scoreRes.error?.message || subRes.error?.message || logRes.error?.message), 'error');
+                btn.innerHTML = 'Retry Restart';
+                btn.disabled = false;
+                return;
+              }
 
-          updates.status = 'pending';
-          updates.started_at = null;
-          updates.ended_at = null;
-          updates.config = {};
+              await supabase.from('rounds').update({
+                status: 'pending',
+                started_at: null,
+                ended_at: null,
+                config: {}
+              }).eq('id', roundId);
+              
+              Notifier.toast('Round restarted successfully', 'success');
+              renderAdmin(container);
+            },
+            { type: 'error', confirmText: 'Reset Round Data', icon: 'restart_alt' }
+          );
+          return; // Exit early as the modal handles the rest
         }
 
         await supabase.from('rounds').update(updates).eq('id', roundId);
@@ -2349,10 +2367,10 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
     // Handle Quiz Addition
     document.getElementById('add-q')?.addEventListener('click', async () => {
       const text = document.getElementById('q-text').value.trim();
-      if (!text) return alert('Question text required');
+      if (!text) return Notifier.toast('Question text required', 'warning');
       const options = [0, 1, 2, 3].map(i => document.getElementById(`q-opt-${i}`).value.trim());
-      if (options.some(o => !o)) return alert('All 4 options required');
-
+      if (options.some(o => !o)) return Notifier.toast('All 4 options required', 'warning');
+      
       await supabase.from('questions').insert({
         round_id: selectedRound.id,
         question_text: text,
@@ -2361,6 +2379,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
         points: parseInt(document.getElementById('q-points').value) || 1,
         order_index: assets.length + 1
       });
+      Notifier.toast('Question added successfully', 'success');
       renderTabContent('assets');
     });
 
@@ -2383,8 +2402,8 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
 
     document.getElementById('import-q-json')?.addEventListener('click', async () => {
       const jsonStr = document.getElementById('q-json-input').value.trim();
-      if (!jsonStr) return alert('Please paste JSON data first');
-
+      if (!jsonStr) return Notifier.toast('Please paste JSON data first', 'info');
+      
       try {
         const questionsArr = JSON.parse(jsonStr);
         if (!Array.isArray(questionsArr)) throw new Error('Root must be an array');
@@ -2405,10 +2424,10 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
         const { error } = await supabase.from('questions').insert(mappedQuestions);
         if (error) throw error;
 
-        alert(`Successfully imported ${mappedQuestions.length} questions!`);
+        Notifier.toast(`Successfully imported ${mappedQuestions.length} questions!`, 'success');
         renderTabContent('assets');
       } catch (err) {
-        alert('Bulk Import Error: ' + err.message);
+        Notifier.alert('Bulk Import Error', err.message, 'error');
         const btn = document.getElementById('import-q-json');
         btn.innerText = 'Import All Questions';
         btn.disabled = false;
@@ -2416,62 +2435,82 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
     });
 
     el.querySelectorAll('.del-q').forEach(btn => {
-      btn.addEventListener('click', async () => {
-        if (!confirm('Delete this question?')) return;
-        const { error } = await supabase.from('questions').delete().eq('id', btn.dataset.delQ);
-        if (error) alert('Error: ' + error.message);
-        renderTabContent('assets');
+      btn.addEventListener('click', () => {
+        Notifier.confirm(
+          'Delete Question',
+          'Are you sure you want to remove this question? This will affect all generated sets.',
+          async () => {
+            const { error } = await supabase.from('questions').delete().eq('id', btn.dataset.delQ);
+            if (error) Notifier.toast('Error: ' + error.message, 'error');
+            else Notifier.toast('Question deleted', 'info');
+            renderTabContent('assets');
+          },
+          { type: 'error', icon: 'delete' }
+        );
       });
     });
 
     document.getElementById('gen-sets')?.addEventListener('click', async () => {
-      if (!assets.length) return alert('Add questions first');
-      if (!confirm('This will generate 5 shuffled sets for this round. OK?')) return;
+      if (!assets.length) return Notifier.toast('Add questions first', 'warning');
       
-      const btn = document.getElementById('gen-sets');
-      btn.innerHTML = 'Shuffling...';
-      btn.disabled = true;
+      Notifier.confirm(
+        'Generate Question Sets',
+        'This will clear existing sets and generate 5 new shuffled variants (A-E) for this round. Proceed?',
+        async () => {
+          const btn = document.getElementById('gen-sets');
+          btn.innerHTML = 'Shuffling...';
+          btn.disabled = true;
 
-      await supabase.from('question_sets').delete().eq('round_id', selectedRound.id);
-      
-      const setLabels = ['A', 'B', 'C', 'D', 'E'];
-      const qIds = assets.map(q => q.id);
-      
-      const setRecords = setLabels.map(label => {
-        const shuffled = [...qIds].sort(() => Math.random() - 0.5);
-        return { round_id: selectedRound.id, set_label: label, question_order: shuffled };
-      });
+          await supabase.from('question_sets').delete().eq('round_id', selectedRound.id);
+          
+          const setLabels = ['A', 'B', 'C', 'D', 'E'];
+          const qIds = assets.map(q => q.id);
+          
+          const setRecords = setLabels.map(label => {
+            const shuffled = [...qIds].sort(() => Math.random() - 0.5);
+            return { round_id: selectedRound.id, set_label: label, question_order: shuffled };
+          });
 
-      const { error } = await supabase.from('question_sets').insert(setRecords);
-      if (error) alert('Set Error: ' + error.message);
-      else alert('5 Sets (A-E) generated successfully!');
-      renderTabContent('assets');
+          const { error } = await supabase.from('question_sets').insert(setRecords);
+          if (error) Notifier.toast('Set Error: ' + error.message, 'error');
+          else Notifier.toast('5 Sets (A-E) generated successfully!', 'success');
+          renderTabContent('assets');
+        },
+        { confirmText: 'Generate & Shuffle', icon: 'shuffle' }
+      );
     });
 
     document.getElementById('assign-sets')?.addEventListener('click', async () => {
       const { data: qSets } = await supabase.from('question_sets').select('*').eq('round_id', selectedRound.id);
-      if (!qSets?.length) return alert('Generate sets first');
+      if (!qSets?.length) return Notifier.toast('Generate sets first', 'warning');
 
       const { data: teams } = await supabase.from('teams').select('id').eq('event_id', selectedRound.event_id);
-      if (!teams?.length) return alert('No teams registered');
+      if (!teams?.length) return Notifier.toast('No teams registered', 'warning');
 
-      const btn = document.getElementById('assign-sets');
-      btn.innerHTML = 'Assigning...';
-      btn.disabled = true;
+      Notifier.confirm(
+        'Assign Sets',
+        `This will assign all ${teams.length} teams to the 5 generated question sets in round-robin order. Continue?`,
+        async () => {
+          const btn = document.getElementById('assign-sets');
+          btn.innerHTML = 'Assigning...';
+          btn.disabled = true;
 
-      await supabase.from('team_set_assignments').delete().eq('round_id', selectedRound.id);
+          await supabase.from('team_set_assignments').delete().eq('round_id', selectedRound.id);
 
-      const sortedSets = qSets.sort((a,b) => a.set_label.localeCompare(b.set_label));
-      const assignments = teams.map((team, idx) => ({
-        team_id: team.id,
-        round_id: selectedRound.id,
-        set_id: sortedSets[idx % sortedSets.length].id
-      }));
+          const sortedSets = qSets.sort((a,b) => a.set_label.localeCompare(b.set_label));
+          const assignments = teams.map((team, idx) => ({
+            team_id: team.id,
+            round_id: selectedRound.id,
+            set_id: sortedSets[idx % sortedSets.length].id
+          }));
 
-      const { error } = await supabase.from('team_set_assignments').insert(assignments);
-      if (error) alert('Assign Error: ' + error.message);
-      else alert(`Assigned ${assignments.length} teams to sets in round-robin order!`);
-      renderTabContent('assets');
+          const { error } = await supabase.from('team_set_assignments').insert(assignments);
+          if (error) Notifier.toast('Assign Error: ' + error.message, 'error');
+          else Notifier.toast(`Assigned ${assignments.length} teams to sets!`, 'success');
+          renderTabContent('assets');
+        },
+        { icon: 'group_add' }
+      );
     });
 
     el.querySelectorAll('.dl-pdf').forEach(btn => {
@@ -2575,7 +2614,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
       
       if (error) {
          console.error("Storage upload error:", error);
-         alert("Failed to upload image. " + error.message);
+         Notifier.alert('Asset Upload Failed', error.message, 'error');
          throw error;
       }
       
@@ -2586,7 +2625,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
     // Handle Logo Addition
     document.getElementById('add-logo')?.addEventListener('click', async (e) => {
       const brand = document.getElementById('l-brand').value.trim();
-      if (!brand) return alert('Brand name is required');
+      if (!brand) return Notifier.toast('Brand name is required', 'warning');
       
       const btn = e.currentTarget;
       const originalText = btn.innerHTML;
@@ -2612,10 +2651,17 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
     });
     el.querySelectorAll('.del-logo').forEach(btn => {
       btn.addEventListener('click', async () => {
-        if (!confirm('Delete this logo target?')) return;
-        const { error } = await supabase.from('logo_assets').delete().eq('id', btn.dataset.delLogo);
-        if (error) alert('Error: ' + error.message);
-        renderTabContent('assets');
+        Notifier.confirm(
+          'Remove Asset',
+          'Delete this logo target? This will remove it from the round pool.',
+          async () => {
+            const { error } = await supabase.from('logo_assets').delete().eq('id', btn.dataset.delLogo);
+            if (error) Notifier.toast('Error: ' + error.message, 'error');
+            else Notifier.toast('Asset removed', 'info');
+            renderTabContent('assets');
+          },
+          { type: 'error', icon: 'delete_sweep' }
+        );
       });
     });
 
@@ -2654,10 +2700,17 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
 
     el.querySelectorAll('.del-prompt').forEach(btn => {
       btn.addEventListener('click', async () => {
-        if (!confirm('Delete this prompt image?')) return;
-        const { error } = await supabase.from('prompt_images').delete().eq('id', btn.dataset.delPrompt);
-        if (error) alert('Error: ' + error.message);
-        renderTabContent('assets');
+        Notifier.confirm(
+          'Remove Asset',
+          'Delete this prompt image? This will remove it from the round requirements.',
+          async () => {
+            const { error } = await supabase.from('prompt_images').delete().eq('id', btn.dataset.delPrompt);
+            if (error) Notifier.toast('Error: ' + error.message, 'error');
+            else Notifier.toast('Asset removed', 'info');
+            renderTabContent('assets');
+          },
+          { type: 'error', icon: 'delete_sweep' }
+        );
       });
     });
 
@@ -2666,7 +2719,8 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
       const topic = document.getElementById('d-topic').value.trim();
       const desc = document.getElementById('d-desc').value.trim();
       const duration = parseInt(document.getElementById('d-duration').value) || 60;
-      if (!topic) return alert('Debate topic is required');
+      if (!topic) return Notifier.toast('Debate topic is required', 'warning');
+      Notifier.toast('Saving topic configuration...', 'info');
 
       const btn = e.currentTarget;
       const originalText = btn.innerHTML;
@@ -2684,7 +2738,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
         } else {
           await supabase.from('debate_topics').insert({ round_id: selectedRound.id, ...updateData });
         }
-        alert('Debate configuration saved!');
+        Notifier.toast('Debate configuration saved!', 'success');
         renderTabContent('assets');
       } catch (err) {
         btn.innerHTML = originalText;
@@ -2707,7 +2761,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
         cfg.guidelines = guidelines;
 
         await supabase.from('rounds').update({ config: cfg }).eq('id', selectedRound.id);
-        alert('Round guidelines updated!');
+        Notifier.toast('Round guidelines updated!', 'success');
         renderTabContent('assets');
       } catch (err) {
         btn.innerHTML = originalText;

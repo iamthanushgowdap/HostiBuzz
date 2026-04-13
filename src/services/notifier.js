@@ -184,6 +184,33 @@ class NotifierService {
     } else {
       container.querySelector('#modal-close-btn').addEventListener('click', close);
     }
+  /**
+   * Convenience wrapper for a simple alert modal
+   */
+  alert(title, body, type = 'info') {
+    this.modal({
+      title,
+      body,
+      type,
+      icon: type === 'error' ? 'report' : type === 'success' ? 'verified' : 'info',
+      showConfirm: false
+    });
+  }
+
+  /**
+   * Convenience wrapper for a confirmation modal
+   */
+  confirm(title, body, onConfirm, options = {}) {
+    this.modal({
+      title,
+      body,
+      showConfirm: true,
+      onConfirm,
+      confirmText: options.confirmText || 'Confirm',
+      type: options.type || 'kinetic',
+      icon: options.icon || 'help',
+      ...options
+    });
   }
 }
 

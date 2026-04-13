@@ -6,6 +6,7 @@ import { startAntiCheat, stopAntiCheat } from '../services/anti-cheat.js';
 import { navigate } from '../router.js';
 import { ActivityBroadcast } from '../services/activity-broadcast.js';
 import { Ticker } from '../components/ticker.js';
+import { Notifier } from '../services/notifier.js';
 
 let timer = null;
 
@@ -205,7 +206,7 @@ export async function renderQuizRound(container, params, search = {}, mockUser =
     // Broadcast submission to ticker
     ActivityBroadcast.push('activity', `Team "${user.team_name}" just submitted for ${round.title}!`);
     
-    alert(`Quiz submitted! Result: ${score}/${maxScore}`);
+    Notifier.toast(`Quiz submitted! Result: ${score}/${maxScore}`, 'success');
     navigate('/dashboard');
   }
 
@@ -253,11 +254,17 @@ export async function renderQuizRound(container, params, search = {}, mockUser =
         return;
       }
       const answeredCount = Object.keys(answers).filter(k => answers[k] !== undefined && answers[k] !== null).length;
-      if (!confirm(`Submit quiz? You've answered ${answeredCount}/${questions.length} questions.`)) return;
       
-      // Safety fetch
-      const { data: latest } = await supabase.from('submissions').select('answers').eq('team_id', user.id).eq('round_id', round.id).maybeSingle();
-      await performEvaluation(latest?.answers || answers);
+      Notifier.confirm(
+        'Final Submission',
+        `Are you sure you want to submit the quiz? You've answered ${answeredCount} out of ${questions.length} questions.`,
+        async () => {
+          // Safety fetch
+          const { data: latest } = await supabase.from('submissions').select('answers').eq('team_id', user.id).eq('round_id', round.id).maybeSingle();
+          await performEvaluation(latest?.answers || answers);
+        },
+        { confirmText: 'Submit Quiz', icon: 'verified' }
+      );
     }
   });
 
@@ -317,7 +324,7 @@ export async function renderQuizRound(container, params, search = {}, mockUser =
         // Auto-submit
         const { data: latest } = await supabase.from('submissions').select('answers').eq('team_id', user.id).eq('round_id', round.id).maybeSingle();
         await performEvaluation(latest?.answers || answers);
-        alert('Time is up! Quiz auto-submitted.');
+        Notifier.toast('Time is up! Quiz auto-submitted.', 'warning');
       }
     });
     timer.startFromServer(round.started_at, round.duration_minutes);
