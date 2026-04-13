@@ -26,9 +26,12 @@ const io = new Server(httpServer, {
 // Use Render's dynamic port or default to 5000
 const PORT = process.env.PORT || 5000;
 
-// Handle SPA routing (redirect all unknown requests to index.html)
-app.get('/*', (req, res, next) => {
+// Handle SPA routing as a terminal middleware (Catch-all)
+app.use((req, res, next) => {
+  // Pass through socket.io requests
   if (req.path.startsWith('/socket.io')) return next();
+  
+  // Serve index.html for all other routes
   res.sendFile(path.join(distPath, 'index.html'));
 });
 
