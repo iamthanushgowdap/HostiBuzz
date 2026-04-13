@@ -60,20 +60,25 @@ export function initRealtimeNotifier() {
   // 3. Listen for Global Broadcasts (Admin Campaign)
   supabase
     .channel('global-system')
-    .on('broadcast', { event: 'notification' }, (payload) => {
-      console.log('⚡ Received Broadcast:', payload);
-      const { message, event_id } = payload;
+    .on('broadcast', { event: 'notification' }, (response) => {
+      console.log('⚡ Received Broadcast:', response);
       
-      // If no event_id filter, or if it matches the current user's event
-      if (!event_id || event_id === user.event_id) {
+      // Support both flat and nested structures in Supabase Realtime v2
+      const data = response.payload || response;
+      const { message, event_id } = data;
+      
+      // Success check: display if ID matches or if it's a true global broadcast
+      if (message && (!event_id || event_id === user.event_id)) {
         Notifier.modal({
           title: 'Broadcast from Admin',
           body: message,
           icon: 'campaign',
           type: 'info'
         });
+      } else if (!message) {
+        console.error('🛑 Received malformed broadcast (missing message):', response);
       } else {
-        console.warn(`🛑 Broadcast ignored: Target Event ID (${event_id}) does not match User Event ID (${user.event_id})`);
+        console.warn(`🛑 Broadcast filtered: Target ${event_id} != User ${user.event_id}`);
       }
     })
     .subscribe((status) => {
