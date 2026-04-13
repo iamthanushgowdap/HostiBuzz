@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.49.8",
-    "jspdf": "^3.0.1"
+    "jspdf": "^3.0.1",
+    "prismjs": "^1.30.0"
   },
   "devDependencies": {
     "vite": "^6.3.2"

@@ -6,11 +6,11 @@ import { navigate } from '../router.js';
 
 let roundTimer = null;
 
-export async function renderDashboard(container) {
-  const user = getState('user');
+export async function renderDashboard(container, mockUser = null) {
+  const user = mockUser || getState('user');
   
-  // Admin Redirection
-  if (user.role === 'admin') {
+  // Admin Redirection (Skip if mockUser is provided for preview)
+  if (!mockUser && user.role === 'admin') {
     navigate('/admin');
     return;
   }

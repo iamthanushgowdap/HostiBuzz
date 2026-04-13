@@ -4,6 +4,12 @@ import { renderNavbar, bindNavbarEvents } from '../components/navbar.js';
 import { navigate } from '../router.js';
 import { Notifier } from '../services/notifier.js';
 import { jsPDF } from 'jspdf';
+import { renderDashboard } from './dashboard.js';
+import Prism from 'prismjs';
+import 'prismjs/themes/prism-tomorrow.css'; 
+import 'prismjs/components/prism-javascript';
+import 'prismjs/components/prism-css';
+import 'prismjs/components/prism-markup';
 
 let selectedEventId = null;
 let selectedBankRoundId = null;
@@ -15,9 +21,45 @@ function generateSlug(name) {
 
 export async function renderAdmin(container) {
   const user = getState('user');
+  let onlineTeams = new Set();
+  
+  // Initialize Presence
+  const presenceChannel = supabase.channel('online-teams');
+  presenceChannel
+    .on('presence', { event: 'sync' }, () => {
+      const state = presenceChannel.presenceState();
+      onlineTeams.clear();
+      Object.values(state).forEach(presences => {
+        presences.forEach(p => {
+          if (p.team_id) onlineTeams.add(p.team_id);
+        });
+      });
+      refreshSidebarPresence();
+    })
+    .subscribe();
+
+  function refreshSidebarPresence() {
+    container.querySelectorAll('.presence-dot').forEach(dot => {
+      const teamId = dot.dataset.teamId;
+      if (onlineTeams.has(teamId)) {
+        dot.classList.remove('bg-outline');
+        dot.classList.add('bg-secondary', 'animate-pulse');
+      } else {
+        dot.classList.remove('bg-secondary', 'animate-pulse');
+        dot.classList.add('bg-outline');
+      }
+    });
+  }
 
   // Fetch all events
   const { data: events } = await supabase.from('events').select('*').order('created_at', { ascending: false });
+
+  // Fetch all teams if an event is selected
+  let teams = [];
+  if (selectedEventId) {
+    const { data } = await supabase.from('teams').select('*').eq('event_id', selectedEventId).order('team_name');
+    teams = data || [];
+  }
 
   container.innerHTML = `
     ${renderNavbar({ activeLink: 'dashboard' })}
@@ -27,6 +69,23 @@ export async function renderAdmin(container) {
         <div class="p-6">
           <h3 class="text-lg font-black text-white font-headline">Control Panel</h3>
           <p class="text-[10px] text-on-surface-variant uppercase tracking-widest">Administrator // ${user.username}</p>
+        </div>
+
+        <!-- NEW: Preview Engine -->
+        <div class="px-6 mb-8 py-4 bg-primary/5 border-y border-white/5">
+          <h4 class="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
+            <span class="material-symbols-outlined text-sm">visibility</span>
+            Preview Engine
+          </h4>
+          <div class="flex flex-col gap-2">
+            <select id="preview-team-select" class="w-full bg-surface-container-lowest border-none rounded-lg py-2 px-3 text-[10px] text-white font-headline">
+              <option value="">Select Team to Preview...</option>
+              ${teams.map(t => `<option value="${t.id}">${t.team_name}</option>`).join('')}
+            </select>
+            <button id="launch-preview" class="w-full py-2 rounded-lg bg-white/5 hover:bg-white/10 text-white font-headline font-bold text-[10px] uppercase tracking-widest border border-white/10 transition-all">
+              Launch Live Preview
+            </button>
+          </div>
         </div>
 
         <!-- Events in sidebar -->
@@ -1101,8 +1160,13 @@ export async function renderAdmin(container) {
               <tr class="${t.status === 'eliminated' ? 'opacity-40' : ''} hover:bg-white/5 transition-all">
                 <td class="px-5 py-4 text-xs text-on-surface-variant font-headline">${i + 1}</td>
                 <td class="px-5 py-4">
-                  <div class="font-headline font-bold text-white text-sm">${t.team_name}</div>
-                  <div class="text-[10px] text-on-surface-variant font-mono">${t.team_id}</div>
+                  <div class="flex items-center gap-3">
+                    <span data-team-id="${t.id}" class="presence-dot w-2 h-2 rounded-full ${onlineTeams.has(t.id) ? 'bg-secondary animate-pulse' : 'bg-outline'}"></span>
+                    <div>
+                      <div class="font-headline font-bold text-white text-sm">${t.team_name}</div>
+                      <div class="text-[10px] text-on-surface-variant font-mono">${t.team_id}</div>
+                    </div>
+                  </div>
                 </td>
                 <td class="px-5 py-4">
                   <span class="text-xs text-secondary font-headline font-medium">${event.name}</span>
@@ -1343,32 +1407,59 @@ export async function renderAdmin(container) {
         }
 
         let bodyHtml = `
-          <div class="space-y-6 text-left max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+          <div class="space-y-6 text-left max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar submission-intelligence">
             ${submissions.map(s => `
-              <div class="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-3">
+              <div class="p-6 rounded-3xl bg-white/5 border border-white/5 space-y-4 hover:border-primary/30 transition-all">
                 <div class="flex items-center justify-between">
-                  <span class="text-[10px] font-bold uppercase tracking-widest text-primary">Round ${s.round.round_number}: ${s.round.title}</span>
-                  <span class="text-[10px] text-on-surface-variant">${new Date(s.submission_time).toLocaleString()}</span>
+                  <div class="flex items-center gap-3">
+                    <span class="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                      <span class="material-symbols-outlined text-sm">
+                        ${s.round.round_type === 'quiz' ? 'quiz' : s.round.round_type === 'webdev' ? 'code' : 'image'}
+                      </span>
+                    </span>
+                    <div>
+                      <span class="text-[10px] font-bold uppercase tracking-widest text-primary">Round ${s.round.round_number}: ${s.round.title}</span>
+                      <div class="text-[10px] text-on-surface-variant font-mono">${new Date(s.submission_time).toLocaleString()}</div>
+                    </div>
+                  </div>
                 </div>
                 
                 ${s.text_content ? `
-                  <div class="space-y-1">
-                    <label class="text-[10px] uppercase text-on-surface-variant font-bold">Content</label>
-                    <div class="bg-black/20 p-3 rounded-lg text-sm text-white whitespace-pre-wrap">${s.text_content}</div>
+                  <div class="space-y-2">
+                    <label class="text-[10px] uppercase text-on-surface-variant font-bold flex items-center gap-2">
+                       <span class="material-symbols-outlined text-xs">notes</span> Submitted Content
+                    </label>
+                    <div class="bg-black/30 rounded-2xl overflow-hidden border border-white/5">
+                      ${s.round.round_type === 'webdev' ? `
+                        <pre class="p-4 text-xs font-mono !bg-transparent"><code class="language-javascript">${s.text_content.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")}</code></pre>
+                      ` : `
+                        <div class="p-4 text-sm text-white whitespace-pre-wrap leading-relaxed">${s.text_content}</div>
+                      `}
+                    </div>
                   </div>
                 ` : ''}
 
                 ${s.answers ? `
-                   <div class="space-y-1">
-                    <label class="text-[10px] uppercase text-on-surface-variant font-bold">Answers / Metadata</label>
-                    <div class="bg-black/20 p-3 rounded-lg text-xs font-mono text-secondary">${JSON.stringify(s.answers, null, 2)}</div>
+                   <div class="space-y-2">
+                    <label class="text-[10px] uppercase text-on-surface-variant font-bold flex items-center gap-2">
+                      <span class="material-symbols-outlined text-xs">analytics</span> Performance Data
+                    </label>
+                    <div class="bg-black/30 p-4 rounded-2xl border border-white/5 overflow-hidden">
+                      ${(() => {
+                        const a = s.answers;
+                        if (a.imageUrl) {
+                          return `<div class="mb-4 rounded-xl overflow-hidden border border-white/10 max-h-48 flex items-center justify-center bg-black/40"><img src="${a.imageUrl}" class="max-w-full max-h-full object-contain" /></div>`;
+                        }
+                        return `<pre class="text-[10px] font-mono text-secondary !bg-transparent">${JSON.stringify(a, null, 2)}</pre>`;
+                      })()}
+                    </div>
                   </div>
                 ` : ''}
 
-                <div class="flex flex-wrap gap-2">
-                  ${s.github_link ? `<a href="${s.github_link}" target="_blank" class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/5 text-[10px] text-white hover:bg-primary/20 transition-all flex items-center gap-2"><span class="material-symbols-outlined text-sm">code</span> GitHub</a>` : ''}
-                  ${s.live_link ? `<a href="${s.live_link}" target="_blank" class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/5 text-[10px] text-white hover:bg-secondary/20 transition-all flex items-center gap-2"><span class="material-symbols-outlined text-sm">language</span> Live Demo</a>` : ''}
-                  ${s.drive_link ? `<a href="${s.drive_link}" target="_blank" class="px-3 py-1.5 rounded-lg bg-white/5 border border-white/5 text-[10px] text-white hover:bg-tertiary/20 transition-all flex items-center gap-2"><span class="material-symbols-outlined text-sm">folder</span> Drive</a>` : ''}
+                <div class="flex flex-wrap gap-2 pt-2">
+                  ${s.github_link ? `<a href="${s.github_link}" target="_blank" class="px-3 py-1.5 rounded-xl bg-white/5 border border-white/5 text-[10px] text-white hover:bg-primary/20 transition-all flex items-center gap-2"><span class="material-symbols-outlined text-sm">code</span> Repository</a>` : ''}
+                  ${s.live_link ? `<a href="${s.live_link}" target="_blank" class="px-3 py-1.5 rounded-xl bg-white/5 border border-white/5 text-[10px] text-white hover:bg-secondary/20 transition-all flex items-center gap-2"><span class="material-symbols-outlined text-sm">language</span> Preview Link</a>` : ''}
+                  ${s.drive_link ? `<a href="${s.drive_link}" target="_blank" class="px-3 py-1.5 rounded-xl bg-white/5 border border-white/5 text-[10px] text-white hover:bg-tertiary/20 transition-all flex items-center gap-2"><span class="material-symbols-outlined text-sm">folder</span> Assets</a>` : ''}
                 </div>
               </div>
             `).join('')}
@@ -1376,11 +1467,14 @@ export async function renderAdmin(container) {
         `;
 
         Notifier.modal({
-          title: `Submission Review: ${team.team_name}`,
-          icon: 'inventory',
+          title: `Submission Intel: ${team.team_name}`,
+          icon: 'intelligence',
           type: 'info',
           body: bodyHtml
         });
+
+        // Trigger Syntax Highlighting
+        setTimeout(() => Prism.highlightAll(), 100);
       });
     });
   }
@@ -2299,4 +2393,67 @@ export async function renderAdmin(container) {
     });
   }
 
+  // ========================================
+  // PREVIEW ENGINE LOGIC
+  // ========================================
+  const launchBtn = document.getElementById('launch-preview');
+  const teamSelect = document.getElementById('preview-team-select');
+
+  if (launchBtn && teamSelect) {
+    launchBtn.addEventListener('click', async () => {
+      const teamId = teamSelect.value;
+      if (!teamId) return Notifier.toast('Select a team first', 'error');
+
+      const team = teams.find(t => t.id === teamId);
+      if (!team) return;
+
+      renderPreviewModal(team);
+    });
+  }
+
+  function renderPreviewModal(team) {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-surface z-[100] flex flex-col slide-in-bottom';
+    modal.innerHTML = `
+      <div class="bg-black text-white px-6 py-2 flex items-center justify-between border-b border-primary/20">
+        <div class="flex items-center gap-4">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+            <span class="text-[10px] font-bold uppercase tracking-widest text-secondary">Admin Live Preview</span>
+          </div>
+          <div class="h-4 w-px bg-white/10"></div>
+          <div class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Viewing as: <span class="text-white">${team.team_name}</span></div>
+        </div>
+        <button id="close-preview" class="px-4 py-1.5 rounded-lg bg-error/20 text-error hover:bg-error/30 text-[10px] font-bold uppercase tracking-widest transition-all">Close Preview</button>
+      </div>
+      <div id="preview-viewport" class="flex-1 overflow-auto bg-surface">
+        <div class="p-12 text-center text-on-surface-variant flex flex-col items-center justify-center h-full">
+          <span class="material-symbols-outlined animate-spin text-4xl mb-4">refresh</span>
+          <p class="font-headline tracking-widest uppercase text-xs">Simulating Neural Connection...</p>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    const viewport = modal.querySelector('#preview-viewport');
+    
+    // Mock user object for dashboard
+    const mockUser = {
+      id: team.id,
+      team_id: team.team_id,
+      team_name: team.team_name,
+      role: 'participant',
+      event_id: team.event_id,
+      members: team.members || []
+    };
+
+    // Render dashboard with mock user
+    setTimeout(() => {
+      renderDashboard(viewport, mockUser);
+    }, 500);
+
+    document.getElementById('close-preview').addEventListener('click', () => {
+      modal.remove();
+    });
+  }
 }
