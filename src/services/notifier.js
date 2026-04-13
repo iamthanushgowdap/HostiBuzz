@@ -184,6 +184,8 @@ class NotifierService {
     } else {
       container.querySelector('#modal-close-btn').addEventListener('click', close);
     }
+  }
+
   /**
    * Convenience wrapper for a simple alert modal
    */

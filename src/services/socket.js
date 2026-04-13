@@ -12,23 +12,29 @@ class SocketService {
     this.lastVersion = new Map();
     this.status = 'offline'; // 'offline', 'connecting', 'connected', 'joined'
     this.statusListeners = [];
+    this.queue = [];
+    this.isReady = false;
   }
 
   init() {
     if (this.socket) return;
 
-    // ELITE FIX: Dynamic Host Detection
-    // This allows the socket to connect even if accessed via IP or different localhost alias
+    // ELITE FIX: Enterprise Protocol Detection
+    const isSecure = window.location.protocol === "https:";
     const host = window.location.hostname || 'localhost';
-    const socketUrl = `http://${host}:5000`;
     
-    console.log(`🔌 Initializing Socket on: ${socketUrl}`);
+    // Choose WSS for Production, HTTP for Local
+    const socketUrl = import.meta.env.VITE_SOCKET_URL || 
+                      (isSecure ? `wss://${host}` : `http://${host}:5000`);
+    
+    console.log(`🔌 Initializing Socket on: ${socketUrl} [Secure: ${isSecure}]`);
     this.updateStatus('connecting');
 
     this.socket = io(socketUrl, {
       reconnection: true,
       reconnectionAttempts: Infinity,
       reconnectionDelay: 1000,
+      transports: ["websocket"] // Enforce WebSocket for performance
     });
 
     this.socket.on('connect', () => {
@@ -44,14 +50,32 @@ class SocketService {
       }
     });
 
-    this.socket.on('connect_error', () => {
+    this.socket.on('connect_error', (err) => {
+      console.error('📡 Pulse Link Error:', err.message);
       this.updateStatus('offline');
+      this.isReady = false; // Connection lost, lock emits
+    });
+
+    this.socket.on('disconnect', () => {
+      console.warn('⚠️ Pulse Link Severed → Fallback to Supabase Heartbeat');
+      this.updateStatus('offline');
+      this.isReady = false;
     });
 
     this.socket.on('joined_event', (data) => {
       this.joinedEventId = data.eventId;
       this.updateStatus('joined');
+      this.isReady = true;
       console.log(`%c✅ Verified Room Membership: ${data.eventId}`, 'color: #00ff00; font-weight: bold');
+      
+      // Flush Pulse Queue
+      if (this.queue.length > 0) {
+        console.log(`🔋 Flushing ${this.queue.length} buffered Pulses...`);
+        this.queue.forEach(({ event, data }) => {
+          this.socket.emit(event, data);
+        });
+        this.queue = [];
+      }
     });
 
     // Global Event Forwarder
@@ -96,6 +120,7 @@ class SocketService {
     if (!this.socket || !eventId) return;
     this.currentEventId = eventId;
     this.currentRole = role;
+    this.isReady = false; // Reset readiness for new room join
     this.socket.emit('join_event', { eventId, role });
   }
 
@@ -103,13 +128,14 @@ class SocketService {
     if (!this.socket) return;
     const user = getState('user');
     const targetEventId = data.eventId || this.currentEventId || user?.event_id;
+    const payload = { ...data, eventId: targetEventId };
     
-    // Pulse Guard: Warn if emitting to a room we haven't joined yet
-    if (event.startsWith('admin:') && this.joinedEventId !== targetEventId) {
-       console.warn(`⚠️ Attempting to Pulse [${event}] without verified membership for ${targetEventId}. Pulse may be ignored.`);
+    if (!this.isReady) {
+       console.log(`⏳ Buffering Pulse [${event}]... waiting for handshake.`);
+       this.queue.push({ event, data: payload });
+       return;
     }
 
-    const payload = { ...data, eventId: targetEventId };
     this.socket.emit(event, payload);
   }
 
