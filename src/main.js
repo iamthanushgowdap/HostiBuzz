@@ -2,6 +2,7 @@ import { registerRoute, initRouter } from './router.js';
 import { loadAuth } from './services/state.js';
 import { initGlobalListeners } from './services/global-listeners.js';
 import { Notifier } from './services/notifier.js';
+import { supabase } from './config/supabase.js';
 
 // Pages
 import { renderLanding } from './pages/landing.js';

@@ -210,43 +210,71 @@ export async function renderAdmin(container) {
   // ========================================
   const broadcastToggle = document.getElementById('broadcast-toggle');
   const broadcastPopup = document.getElementById('broadcast-popup');
+  const broadcastBtn = document.getElementById('send-broadcast');
+  const broadcastInput = document.getElementById('broadcast-msg');
+
+  // Pre-initialize channel for faster sending
+  const broadcastChannel = supabase.channel('global-system').subscribe();
+
   if (broadcastToggle && broadcastPopup) {
     broadcastToggle.addEventListener('click', () => {
       broadcastPopup.classList.toggle('hidden');
+      if (!broadcastPopup.classList.contains('hidden')) {
+        broadcastInput.focus();
+      }
     });
   }
 
-  const broadcastBtn = document.getElementById('send-broadcast');
   if (broadcastBtn) {
     broadcastBtn.addEventListener('click', async () => {
-      const msg = document.getElementById('broadcast-msg').value.trim();
+      const msg = broadcastInput.value.trim();
       if (!msg) return;
+
+      // Start loading
       broadcastBtn.disabled = true;
+      const originalInner = broadcastBtn.innerHTML;
       broadcastBtn.innerHTML = '<span class="material-symbols-outlined animate-spin text-sm">refresh</span>';
       
-      const channel = supabase.channel('global-system');
-      channel.subscribe(async (status) => {
-        if (status === 'SUBSCRIBED') {
-          await channel.send({
-            type: 'broadcast',
-            event: 'notification',
-            payload: { message: msg, event_id: selectedEventId }
-          });
-          
-          document.getElementById('broadcast-msg').value = '';
+      // Safety timeout: Release button after 3s if no response
+      const safetyTimeout = setTimeout(() => {
+        if (broadcastBtn.disabled) {
           broadcastBtn.disabled = false;
-          broadcastBtn.innerHTML = 'Send Now';
-          
-          const prevClass = broadcastBtn.className;
-          broadcastBtn.className = 'w-full py-2 bg-secondary text-surface rounded-xl font-headline font-bold text-xs uppercase tracking-widest transition-all text-center';
-          broadcastBtn.innerHTML = 'Sent!';
-          setTimeout(() => {
-            broadcastBtn.className = prevClass;
-            broadcastBtn.innerHTML = 'Send Now';
-            broadcastPopup.classList.add('hidden');
-          }, 2000);
+          broadcastBtn.innerHTML = originalInner;
+          Notifier.toast('Broadcast timed out, please try again.', 'error');
         }
-      });
+      }, 3000);
+
+      try {
+        const { error } = await broadcastChannel.send({
+          type: 'broadcast',
+          event: 'notification',
+          payload: { message: msg, event_id: selectedEventId }
+        });
+
+        if (error) throw error;
+
+        // Success state
+        clearTimeout(safetyTimeout);
+        broadcastInput.value = '';
+        broadcastBtn.disabled = false;
+        
+        const prevClass = broadcastBtn.className;
+        broadcastBtn.className = 'w-full py-2 bg-secondary text-surface rounded-xl font-headline font-bold text-xs uppercase tracking-widest transition-all text-center';
+        broadcastBtn.innerHTML = 'Sent!';
+        
+        setTimeout(() => {
+          broadcastBtn.className = prevClass;
+          broadcastBtn.innerHTML = 'Send Now';
+          broadcastPopup.classList.add('hidden');
+        }, 2000);
+
+      } catch (err) {
+        console.error('Broadcast failed:', err);
+        clearTimeout(safetyTimeout);
+        broadcastBtn.disabled = false;
+        broadcastBtn.innerHTML = originalInner;
+        Notifier.toast('Failed to send broadcast.', 'error');
+      }
     });
   }
 

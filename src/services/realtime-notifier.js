@@ -64,14 +64,19 @@ export function initRealtimeNotifier() {
       console.log('⚡ Received Broadcast:', payload);
       const { message, event_id } = payload;
       
-      if (event_id === user.event_id) {
+      // If no event_id filter, or if it matches the current user's event
+      if (!event_id || event_id === user.event_id) {
         Notifier.modal({
           title: 'Broadcast from Admin',
           body: message,
           icon: 'campaign',
           type: 'info'
         });
+      } else {
+        console.warn(`🛑 Broadcast ignored: Target Event ID (${event_id}) does not match User Event ID (${user.event_id})`);
       }
     })
-    .subscribe();
+    .subscribe((status) => {
+      console.log(`📡 Broadcast channel status: ${status}`);
+    });
 }
