@@ -2,9 +2,18 @@ import express from 'express';
 import { createServer } from 'http';
 import { Server } from 'socket.io';
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(cors());
+
+// Serve Static Frontend (Vite build output)
+const distPath = path.join(__dirname, '../dist');
+app.use(express.static(distPath));
 
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
@@ -14,7 +23,14 @@ const io = new Server(httpServer, {
   }
 });
 
-const PORT = 5000;
+// Use Render's dynamic port or default to 5000
+const PORT = process.env.PORT || 5000;
+
+// Handle SPA routing (redirect all unknown requests to index.html)
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/socket.io')) return next();
+  res.sendFile(path.join(distPath, 'index.html'));
+});
 
 // 10/10 Architecture: Per-Event Versioning
 const eventVersions = new Map(); // eventId -> version
