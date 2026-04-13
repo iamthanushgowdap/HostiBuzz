@@ -3,6 +3,7 @@ import { getState } from '../services/state.js';
 import { renderNavbar, bindNavbarEvents } from '../components/navbar.js';
 import { navigate } from '../router.js';
 import { Notifier } from '../services/notifier.js';
+import { jsPDF } from 'jspdf';
 
 let selectedEventId = null;
 let selectedBankRoundId = null;
@@ -1811,59 +1812,85 @@ export async function renderAdmin(container) {
     el.querySelectorAll('.dl-pdf').forEach(btn => {
       btn.addEventListener('click', async () => {
          const setLabel = btn.dataset.pdfSet;
-         const { jsPDF } = window.jspdf;
-         const doc = new jsPDF();
+         const originalInner = btn.innerHTML;
          
-         const eventName = (await supabase.from('events').select('name').eq('id', selectedRound.event_id).single()).data.name;
+         // Start Loading
+         btn.disabled = true;
+         btn.innerHTML = `<span class="material-symbols-outlined animate-spin text-[10px] mb-2">refresh</span><div class="text-[10px] font-bold uppercase tracking-widest">Generating...</div>`;
          
-         doc.setFontSize(22);
-         doc.setTextColor(0,0,0);
-         doc.text(eventName, 105, 20, { align: 'center'});
-         doc.setFontSize(14);
-         doc.text(`ROUND ${selectedRound.round_number}: ${selectedRound.title}`, 105, 30, { align: 'center'});
-         
-         if (setLabel === 'KEY') {
-            doc.setFontSize(18);
-            doc.text('MASTER ANSWER KEY', 105, 45, { align: 'center'});
-            let y = 60;
-            assets.forEach((q, i) => {
-              if (y > 270) { doc.addPage(); y = 20; }
-              const opts = typeof q.options === 'string' ? JSON.parse(q.options) : q.options;
-              doc.setFontSize(10);
-              doc.text(`${i+1}. ${q.question_text.slice(0, 80)}${q.question_text.length > 80 ? '...' : ''}`, 20, y);
-              doc.setFontSize(10);
-              doc.setTextColor(40, 167, 69);
-              doc.text(`[ANS: ${String.fromCharCode(65 + q.correct_answer)} - ${opts[q.correct_answer]}]`, 20, y+5);
-              doc.setTextColor(0,0,0);
-              y += 15;
-            });
-            doc.save(`ANSWER_KEY_${selectedRound.title.replace(/\s/g,'_')}.pdf`);
-         } else {
-            const { data: setInfo } = await supabase.from('question_sets').select('*').eq('round_id', selectedRound.id).eq('set_label', setLabel).single();
-            if (!setInfo) return alert('Set not found. Generate sets first.');
-            
-            doc.setFontSize(18);
-            doc.text(`QUESTION SET: ${setLabel}`, 105, 45, { align: 'center'});
-            
-            const orderedQIds = setInfo.question_order;
-            const orderedQs = orderedQIds.map(id => assets.find(a => a.id === id)).filter(Boolean);
-            
-            let y = 65;
-            orderedQs.forEach((q, i) => {
-               if (y > 250) { doc.addPage(); y = 20; }
-               doc.setFont('helvetica', 'bold');
-               doc.text(`${i+1}. ${q.question_text}`, 20, y, { maxWidth: 170 });
-               y += (doc.splitTextToSize(q.question_text, 170).length * 7);
-               
-               doc.setFont('helvetica', 'normal');
-               const opts = typeof q.options === 'string' ? JSON.parse(q.options) : q.options;
-               opts.forEach((opt, oi) => {
-                  doc.text(`(${String.fromCharCode(65+oi)}) ${opt}`, 30, y);
-                  y += 7;
-               });
-               y += 5;
-            });
-            doc.save(`SET_${setLabel}_${selectedRound.title.replace(/\s/g,'_')}.pdf`);
+         try {
+           const doc = new jsPDF();
+           
+           // Fetch event name with fallback
+           const { data: eventData } = await supabase.from('events').select('name').eq('id', selectedRound.event_id).single();
+           const eventName = eventData?.name || 'Technical Event';
+           
+           doc.setFontSize(22);
+           doc.setTextColor(0,0,0);
+           doc.text(eventName, 105, 20, { align: 'center'});
+           doc.setFontSize(14);
+           doc.text(`ROUND ${selectedRound.round_number}: ${selectedRound.title}`, 105, 30, { align: 'center'});
+           
+           if (setLabel === 'KEY') {
+              doc.setFontSize(18);
+              doc.text('MASTER ANSWER KEY', 105, 45, { align: 'center'});
+              let y = 60;
+              assets.forEach((q, i) => {
+                if (y > 270) { doc.addPage(); y = 20; }
+                const opts = typeof q.options === 'string' && q.options.startsWith('[') ? JSON.parse(q.options) : (q.options || []);
+                doc.setFontSize(10);
+                const qText = `${i+1}. ${q.question_text}`;
+                const splitText = doc.splitTextToSize(qText, 170);
+                doc.text(splitText, 20, y);
+                y += (splitText.length * 6);
+                
+                doc.setFontSize(10);
+                doc.setTextColor(40, 167, 69);
+                doc.text(`[ANS: ${String.fromCharCode(65 + q.correct_answer)} - ${opts[q.correct_answer] || 'N/A'}]`, 20, y);
+                doc.setTextColor(0,0,0);
+                y += 12;
+              });
+              doc.save(`ANSWER_KEY_${selectedRound.title.replace(/\s/g,'_')}.pdf`);
+           } else {
+              const { data: setInfo } = await supabase.from('question_sets').select('*').eq('round_id', selectedRound.id).eq('set_label', setLabel).single();
+              if (!setInfo) {
+                Notifier.toast(`Set ${setLabel} not found. Please generate sets first.`, 'error');
+                throw new Error('Set not found');
+              }
+              
+              doc.setFontSize(18);
+              doc.text(`QUESTION SET: ${setLabel}`, 105, 45, { align: 'center'});
+              
+              const orderedQIds = setInfo.question_order;
+              const orderedQs = orderedQIds.map(id => assets.find(a => a.id === id)).filter(Boolean);
+              
+              let y = 65;
+              orderedQs.forEach((q, i) => {
+                 const qText = `${i+1}. ${q.question_text}`;
+                 const splitTitle = doc.splitTextToSize(qText, 170);
+                 
+                 if (y + (splitTitle.length * 7) + 30 > 280) { doc.addPage(); y = 20; }
+                 
+                 doc.setFont('helvetica', 'bold');
+                 doc.text(splitTitle, 20, y);
+                 y += (splitTitle.length * 7);
+                 
+                 doc.setFont('helvetica', 'normal');
+                 const opts = typeof q.options === 'string' && q.options.startsWith('[') ? JSON.parse(q.options) : (q.options || []);
+                 opts.forEach((opt, oi) => {
+                    doc.text(`(${String.fromCharCode(65+oi)}) ${opt}`, 30, y);
+                    y += 7;
+                 });
+                 y += 8;
+              });
+              doc.save(`SET_${setLabel}_${selectedRound.title.replace(/\s/g,'_')}.pdf`);
+           }
+         } catch (err) {
+           console.error('PDF Generation Error:', err);
+           if (err.message !== 'Set not found') Notifier.toast('Failed to generate PDF', 'error');
+         } finally {
+            btn.disabled = false;
+            btn.innerHTML = originalInner;
          }
       });
     });
