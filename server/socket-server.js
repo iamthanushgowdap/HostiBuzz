@@ -27,7 +27,7 @@ const io = new Server(httpServer, {
 const PORT = process.env.PORT || 5000;
 
 // Handle SPA routing (redirect all unknown requests to index.html)
-app.get('*', (req, res, next) => {
+app.get('/*', (req, res, next) => {
   if (req.path.startsWith('/socket.io')) return next();
   res.sendFile(path.join(distPath, 'index.html'));
 });
