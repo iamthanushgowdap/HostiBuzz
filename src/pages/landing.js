@@ -35,7 +35,7 @@ export async function renderLanding(container) {
 
       <!-- Hero Section -->
       <section class="min-h-[85vh] flex flex-col items-center justify-center text-center px-6 relative">
-        <div class="space-y-2 mb-6">
+        <div class="space-y-2 mb-6 mt-12">
           <div class="flex items-center justify-center gap-3 text-primary text-sm font-headline tracking-[0.2em] uppercase">
             <span class="material-symbols-outlined text-sm">rocket_launch</span>
             <span>Open Source Platform for Hosting Technical Events</span>
