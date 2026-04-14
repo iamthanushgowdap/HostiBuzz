@@ -20,7 +20,7 @@ export function renderNavbar(options = {}) {
     <nav class="glow-nav sticky top-0 z-50 shadow-[0_0_30px_rgba(167,165,255,0.08)] backdrop-blur-md border-b border-white/5">
       <div class="flex flex-col lg:flex-row justify-between items-center w-full px-4 lg:px-6 py-2 lg:py-3 mx-auto gap-2 lg:gap-0">
         
-        <div class="flex items-center justify-between w-full lg:w-auto">
+        <div class="flex items-center justify-between w-full lg:w-auto lg:pr-12">
           <!-- Logo -->
           <div class="flex-shrink-0">
             ${hideNavigation

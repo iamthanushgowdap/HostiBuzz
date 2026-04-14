@@ -89,9 +89,6 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
       <!-- Mobile Admin Header -->
       <div class="lg:hidden flex items-center justify-between px-4 py-2 bg-surface-container-high/90 backdrop-blur-md border-b border-white/5 sticky top-[64px] z-30">
         <div class="flex items-center gap-3">
-          <a href="#/" class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-on-surface-variant/40 hover:text-primary transition-colors">
-            <span class="material-symbols-outlined text-sm">arrow_back</span>
-          </a>
           <button id="admin-sidebar-toggle" class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-primary group active:scale-95 transition-all">
             <span class="material-symbols-outlined">menu_open</span>
           </button>
