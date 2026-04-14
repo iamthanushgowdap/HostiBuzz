@@ -480,16 +480,16 @@
            GLOBAL FOOTER
         ============================================= */
         .hb-footer {
-          display: flex;
+          display: grid;
+          grid-template-columns: 35% 65%;
           align-items: center;
-          gap: 0;
           background: rgba(10,14,25,0.94);
           backdrop-filter: blur(20px);
           border-top: 1px solid rgba(167,165,255,0.12);
-          padding: 0 2.5rem;
-          min-height: 80px;
+          padding: 1rem 0;
+          min-height: 120px;
           position: relative;
-          overflow: visible; /* Allow clock to pop out */
+          overflow: visible;
         }
         .hb-footer::before {
           content: '';
@@ -499,29 +499,35 @@
           pointer-events: none;
         }
 
-        /* Clock side */
+        /* Clock side (35%) */
         .hb-footer__clock {
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          gap: 2px;
           opacity: 0;
           transition: opacity 0.6s ease;
-          flex-shrink: 0;
-          height: 80px; /* match footer */
+          width: 100%;
         }
         .hb-footer__clock.footer-clock-ready { opacity: 1; }
 
         #footer-spider-wBody {
-          width: 150px;
-          height: 120px; /* shorter to help alignment */
+          width: 100px;
+          height: 80px;
           position: relative;
-          flex-shrink: 0;
           display: flex;
           align-items: center;
           justify-content: center;
+          transform: scale(1.1);
         }
+        @media (min-width: 768px) {
+          #footer-spider-wBody {
+            width: 140px;
+            height: 100px;
+            transform: scale(1);
+          }
+        }
+
         #footer-spider-watch {
           position: absolute;
           top: 50%; left: 50%;
@@ -537,28 +543,29 @@
         }
         .hb-footer__clock-label {
           font-family: 'Space Grotesk', sans-serif;
-          font-size: 0.55rem;
-          letter-spacing: 0.18em;
-          color: rgba(167,165,255,0.5);
+          font-size: 0.5rem;
+          letter-spacing: 0.2em;
+          color: rgba(167,165,255,0.6);
           text-transform: uppercase;
+          text-align: center;
+          margin-top: 4px;
         }
 
-        /* Divider */
-        .hb-footer__divider {
-          width: 1px;
-          height: 48px;
-          background: linear-gradient(to bottom, transparent, rgba(167,165,255,0.3), transparent);
-          margin: 0 2rem;
-          flex-shrink: 0;
-        }
-
-        /* Credits side */
-        .hb-footer__credits {
+        /* Credits side (65%) */
+        .hb-footer__details {
           display: flex;
           flex-direction: column;
-          gap: 4px;
-          flex: 1;
+          justify-content: center;
+          padding-left: 1rem;
+          border-left: 1px solid rgba(167,165,255,0.08);
+          gap: 6px;
         }
+        @media (min-width: 768px) {
+          .hb-footer__details {
+            padding-left: 2.5rem;
+          }
+        }
+
         .hb-footer__brand {
           display: flex;
           align-items: baseline;
@@ -567,12 +574,12 @@
         .hb-footer__brand-name {
           font-family: 'Space Grotesk', sans-serif;
           font-weight: 700;
-          font-size: 1.1rem;
+          font-size: 1rem;
           color: #fff;
           letter-spacing: -0.02em;
         }
         .hb-footer__brand-version {
-          font-size: 0.65rem;
+          font-size: 0.6rem;
           color: rgba(167,165,255,0.4);
           font-family: 'Space Grotesk', sans-serif;
         }
@@ -584,33 +591,29 @@
         .hb-footer__author-name {
           font-family: 'Space Grotesk', sans-serif;
           font-weight: 600;
-          font-size: 0.95rem;
+          font-size: 0.85rem;
           color: #a7a5ff;
         }
         .hb-footer__author-title {
-          font-size: 0.72rem;
+          font-size: 0.65rem;
           color: rgba(167,165,255,0.5);
           font-family: 'Inter', sans-serif;
           letter-spacing: 0.04em;
         }
         .hb-footer__copy {
-          font-size: 0.62rem;
-          color: rgba(255,255,255,0.2);
+          font-size: 0.55rem;
+          color: rgba(255,255,255,0.15);
           font-family: 'Inter', sans-serif;
           letter-spacing: 0.06em;
           text-transform: uppercase;
-          margin-top: 2px;
         }
-
-        /* Right side tagline */
         .hb-footer__tagline {
-          margin-left: auto;
           font-family: 'Space Grotesk', sans-serif;
-          font-size: 0.65rem;
-          letter-spacing: 0.18em;
+          font-size: 0.6rem;
+          letter-spacing: 0.12em;
           color: rgba(255,255,255,0.1);
           text-transform: uppercase;
-          text-align: right;
+          margin-top: 2px;
         }
     </style>
 </head>

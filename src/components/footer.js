@@ -2,7 +2,7 @@
 export function renderFooter() {
   return `
     <footer class="hb-footer" id="hb-global-footer">
-      <!-- Spider Clock side -->
+      <!-- Spider Clock side (35%) -->
       <div class="hb-footer__clock" id="footer-clock-area">
         <div id="footer-spider-wBody">
           <div id="footer-spider-watch">
@@ -43,20 +43,17 @@ export function renderFooter() {
         <p class="hb-footer__clock-label">SYSTEM TIME</p>
       </div>
 
-      <!-- Divider -->
-      <div class="hb-footer__divider"></div>
-
-      <!-- Credits side -->
-      <div class="hb-footer__credits">
+      <!-- Details side (65%) -->
+      <div class="hb-footer__details">
         <div class="hb-footer__brand">
           <span class="hb-footer__brand-name">HostiBuzz</span>
-          <span class="hb-footer__brand-version">v1.0</span>
+          <span class="hb-footer__brand-version">v2.1.0</span>
         </div>
         <div class="hb-footer__author">
-          <span class="hb-footer__author-name">Thanush Gowda P</span>
-          <span class="hb-footer__author-title">Web Designer &amp; Developer</span>
+          <span class="hb-footer__author-name">Tanush Gowda P</span>
+          <span class="hb-footer__author-title">Lead Technical Architect &amp; Developer</span>
         </div>
-        <p class="hb-footer__copy">© 2026 · HostiBuzz Platform · Open Source</p>
+        <p class="hb-footer__copy">© 2026 · HostiBuzz Platform · Open Source Project Obsidian</p>
       </div>
     </footer>
   `;
