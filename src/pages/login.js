@@ -18,7 +18,7 @@ export async function renderLogin(container) {
           <h1 class="text-4xl md:text-5xl font-headline font-bold tracking-tighter text-white">Team Login</h1>
         </div>
         
-        <div class="glass-panel p-8 rounded-2xl space-y-6">
+        <div class="glass-panel p-6 lg:p-8 rounded-2xl space-y-6">
           <div id="login-error" class="hidden bg-error-container/20 border border-error/20 text-on-error-container px-4 py-3 rounded-xl text-sm font-medium"></div>
           
           <div class="space-y-2">

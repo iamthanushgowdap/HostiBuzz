@@ -108,6 +108,11 @@
         };
     </script>
     <style>
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+            position: relative;
+        }
         body { font-family: 'Inter', sans-serif; }
         h1, h2, h3, h4, .font-headline { font-family: 'Space Grotesk', sans-serif; }
         .material-symbols-outlined {
@@ -130,6 +135,18 @@
         .kinetic-bg {
             background: radial-gradient(circle at 50% 50%, #141927 0%, #0a0e19 100%);
         }
+        /* Mobile Watermarks Refinement */
+        .mobile-watermark {
+            font-size: clamp(3rem, 15vw, 8rem);
+            opacity: 0.03;
+            pointer-events: none;
+            user-select: none;
+            line-height: 0.8;
+            font-weight: 900;
+        }
+        @media (min-width: 640px) {
+            .mobile-watermark { font-size: 12rem; opacity: 0.05; }
+        }
         @keyframes spin-slow {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
@@ -146,6 +163,10 @@
         ::-webkit-scrollbar-track { background: #0a0e19; }
         ::-webkit-scrollbar-thumb { background: #444855; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #717583; }
+
+        /* No-scrollbar Utility */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
         /* =============================================
            GLOWING TAB NAVIGATION

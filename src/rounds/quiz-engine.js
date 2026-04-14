@@ -105,26 +105,26 @@ export async function renderQuizRound(container, params, search = {}, mockUser =
       </div>
 
       <!-- Question Text (Impactful) -->
-      <div class="mb-12 text-center">
-        <h2 class="text-2xl md:text-4xl font-headline font-bold text-white leading-tight tracking-tighter">${q.question_text}</h2>
+      <div class="mb-8 lg:mb-12 text-center px-2">
+        <h2 class="text-xl md:text-4xl font-headline font-bold text-white leading-tight lg:tracking-tighter">${q.question_text}</h2>
       </div>
 
-      <!-- Options (2x2 Grid) -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12">
+      <!-- Options (Adaptive Grid) -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3 lg:gap-4 mb-10 lg:mb-12">
         ${(() => {
           const rawOpts = q.options;
           const opts = typeof rawOpts === 'string' && rawOpts.startsWith('[') ? JSON.parse(rawOpts) : (Array.isArray(rawOpts) ? rawOpts : []);
           return opts.map((opt, i) => {
             const parts = opt.includes(':') ? opt.split(':') : [opt, ''];
             return `
-              <button data-answer="${i}" class="quiz-option group relative overflow-hidden text-left p-6 rounded-2xl transition-all duration-300 ${selectedAnswer === i ? 'bg-primary/20 border-2 border-primary' : 'bg-surface-container-low hover:bg-surface-container border-2 border-white/5 hover:border-white/20'}">
-                <div class="flex items-center gap-5">
-                  <div class="w-10 h-10 rounded-full flex-shrink-0 flex items-center justify-center transition-all ${selectedAnswer === i ? 'bg-primary text-on-primary-fixed shadow-[0_0_20px_rgba(59,130,246,0.5)]' : 'bg-white/5 text-on-surface-variant group-hover:bg-white/10'} shadow-inner">
-                    <div class="w-3 h-3 rounded-full border-2 ${selectedAnswer === i ? 'bg-white border-white' : 'border-on-surface-variant/30'}"></div>
+              <button data-answer="${i}" class="quiz-option group relative overflow-hidden text-left p-5 lg:p-6 rounded-2xl transition-all duration-300 ${selectedAnswer === i ? 'bg-primary/20 border-2 border-primary' : 'bg-surface-container-low hover:bg-surface-container border-2 border-white/5 hover:border-white/20'}">
+                <div class="flex items-center gap-4 lg:gap-5">
+                  <div class="w-8 h-8 lg:w-10 lg:h-10 rounded-full flex-shrink-0 flex items-center justify-center transition-all ${selectedAnswer === i ? 'bg-primary text-on-primary-fixed' : 'bg-white/5 text-on-surface-variant group-hover:bg-white/10'} shadow-inner">
+                    <div class="w-2.5 h-2.5 lg:w-3 lg:h-3 rounded-full border-2 ${selectedAnswer === i ? 'bg-white border-white' : 'border-on-surface-variant/30'}"></div>
                   </div>
                   <div class="flex flex-col">
-                    <span class="text-xl font-headline font-bold ${selectedAnswer === i ? 'text-white' : 'text-on-surface-variant group-hover:text-white'}">${parts[0].trim()}</span>
-                    ${parts[1] ? `<span class="text-[9px] uppercase tracking-widest font-bold ${selectedAnswer === i ? 'text-primary' : 'text-on-surface-variant/40'}">${parts[1].trim()}</span>` : ''}
+                    <span class="text-lg lg:text-xl font-headline font-bold ${selectedAnswer === i ? 'text-white' : 'text-on-surface-variant group-hover:text-white'}">${parts[0].trim()}</span>
+                    ${parts[1] ? `<span class="text-[8px] lg:text-[9px] uppercase tracking-widest font-black ${selectedAnswer === i ? 'text-primary' : 'text-on-surface-variant/40'}">${parts[1].trim()}</span>` : ''}
                   </div>
                 </div>
               </button>
@@ -134,26 +134,28 @@ export async function renderQuizRound(container, params, search = {}, mockUser =
       </div>
 
       <!-- Navigation & Action -->
-      <div class="flex items-center justify-between pt-8 border-t border-white/5">
-        <button id="prev-q" class="flex items-center gap-2 text-[10px] font-headline font-bold text-on-surface-variant uppercase tracking-widest hover:text-white transition-colors ${currentQ === 0 ? 'opacity-20 pointer-events-none' : ''}">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-6 pt-8 border-t border-white/5">
+        <button id="prev-q" class="order-3 sm:order-1 flex items-center gap-2 text-[10px] font-headline font-black text-on-surface-variant uppercase tracking-widest hover:text-white transition-colors ${currentQ === 0 ? 'opacity-20 pointer-events-none' : ''}">
           <span class="material-symbols-outlined text-sm">arrow_back</span> Previous
         </button>
         
-        <div class="flex gap-2">
+        <div class="order-2 flex gap-1.5 lg:gap-2 px-4 py-2 bg-white/5 rounded-full">
           ${questions.map((_, i) => `
-            <button data-goto="${i}" class="quiz-nav w-2 h-2 rounded-full transition-all ${i === currentQ ? 'w-6 kinetic-gradient' : (answers[questions[i].id] !== undefined && answers[questions[i].id] !== null) ? 'bg-secondary' : 'bg-white/10 hover:bg-white/20'}"></button>
+            <button data-goto="${i}" class="quiz-nav w-1.5 lg:w-2 h-1.5 lg:h-2 rounded-full transition-all ${i === currentQ ? 'w-4 lg:w-6 kinetic-gradient' : (answers[questions[i].id] !== undefined && answers[questions[i].id] !== null) ? 'bg-secondary' : 'bg-white/10 hover:bg-white/20'}"></button>
           `).join('')}
         </div>
 
-        ${currentQ === questions.length - 1 ? `
-          <button id="submit-quiz-btn" class="px-8 py-3 rounded-xl kinetic-gradient text-on-primary-fixed font-headline font-bold text-xs uppercase tracking-[0.2em] shadow-lg hover:scale-105 active:scale-95 transition-all">
-            Finish Quiz
-          </button>
-        ` : `
-          <button id="next-q" class="flex items-center gap-2 px-8 py-3 rounded-xl bg-primary/10 text-primary font-headline font-bold text-xs uppercase tracking-[0.2em] hover:bg-primary/20 transition-all group">
-            Next <span class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
-          </button>
-        `}
+        <div class="order-1 sm:order-3 w-full sm:w-auto">
+          ${currentQ === questions.length - 1 ? `
+            <button id="submit-quiz-btn" class="w-full sm:w-auto px-8 py-4 rounded-xl kinetic-gradient text-on-primary-fixed font-headline font-black text-xs uppercase tracking-[0.2em] shadow-xl hover:scale-105 active:scale-95 transition-all">
+              Initialize Submission
+            </button>
+          ` : `
+            <button id="next-q" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-primary/20 text-primary font-headline font-black text-xs uppercase tracking-[0.2em] border border-primary/30 hover:bg-primary/30 transition-all group flex items-center justify-center gap-3">
+              Next Sequence <span class="material-symbols-outlined text-lg lg:text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+            </button>
+          `}
+        </div>
       </div>
     `;
   }
@@ -275,18 +277,21 @@ export async function renderQuizRound(container, params, search = {}, mockUser =
     <main class="min-h-[calc(100vh-76px)] p-6 md:p-12 max-w-4xl mx-auto relative">
       <div class="absolute top-1/4 -left-20 w-96 h-96 bg-primary/10 blur-[120px] rounded-full pointer-events-none"></div>
       
-      <div class="flex justify-between items-end mb-8 border-b border-white/5 pb-6">
+      <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-8 border-b border-white/5 pb-6">
         <div>
-          <div class="flex items-center gap-3 text-primary text-sm font-headline tracking-[0.2em] uppercase">
+          <div class="flex items-center gap-3 text-primary text-[10px] lg:text-sm font-headline tracking-[0.3em] uppercase font-black">
             <span class="material-symbols-outlined text-sm">quiz</span>
-            <span>Round ${round.round_number}</span>
+            <span>Tactical Phase ${round.round_number}</span>
           </div>
-          <h1 class="text-4xl md:text-5xl font-headline font-bold tracking-tighter text-white">${round.title}</h1>
+          <h1 class="text-3xl lg:text-5xl font-headline font-black tracking-tighter text-white mt-1">${round.title}</h1>
         </div>
-        <div class="glass-panel p-4 rounded-xl flex items-center gap-4 glow-accent">
-          <div class="flex flex-col items-end">
-            <span class="text-[10px] uppercase tracking-widest text-on-surface-variant font-headline">Time Left</span>
-            <div id="quiz-timer" class="text-3xl font-headline font-bold tabular-nums text-secondary tracking-tight">${Timer.formatTime(round.duration_minutes * 60 * 1000)}</div>
+        <div class="glass-panel p-3 lg:p-4 rounded-2xl flex items-center justify-between lg:justify-end gap-6 border border-white/10">
+          <button id="terminate-session" class="w-8 h-8 lg:w-10 lg:h-10 rounded-lg bg-white/5 flex items-center justify-center text-on-surface-variant/60 hover:text-error transition-colors order-2 lg:order-1" title="Terminate Session">
+            <span class="material-symbols-outlined text-sm lg:text-base">logout</span>
+          </button>
+          <div class="flex flex-col items-start lg:items-end order-1 lg:order-2">
+            <span class="text-[9px] uppercase tracking-[0.2em] text-on-surface-variant font-black">Pulse Remaining</span>
+            <div id="quiz-timer" class="text-2xl lg:text-3xl font-headline font-black tabular-nums text-secondary tracking-tighter">${Timer.formatTime(round.duration_minutes * 60 * 1000)}</div>
           </div>
         </div>
       </div>
@@ -341,4 +346,14 @@ export async function renderQuizRound(container, params, search = {}, mockUser =
     const el = document.getElementById('quiz-timer');
     if (el) el.textContent = Timer.formatTime(remaining);
   }
+
+  // Terminate Session
+  container.querySelector('#terminate-session')?.addEventListener('click', () => {
+    Notifier.confirm(
+      'Terminate Session',
+      'Are you sure you want to exit the current round? Your progress is auto-saved, but you will leave the tactical terminal.',
+      () => navigate('/dashboard'),
+      { confirmText: 'Exit to Dashboard', type: 'warning' }
+    );
+  });
 }

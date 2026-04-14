@@ -91,20 +91,23 @@ export async function renderLogoRound(container, params, search = {}, mockUser =
       <div class="absolute bottom-0 left-0 w-[600px] h-[600px] bg-secondary/5 blur-[120px] rounded-full pointer-events-none"></div>
 
       <div class="w-full max-w-7xl relative z-10 flex flex-col gap-6">
-        <div class="flex justify-between items-end border-b border-white/5 pb-4">
+        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 border-b border-white/5 pb-6">
           <div class="space-y-1">
-            <div class="flex items-center gap-2 text-primary text-xs font-headline tracking-[0.2em] uppercase">
-              <span class="material-symbols-outlined text-xs">target</span>
-              <span>${logos?.length || 0} Logos</span>
+            <div class="flex items-center gap-3 mb-2 text-primary text-[10px] lg:text-sm font-headline tracking-[0.3em] uppercase font-black">
+              <span class="material-symbols-outlined text-sm font-black">target</span>
+              <span>Sequence: ${logos?.length || 0} Nodes</span>
             </div>
-            <h1 class="text-4xl md:text-5xl font-headline font-bold tracking-tighter text-white uppercase">LOGO ROUND</h1>
+            <h1 class="text-3xl lg:text-5xl font-headline font-black tracking-tighter text-white uppercase leading-none">Identification Round</h1>
           </div>
-          <div class="glass-panel p-3 rounded-xl flex items-center gap-4 glow-accent">
-            <div class="flex flex-col items-end">
-              <span class="text-[9px] uppercase tracking-widest text-on-surface-variant font-headline">Round Time</span>
-              <div id="logo-timer" class="text-2xl font-headline font-bold tabular-nums text-secondary tracking-tight">--:--</div>
+          <div class="glass-panel p-3 lg:p-4 rounded-2xl flex items-center justify-between lg:justify-end gap-6 border border-white/5">
+            <button id="terminate-session" class="w-8 h-8 lg:w-10 lg:h-10 rounded-lg bg-white/5 flex items-center justify-center text-on-surface-variant/60 hover:text-error transition-colors order-2 lg:order-1" title="Terminate Session">
+              <span class="material-symbols-outlined text-sm lg:text-base">logout</span>
+            </button>
+            <div class="flex flex-col items-start lg:items-end order-1 lg:order-2">
+              <span class="text-[9px] uppercase tracking-[0.2em] text-on-surface-variant font-black">Sync Pulse</span>
+              <div id="logo-timer" class="text-2xl lg:text-3xl font-headline font-black tabular-nums text-secondary tracking-tighter">--:--</div>
             </div>
-            ${isFinal ? `<button onclick="window.location.hash='#/dashboard'" class="ml-2 w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center hover:bg-primary/30 transition-all" title="Back to Dashboard"><span class="material-symbols-outlined text-primary text-sm">dashboard</span></button>` : ''}
+            ${isFinal ? `<button onclick="window.location.hash='#/dashboard'" class="ml-2 w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-primary/20 flex items-center justify-center hover:bg-primary/30 transition-all border border-primary/20"><span class="material-symbols-outlined text-primary text-xl">dashboard</span></button>` : ''}
           </div>
         </div>
 
@@ -232,31 +235,35 @@ export async function renderLogoRound(container, params, search = {}, mockUser =
     const logo = logos[index];
     const val = answers[logo.id] || '';
     return `
-      <div class="glass-panel p-8 rounded-3xl flex flex-col items-center slide-in-bottom">
-        <div class="w-full flex justify-between items-center mb-8 border-b border-white/5 pb-4">
-          <div class="flex items-center gap-3">
-            <span class="w-10 h-10 rounded-xl bg-primary/20 text-primary flex items-center justify-center font-headline font-bold">${index + 1}</span>
-            <span class="text-on-surface-variant text-sm font-medium uppercase tracking-widest">Logo Identification</span>
+      <div class="glass-panel p-6 lg:p-10 rounded-[2.5rem] flex flex-col items-center slide-in-bottom border border-white/5">
+        <div class="w-full flex items-center justify-between mb-8 border-b border-white/5 pb-4">
+          <div class="flex items-center gap-4">
+            <div class="w-10 h-10 lg:w-12 lg:h-12 rounded-[1rem] bg-secondary/10 text-secondary border border-secondary/20 flex items-center justify-center font-headline font-black text-lg">${index + 1}</div>
+            <div class="flex flex-col">
+              <span class="text-on-surface-variant font-black text-[10px] uppercase tracking-[0.2em]">Identification Node</span>
+              <span class="text-white text-[9px] uppercase tracking-[0.3em] font-black opacity-40">Phase: Acquisition</span>
+            </div>
           </div>
-          <div class="flex items-center gap-2 text-secondary bg-secondary/10 px-4 py-2 rounded-xl">
-            <span class="material-symbols-outlined text-sm animate-pulse">timer</span>
-            <span class="font-headline font-bold tracking-tight"><span class="text-xl tabular-nums" id="slide-sec"></span>s</span>
+          <div class="flex items-center gap-2 text-secondary bg-secondary/10 px-4 py-2 rounded-xl border border-secondary/20">
+            <span class="material-symbols-outlined text-sm animate-pulse font-black">timer</span>
+            <span class="font-headline font-black tracking-tighter text-xl tabular-nums" id="slide-sec"></span>
           </div>
         </div>
 
         ${logo.image_url ? `
-          <div class="relative w-64 h-64 md:w-96 md:h-96 rounded-2xl overflow-hidden glass-panel p-2 mb-8 select-none bg-white">
+          <div class="relative w-full max-w-[400px] aspect-square rounded-[2rem] overflow-hidden glass-panel p-4 mb-8 select-none bg-white shadow-2xl">
             <div class="absolute inset-0 z-20" oncontextmenu="return false;"></div>
             <img src="${logo.image_url}" draggable="false" oncontextmenu="return false;" class="w-full h-full object-contain transition-all duration-300" />
           </div>
         ` : `
-          <div class="w-64 h-64 md:w-96 md:h-96 rounded-2xl glass-panel flex items-center justify-center mb-8 text-on-surface-variant font-headline text-sm uppercase tracking-widest">
-            Projector Screen
+          <div class="w-full max-w-[400px] aspect-square rounded-[2rem] glass-panel flex flex-col items-center justify-center mb-8 text-on-surface-variant/40 font-headline text-[10px] uppercase tracking-[0.4em] bg-white/5 border-dashed border-2 border-white/5">
+            <span class="material-symbols-outlined text-4xl mb-3">image_not_supported</span>
+            Acquiring Visuals...
           </div>
         `}
         
         <div class="w-full max-w-md">
-          <input type="text" id="current-slide-input" data-logo-id="${logo.id}" class="logo-list-input w-full bg-surface-container-lowest border border-white/5 rounded-xl py-4 px-6 text-center text-white text-2xl font-headline font-bold uppercase tracking-widest focus:ring-2 focus:ring-primary/50 focus:border-transparent placeholder:text-white/10 transition-all shadow-inner" placeholder="TYPE BRAND..." value="${val}" autocomplete="off" spellcheck="false" />
+          <input type="text" id="current-slide-input" data-logo-id="${logo.id}" class="logo-list-input w-full bg-surface-container-lowest border border-white/10 rounded-2xl py-4 lg:py-5 px-6 text-center text-white text-xl lg:text-2xl font-headline font-black uppercase tracking-widest focus:ring-2 focus:ring-secondary/40 focus:border-transparent placeholder:text-white/5 transition-all shadow-inner" placeholder="IDENTIFY..." value="${val}" autocomplete="off" spellcheck="false" />
         </div>
       </div>
     `;
@@ -264,45 +271,46 @@ export async function renderLogoRound(container, params, search = {}, mockUser =
 
   function renderList(isFinalState) {
     let html = isFinalState ? `
-      <div class="glass-panel p-4 mb-6 rounded-2xl bg-secondary/10 border border-secondary/20 flex flex-col items-center text-center gap-2 slide-in-top glow-accent">
+      <div class="glass-panel p-5 mb-8 rounded-[1.5rem] bg-secondary/10 border border-secondary/20 flex flex-col items-center text-center gap-2 slide-in-top glow-accent">
         <div class="flex items-center gap-3">
-          <span class="material-symbols-outlined text-2xl text-secondary">verified</span>
-          <h3 class="font-headline font-bold text-xl text-white tracking-tight">Submission Successful!</h3>
+          <div class="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center shadow-lg"><span class="material-symbols-outlined text-xl text-on-secondary font-black">verified</span></div>
+          <h3 class="font-headline font-black text-lg text-white uppercase tracking-tighter">Transmission Sealed</h3>
         </div>
-        <p class="text-[11px] text-on-surface-variant uppercase tracking-widest">Locked and transmitted to the command center.</p>
+        <p class="text-[9px] text-on-surface-variant/60 font-black uppercase tracking-[0.3em]">Manifest transmitted to tactical command center.</p>
       </div>
     ` : `
-      <div class="glass-panel p-4 mb-6 rounded-2xl bg-secondary/10 border border-secondary/20 flex items-center justify-center gap-4 text-secondary slide-in-top">
-        <span class="material-symbols-outlined text-xl animate-pulse">fact_check</span>
-        <div class="text-center">
-          <h3 class="font-headline font-bold text-sm uppercase tracking-[0.2em] mb-1">Review Phase Active</h3>
-          <p class="text-[10px] text-white/70 uppercase tracking-widest">Complete missed logos before time runs out</p>
+      <div class="glass-panel p-5 mb-8 rounded-[1.5rem] bg-primary/10 border border-primary/20 flex flex-col sm:flex-row items-center justify-center gap-4 text-primary slide-in-top">
+        <span class="material-symbols-outlined text-2xl animate-pulse font-black">fact_check</span>
+        <div class="text-center sm:text-left">
+          <h3 class="font-headline font-black text-sm uppercase tracking-[0.2em] mb-1">Tactical Review Active</h3>
+          <p class="text-[10px] text-white/50 uppercase tracking-widest font-black leading-none">Sync remaining identifications before pulse timeout</p>
         </div>
       </div>
     `;
 
-    html += `<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3">`;
+    html += `<div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 lg:gap-4 px-1">`;
     logos.forEach((logo, index) => {
       const val = answers[logo.id] || '';
       html += `
-        <div class="glass-panel p-3 rounded-[20px] flex flex-col items-center gap-3 group hover:border-primary/30 transition-colors">
-          <div class="w-full flex justify-between items-center px-2">
-            <span class="text-[10px] font-headline font-bold text-on-surface-variant group-hover:text-primary transition-colors tracking-widest">LOGO ${index + 1}</span>
+        <div class="glass-panel p-3 lg:p-4 rounded-[1.5rem] flex flex-col items-center gap-4 group hover:border-secondary/30 transition-all border border-white/5">
+          <div class="w-full flex justify-between items-center px-1">
+            <span class="text-[9px] font-headline font-black text-on-surface-variant/40 group-hover:text-secondary transition-colors tracking-[0.3em]">NODE ${String(index + 1).padStart(2, '0')}</span>
+            ${val ? '<span class="w-1.5 h-1.5 rounded-full bg-secondary shadow-lg shadow-secondary/40"></span>' : ''}
           </div>
           
           ${logo.image_url ? `
-            <div class="relative w-full h-20 sm:h-24 md:h-28 rounded-xl overflow-hidden glass-panel flex-shrink-0 select-none bg-white p-2">
+            <div class="relative w-full aspect-square rounded-xl overflow-hidden glass-panel flex-shrink-0 select-none bg-white p-3 shadow-inner">
               <div class="absolute inset-0 z-20" oncontextmenu="return false;"></div>
-              <img src="${logo.image_url}" draggable="false" oncontextmenu="return false;" class="w-full h-full object-contain transition-transform duration-500 group-hover:scale-105" />
+              <img src="${logo.image_url}" draggable="false" oncontextmenu="false;" class="w-full h-full object-contain transition-transform duration-700 group-hover:scale-110" />
             </div>
           ` : `
-            <div class="w-full h-20 sm:h-24 md:h-28 rounded-xl flex items-center justify-center text-on-surface-variant text-[10px] uppercase font-bold tracking-widest glass-panel bg-white/5">
-              NO IMAGE
+            <div class="w-full aspect-square rounded-xl flex items-center justify-center text-on-surface-variant/20 text-[8px] uppercase font-black tracking-widest glass-panel border border-dashed border-white/5">
+              PENDING
             </div>
           `}
           
           <div class="w-full mt-auto">
-            <input type="text" data-logo-id="${logo.id}" class="logo-list-input w-full bg-surface-container-lowest border-white/5 border rounded-xl py-3 px-3 text-center text-white text-sm font-headline font-bold uppercase tracking-[0.2em] focus:ring-2 focus:ring-primary/50 focus:border-transparent placeholder:text-white/20 transition-all shadow-inner ${isFinalState ? 'opacity-50 cursor-not-allowed border-none' : ''}" placeholder="NAME..." value="${val}" autocomplete="off" spellcheck="false" ${isFinalState ? 'disabled' : ''} />
+            <input type="text" data-logo-id="${logo.id}" class="logo-list-input w-full bg-surface-container-lowest border-white/10 border rounded-xl py-2.5 px-3 text-center text-white text-[11px] lg:text-xs font-headline font-black uppercase tracking-widest focus:ring-1 focus:ring-secondary/40 focus:border-transparent placeholder:text-white/5 transition-all shadow-inner ${isFinalState ? 'opacity-40 cursor-not-allowed border-none' : ''}" placeholder="NAME..." value="${val}" autocomplete="off" spellcheck="false" ${isFinalState ? 'disabled' : ''} />
           </div>
         </div>
       `;
@@ -366,4 +374,15 @@ export async function renderLogoRound(container, params, search = {}, mockUser =
     const el = document.getElementById('logo-timer');
     if (el) el.textContent = Timer.formatTime(remaining);
   }
+
+  // Terminate Session
+  container.querySelector('#terminate-session')?.addEventListener('click', async () => {
+    const { Notifier } = await import('../services/notifier.js');
+    Notifier.confirm(
+      'Terminate Session',
+      'Are you sure you want to exit the current round? Your progress is auto-saved, but you will leave the tactical terminal.',
+      () => navigate('/dashboard'),
+      { confirmText: 'Exit to Dashboard', type: 'warning' }
+    );
+  });
 }

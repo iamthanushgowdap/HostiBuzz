@@ -73,28 +73,36 @@ export async function renderPromptRound(container, params, search = {}) {
       <div class="fixed bottom-1/4 -right-20 w-80 h-80 bg-secondary/10 blur-[100px] rounded-full pointer-events-none -z-10"></div>
 
       ${existing?.is_final ? `
-        <div class="glass-panel p-12 rounded-3xl mb-12 text-center border-secondary/20 bg-secondary/5 space-y-6 slide-in-top">
-          <span class="material-symbols-outlined text-6xl text-secondary animate-pulse">verified</span>
-          <h2 class="text-3xl font-headline font-bold text-white uppercase tracking-tighter">Prompt Submitted</h2>
-          <p class="text-on-surface-variant max-w-md mx-auto leading-relaxed">Your creative prompt has been securely recorded. You can now return to the dashboard to wait for evaluation.</p>
+        <div class="glass-panel p-8 lg:p-12 rounded-[3rem] mb-12 text-center border-secondary/20 bg-secondary/5 space-y-6 slide-in-top relative overflow-hidden">
+          <div class="absolute -right-12 -top-12 w-32 h-32 bg-secondary/10 blur-3xl rounded-full"></div>
+          <div class="w-16 h-16 lg:w-20 lg:h-20 bg-secondary/20 text-secondary rounded-[1.5rem] flex items-center justify-center mx-auto mb-2 border border-secondary/20 rotate-12">
+            <span class="material-symbols-outlined text-4xl">beenhere</span>
+          </div>
+          <h2 class="text-2xl lg:text-3xl font-headline font-black text-white uppercase tracking-tighter">Transmission Sealed</h2>
+          <p class="text-on-surface-variant/60 max-w-md mx-auto leading-relaxed font-bold uppercase tracking-widest text-[11px] lg:text-sm">Your cognitive prompt has been recorded in the central hub. Standing by for neural evaluation.</p>
           <div class="pt-6">
-            <button onclick="window.location.hash='#/dashboard'" class="px-10 py-4 bg-secondary text-on-secondary rounded-xl font-headline font-bold text-xs uppercase tracking-[0.2em] hover:scale-105 transition-all shadow-lg">
-              Return to Dashboard
+            <button onclick="window.location.hash='#/dashboard'" class="w-full lg:w-fit px-10 py-5 bg-secondary text-on-secondary rounded-[1.25rem] font-headline font-black text-[10px] uppercase tracking-[0.3em] hover:scale-105 transition-all shadow-xl">
+              Return to Mission Control
             </button>
           </div>
         </div>
       ` : ''}
 
-      <div class="flex flex-col items-center mb-12 ${existing?.is_final ? 'opacity-50 pointer-events-none' : ''}">
-        <div class="glass-panel px-8 py-3 rounded-full flex items-center gap-4 shadow-lg border border-primary/20">
-          <span class="material-symbols-outlined text-primary">hourglass_top</span>
-          <span id="prompt-timer" class="font-headline text-3xl font-bold tracking-widest text-white">${Timer.formatTime(round.duration_minutes * 60 * 1000)}</span>
+      <div class="flex flex-col items-center mb-8 lg:mb-12 ${existing?.is_final ? 'opacity-50 pointer-events-none' : ''}">
+        <div class="glass-panel px-4 lg:px-8 py-3 rounded-2xl flex items-center gap-4 lg:gap-6 shadow-xl border border-primary/20 bg-surface-container-low/50">
+          <button id="terminate-session" class="w-8 h-8 lg:w-10 lg:h-10 rounded-lg bg-white/5 flex items-center justify-center text-on-surface-variant/60 hover:text-error transition-colors" title="Terminate Session">
+            <span class="material-symbols-outlined text-sm lg:text-base">logout</span>
+          </button>
+          <div class="flex items-center gap-2 border-l border-white/5 pl-4 lg:pl-6">
+            <span class="material-symbols-outlined text-primary font-black animate-pulse">hourglass_top</span>
+            <span id="prompt-timer" class="font-headline text-2xl lg:text-3xl font-black tracking-tighter text-white tabular-nums">${Timer.formatTime(round.duration_minutes * 60 * 1000)}</span>
+          </div>
         </div>
-        <div class="mt-4 text-on-surface-variant font-label text-sm tracking-widest uppercase">Round ${round.round_number}: ${round.title}</div>
+        <div class="mt-4 text-[9px] lg:text-xs text-on-surface-variant font-black tracking-[0.4em] uppercase opacity-60">Phase ${round.round_number}: ${round.title}</div>
         
-        <div class="mt-4 glass-panel px-6 py-2 rounded-xl flex items-center gap-3 border border-secondary/20">
-          <span class="material-symbols-outlined text-secondary text-sm">visibility</span>
-          <span class="text-xs text-secondary font-headline tracking-widest uppercase">Target Observer: <span id="obs-timer" class="font-bold">--</span></span>
+        <div class="mt-4 glass-panel px-4 lg:px-6 py-2 rounded-xl flex items-center gap-3 border border-secondary/20 bg-secondary/5">
+          <span class="material-symbols-outlined text-secondary text-base font-black">visibility</span>
+          <span class="text-[8px] lg:text-[10px] text-secondary font-black tracking-[0.2em] uppercase">Target Observer: <span id="obs-timer" class="font-bold">--</span></span>
         </div>
       </div>
 
@@ -114,26 +122,27 @@ export async function renderPromptRound(container, params, search = {}) {
         </div>
 
         <div class="lg:col-span-5 flex flex-col gap-6 ${existing?.is_final ? 'opacity-50 pointer-events-none' : ''}">
-          <div class="bg-surface-container-low p-8 rounded-xl border border-white/5 space-y-6">
+          <div class="bg-surface-container-low p-6 lg:p-8 rounded-[2rem] border border-white/5 space-y-6 shadow-xl">
             <header>
-              <h2 class="font-headline text-2xl font-bold text-white mb-2">Write a descriptive prompt for this image</h2>
-              <p class="text-on-surface-variant text-sm leading-relaxed">Describe the textures, lighting, and composition to earn maximum accuracy points.</p>
+              <h2 class="font-headline text-lg lg:text-2xl font-black text-white mb-2 uppercase tracking-tighter leading-none">Capture Protocol</h2>
+              <p class="text-on-surface-variant/60 text-[10px] lg:text-sm leading-relaxed font-bold uppercase tracking-widest">Architect a descriptive prompt from the source node to maximize neural accuracy.</p>
             </header>
-            <div class="relative">
-              <textarea id="prompt-text" class="w-full h-64 bg-surface-container-lowest text-on-surface border-none rounded-lg p-6 focus:ring-1 focus:ring-secondary/40 placeholder:text-outline/50 resize-none font-body leading-relaxed transition-all" placeholder="Begin your description here..." ${existing?.is_final ? 'disabled' : ''}>${existing?.text_content || ''}</textarea>
-              <div class="absolute bottom-4 right-4 glass-panel px-3 py-1 rounded-md text-xs font-label text-secondary tracking-wider">
-                WORDS: <span id="word-count" class="font-bold">0</span> / 150
+            <div class="relative group">
+              <div class="absolute -inset-1 bg-secondary/10 rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition duration-500"></div>
+              <textarea id="prompt-text" class="relative w-full h-48 lg:h-64 bg-surface-container-lowest text-on-surface border-none rounded-2xl p-6 lg:p-8 focus:ring-1 focus:ring-secondary/40 placeholder:text-outline/20 font-body text-sm lg:text-base leading-relaxed transition-all shadow-inner resize-none" placeholder="Initiate description sequence..." ${existing?.is_final ? 'disabled' : ''}>${existing?.text_content || ''}</textarea>
+              <div class="absolute bottom-4 right-4 glass-panel px-3 py-1.5 rounded-lg text-[9px] font-black text-secondary tracking-[0.2em] border border-secondary/20 shadow-lg">
+                NODES: <span id="word-count" class="font-bold">0</span> / 150
               </div>
             </div>
-            <div class="flex items-center gap-3 text-xs text-on-surface-variant/60 font-label italic">
-              <span class="material-symbols-outlined text-sm">info</span>
-              AI evaluates based on semantic proximity to the original seed.
+            <div class="flex items-center gap-3 text-[8px] lg:text-[10px] text-on-surface-variant/40 font-black uppercase tracking-widest">
+              <span class="material-symbols-outlined text-sm font-black">memory</span>
+              Neural evaluating based on semantic Proximity Map.
             </div>
           </div>
           ${!existing?.is_final ? `
-            <button id="submit-prompt" class="kinetic-gradient w-full py-5 rounded-lg font-headline font-bold text-on-primary-fixed uppercase tracking-widest shadow-[0_10px_30px_rgba(167,165,255,0.2)] hover:shadow-[0_10px_40px_rgba(167,165,255,0.4)] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 group">
-              Submit Prompt
-              <span class="material-symbols-outlined transition-transform group-hover:translate-x-1">arrow_forward</span>
+            <button id="submit-prompt" class="kinetic-gradient w-full py-5 lg:py-6 rounded-[1.5rem] font-headline font-black text-on-primary-fixed uppercase tracking-[0.3em] shadow-[0_20px_40px_rgba(167,165,255,0.2)] hover:shadow-[0_20px_60px_rgba(167,165,255,0.4)] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-4 group text-xs lg:text-sm">
+              <span>Transmit Prompt</span>
+              <span class="material-symbols-outlined text-xl group-hover:translate-x-1 transition-transform">send</span>
             </button>
           ` : ''}
         </div>
@@ -251,4 +260,15 @@ export async function renderPromptRound(container, params, search = {}) {
       if (el) el.textContent = Timer.formatTime(remaining);
     }
   }
+
+  // Terminate Session
+  container.querySelector('#terminate-session')?.addEventListener('click', async () => {
+    const { Notifier } = await import('../services/notifier.js');
+    Notifier.confirm(
+      'Terminate Session',
+      'Are you sure you want to exit the current round? Your progress is auto-saved, but you will leave the tactical terminal.',
+      () => navigate('/dashboard'),
+      { confirmText: 'Exit to Dashboard', type: 'warning' }
+    );
+  });
 }

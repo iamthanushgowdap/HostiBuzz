@@ -77,60 +77,69 @@ export async function renderRegister(container, params = {}) {
         <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full opacity-[0.03] space-pattern"></div>
       </div>
 
+      <!-- Back Button -->
+      <div class="w-full max-w-3xl px-6 pt-8">
+        <a href="#/events" class="inline-flex items-center gap-2 text-on-surface-variant/60 hover:text-primary transition-all group">
+          <span class="material-symbols-outlined text-sm group-hover:-translate-x-1 transition-transform">arrow_back</span>
+          <span class="text-[10px] font-headline font-bold uppercase tracking-[0.2em]">Back to Events</span>
+        </a>
+      </div>
+
       <!-- Banner Image -->
       ${bannerUrl ? `
-        <div class="w-full h-64 md:h-[400px] overflow-hidden relative group">
+        <div class="w-full h-48 md:h-[400px] overflow-hidden relative group">
           <img src="${bannerUrl}" class="w-full h-full object-cover scale-105 group-hover:scale-100 transition-transform duration-1000" alt="Event Banner" />
           <div class="absolute inset-0 bg-gradient-to-b from-transparent via-[#0a0e19]/40 to-[#0a0e19]"></div>
-          <div class="absolute bottom-12 left-0 w-full px-6 flex justify-center">
+          <div class="absolute bottom-6 lg:bottom-12 left-0 w-full px-6 flex justify-center">
              <div class="max-w-4xl w-full text-center slide-in-bottom">
-               <h1 class="text-4xl md:text-7xl font-headline font-black text-white tracking-tighter drop-shadow-2xl mb-4">${headline}</h1>
-               <div class="flex items-center justify-center gap-4">
-                 <span class="px-4 py-1.5 bg-white/10 backdrop-blur-md rounded-full text-[10px] font-bold uppercase tracking-widest text-white border border-white/10">HostiBuzz Event</span>
-                 <span class="px-4 py-1.5 bg-secondary/20 backdrop-blur-md rounded-full text-[10px] font-bold uppercase tracking-widest text-secondary border border-secondary/20">Now Reserving</span>
+               <h1 class="text-3xl lg:text-7xl font-headline font-black text-white tracking-tighter drop-shadow-2xl mb-2 lg:mb-4">${headline}</h1>
+               <div class="flex items-center justify-center gap-3 lg:gap-4">
+                 <span class="px-3 lg:px-4 py-1 lg:py-1.5 bg-white/10 backdrop-blur-md rounded-full text-[8px] lg:text-[10px] font-bold uppercase tracking-widest text-white border border-white/10">HostiBuzz Event</span>
+                 <span class="px-3 lg:px-4 py-1 lg:py-1.5 bg-secondary/20 backdrop-blur-md rounded-full text-[8px] lg:text-[10px] font-bold uppercase tracking-widest text-secondary border border-secondary/20 uppercase tracking-widest">Reserving</span>
                </div>
              </div>
           </div>
         </div>
       ` : `
-        <div class="pt-24 pb-12 px-6 text-center slide-in-bottom">
-          <h1 class="text-4xl md:text-7xl font-headline font-black text-white tracking-tighter mb-4">${headline}</h1>
-          <p class="text-secondary font-headline font-bold text-xs uppercase tracking-[0.4em]">Team Registration System</p>
+        <div class="pt-16 lg:pt-24 pb-6 lg:pb-12 px-6 text-center slide-in-bottom">
+          <h1 class="text-3xl lg:text-5xl font-headline font-black text-white tracking-tighter mb-4">${headline}</h1>
+          <p class="text-secondary font-headline font-bold text-[10px] lg:text-xs uppercase tracking-[0.4em]">Protocol Registration System</p>
         </div>
       `}
 
       <div class="w-full max-w-3xl relative z-10 px-6 ${bannerUrl ? '-mt-8' : ''}">
         
+        <!-- Back Button -->
+        <a href="#/events" class="inline-flex items-center gap-2 text-on-surface-variant/60 hover:text-primary transition-all mb-8 group">
+          <span class="material-symbols-outlined text-sm group-hover:-translate-x-1 transition-transform">arrow_back</span>
+          <span class="text-[10px] font-headline font-bold uppercase tracking-[0.2em]">Back to Events</span>
+        </a>
+
         <!-- Occupancy HUD -->
         ${maxTeams > 0 ? `
-          <div class="glass-panel p-6 rounded-3xl mb-8 glow-accent border-secondary/20 slide-in-bottom stagger-1">
-            <div class="flex items-end justify-between mb-4">
+          <div class="glass-panel p-5 lg:p-6 rounded-3xl mb-8 glow-accent border-secondary/20 slide-in-bottom stagger-1">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-4">
               <div>
-                <p class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant flex items-center gap-2">
+                <p class="text-[9px] lg:text-[10px] font-headline font-bold uppercase tracking-widest text-on-surface-variant/60 flex items-center gap-2">
                   <span class="material-symbols-outlined text-sm">leaderboard</span>
                   Live Event Occupancy
                 </p>
-                <h3 class="text-2xl font-headline font-black text-white mt-1">
-                  ${registeredCount} <span class="text-sm text-on-surface-variant/40">/ ${maxTeams} Teams Registered</span>
+                <h3 class="text-xl lg:text-2xl font-headline font-black text-white mt-1">
+                  ${registeredCount} <span class="text-[10px] lg:text-sm text-on-surface-variant/40">/ ${maxTeams} Slots Reserved</span>
                 </h3>
               </div>
-              <div class="text-right">
+              <div class="text-left sm:text-right flex sm:flex-col items-center sm:items-end justify-between sm:justify-end gap-2">
                 ${spotsLeft <= 5 && spotsLeft > 0 ? `
-                  <div class="text-error font-headline font-bold text-[10px] uppercase tracking-widest animate-pulse mb-1">Low Availability</div>
+                  <div class="text-error font-headline font-black text-[8px] lg:text-[10px] uppercase tracking-widest animate-pulse">Critical Availability</div>
                 ` : ''}
-                <div class="text-3xl font-headline font-black text-secondary uppercase tracking-tight">${Math.round(occupancyPercent)}%</div>
+                <div class="text-2xl lg:text-3xl font-headline font-black text-secondary tracking-tighter">${Math.round(occupancyPercent)}%</div>
               </div>
             </div>
             
-            <div class="h-3 bg-surface-container-highest rounded-full overflow-hidden p-0.5 border border-white/5">
-              <div class="h-full bg-secondary rounded-full relative transition-all duration-1000 ease-out shadow-[0_0_15px_rgba(167,165,255,0.4)]" style="width: ${occupancyPercent}%">
+            <div class="h-2.5 lg:h-3 bg-surface-container-highest rounded-full overflow-hidden p-0.5 border border-white/5">
+              <div class="h-full bg-secondary rounded-full relative transition-all duration-1000 ease-out" style="width: ${occupancyPercent}%">
                 <div class="absolute top-0 right-0 h-full w-8 bg-white/20 blur-md animate-shimmer"></div>
               </div>
-            </div>
-            
-            <div class="flex items-center justify-between mt-3">
-              <span class="text-[10px] text-on-surface-variant/60 font-medium">Platform Capacity: ${maxTeams}</span>
-              <span class="text-[10px] text-on-surface-variant/60 font-medium">Current Selection: ${event.name}</span>
             </div>
           </div>
         ` : ''}
@@ -151,14 +160,14 @@ export async function renderRegister(container, params = {}) {
             </div>
 
             <!-- Section 1: Identity -->
-            <div class="glass-panel p-8 rounded-[40px] space-y-8 border-white/5 hover:border-white/10 transition-colors">
+            <div class="glass-panel p-5 lg:p-8 rounded-3xl space-y-6 lg:space-y-8 border-white/5 hover:border-white/10 transition-colors">
               <div class="flex items-center gap-4">
-                <div class="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-                  <span class="material-symbols-outlined">badge</span>
+                <div class="w-10 h-10 lg:w-12 lg:h-12 bg-primary/10 rounded-xl lg:rounded-2xl flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                  <span class="material-symbols-outlined text-xl">badge</span>
                 </div>
                 <div>
-                  <h3 class="text-xl font-headline font-bold text-white">Team Identity</h3>
-                  <p class="text-[10px] text-on-surface-variant uppercase tracking-widest">Base credentials for your team</p>
+                  <h3 class="text-lg lg:text-xl font-headline font-bold text-white">Team Identity</h3>
+                  <p class="text-[9px] lg:text-[10px] text-on-surface-variant uppercase tracking-widest leading-none">Base credentials</p>
                 </div>
               </div>
 
@@ -191,47 +200,43 @@ export async function renderRegister(container, params = {}) {
             </div>
 
             <!-- Section 2: Command Structure (Members) -->
-            <div class="glass-panel p-8 rounded-[40px] space-y-8 border-white/5 hover:border-white/10 transition-colors">
+            <div class="glass-panel p-6 lg:p-8 rounded-[40px] space-y-6 lg:space-y-8 border-white/5 hover:border-white/10 transition-colors">
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-4">
-                  <div class="w-12 h-12 bg-secondary/10 rounded-2xl flex items-center justify-center text-secondary">
-                    <span class="material-symbols-outlined">diversity_3</span>
+                  <div class="w-10 h-10 lg:w-12 lg:h-12 bg-secondary/10 rounded-2xl flex items-center justify-center text-secondary">
+                    <span class="material-symbols-outlined text-xl lg:text-2xl">diversity_3</span>
                   </div>
                   <div>
-                    <h3 class="text-xl font-headline font-bold text-white">Personnel Manifest</h3>
-                    <p class="text-[10px] text-on-surface-variant uppercase tracking-widest">Capacity: ${maxTeamSize} Members Max</p>
+                    <h3 class="text-lg lg:text-xl font-headline font-bold text-white">Personnel Manifest</h3>
+                    <p class="text-[9px] lg:text-[10px] text-on-surface-variant uppercase tracking-widest">Max ${maxTeamSize} Units</p>
                   </div>
                 </div>
-                <!-- Mini Counter -->
-                <div class="px-3 py-1 bg-surface-container-low rounded-lg border border-white/10 flex items-center gap-2">
-                  <div id="member-ratio" class="text-xs font-headline font-bold text-secondary">1 / ${maxTeamSize}</div>
+                <div class="px-3 py-1 bg-surface-container-low rounded-lg border border-white/10">
+                  <div id="member-ratio" class="text-[10px] lg:text-xs font-headline font-black text-secondary">${1} / ${maxTeamSize}</div>
                 </div>
               </div>
 
               <div id="members-container" class="space-y-4">
-                <!-- Leader is dynamic now to keep it clean -->
-                <div class="flex flex-col md:flex-row gap-4 p-5 bg-surface-container-lowest/50 rounded-3xl border border-white/5 relative overflow-hidden group/row ml-0">
+                <div class="flex flex-col lg:flex-row gap-4 p-5 bg-surface-container-lowest/50 rounded-3xl border border-white/5 relative overflow-hidden group/row ml-0">
                    <div class="absolute left-0 top-0 w-1 h-full bg-secondary opacity-20"></div>
-                   <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
+                   <div class="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-4">
                       <div class="relative flex-1">
                         <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-[18px] text-on-surface-variant/40 pointer-events-none">stars</span>
                         <input class="member-name w-full bg-surface-container border-none rounded-xl py-3 pl-12 pr-4 text-white text-sm focus:ring-1 focus:ring-secondary/40 placeholder:text-slate-600 font-headline" placeholder="Team Leader Name" required />
                       </div>
-                      <div class="flex items-center px-4 bg-secondary/10 rounded-xl border border-secondary/20">
-                         <span class="text-[10px] font-black text-secondary uppercase tracking-[0.2em] w-full text-center">Protocol: LEADER</span>
+                      <div class="flex items-center px-4 py-3 bg-secondary/10 rounded-xl border border-secondary/20">
+                         <span class="text-[9px] lg:text-[10px] font-black text-secondary uppercase tracking-[0.2em] w-full text-center">PROTOCOL: LEADER</span>
                          <input type="hidden" class="member-role" value="Leader" />
                       </div>
                    </div>
                 </div>
                 
-                <div id="additional-members" class="space-y-4">
-                  <!-- JS will append here -->
-                </div>
+                <div id="additional-members" class="space-y-4"></div>
 
-                <button type="button" id="add-member-btn" class="w-full py-4 rounded-2xl border border-dashed border-white/10 text-on-surface-variant hover:border-secondary/40 hover:text-secondary hover:bg-secondary/5 font-headline font-bold text-[10px] uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-3">
-                  <span class="material-symbols-outlined text-sm">person_add</span> Add Unit Member
+                <button type="button" id="add-member-btn" class="w-full py-5 rounded-2xl border border-dashed border-white/10 text-on-surface-variant hover:border-secondary/40 hover:text-secondary hover:bg-secondary/5 font-headline font-black text-[9px] lg:text-[10px] uppercase tracking-[0.3em] transition-all flex items-center justify-center gap-3">
+                  <span class="material-symbols-outlined text-sm lg:text-lg">person_add</span> Enlist New Unit
                 </button>
-                <div id="limit-msg" class="hidden text-center text-[10px] text-on-surface-variant/40 uppercase font-black tracking-widest py-2 bg-surface-container-low/30 rounded-xl">Personnel Capacity Reached</div>
+                <div id="limit-msg" class="hidden text-center text-[9px] lg:text-[10px] text-on-surface-variant/40 uppercase font-black tracking-widest py-3 bg-surface-container-low/30 rounded-xl">Manifest Capacity Reached</div>
               </div>
             </div>
 
@@ -261,42 +266,41 @@ export async function renderRegister(container, params = {}) {
               </div>
             ` : ''}
 
-            <button id="reg-submit" type="submit" class="kinetic-gradient w-full py-6 rounded-[32px] font-headline font-black text-on-primary-fixed text-xl flex items-center justify-center gap-4 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_20px_60px_rgba(167,165,255,0.3)] group">
+            <button id="reg-submit" type="submit" class="kinetic-gradient w-full py-5 rounded-2xl font-headline font-black text-on-primary-fixed text-lg flex items-center justify-center gap-4 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_20px_60px_rgba(167,165,255,0.3)] group">
               <span class="uppercase tracking-[0.3em]">Initialize Team</span>
-              <span class="material-symbols-outlined text-3xl group-hover:translate-x-1 transition-transform">bolt</span>
+              <span class="material-symbols-outlined text-2xl group-hover:translate-x-1 transition-transform">bolt</span>
             </button>
             <p class="text-center text-[10px] text-on-surface-variant/40 uppercase tracking-[0.4em] pt-4 italic">Encrypted Secure Tunnel · HostiBuzz Infrastructure</p>
           </form>
         `}
       </div>
-
       <!-- Success HUD (Hidden by default) -->
-      <div id="reg-success" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-6 bg-[#0a0e19]/90 backdrop-blur-2xl transition-all duration-500">
-        <div class="glass-panel p-12 rounded-[50px] max-w-xl w-full text-center space-y-8 glow-accent border-secondary/20 shadow-[0_30px_100px_rgba(0,0,0,0.8)] relative overflow-hidden">
+      <div id="reg-success" class="hidden fixed inset-0 z-[100] flex items-center justify-center p-4 lg:p-6 bg-[#0a0e19]/95 backdrop-blur-2xl transition-all duration-500">
+        <div class="glass-panel p-8 lg:p-12 rounded-[50px] max-w-xl w-full text-center space-y-6 lg:space-y-8 glow-accent border-secondary/20 shadow-2xl relative overflow-hidden">
           <div class="absolute -top-24 -left-24 w-64 h-64 bg-secondary/10 blur-[100px] rounded-full"></div>
-          <div class="absolute -bottom-24 -right-24 w-64 h-64 bg-primary/10 blur-[100px] rounded-full"></div>
           
           <div class="relative z-10 scale-in">
-            <div class="w-24 h-24 bg-gradient-to-tr from-secondary to-primary rounded-[32px] flex items-center justify-center mx-auto mb-8 rotate-12 shadow-[0_10px_40px_rgba(167,165,255,0.4)]">
-              <span class="material-symbols-outlined text-5xl text-white">verified</span>
+            <div class="w-20 h-20 lg:w-24 lg:h-24 bg-gradient-to-tr from-secondary to-primary rounded-[32px] flex items-center justify-center mx-auto mb-6 lg:mb-8 rotate-12 shadow-xl">
+              <span class="material-symbols-outlined text-4xl lg:text-5xl text-white">verified</span>
             </div>
-            <h2 class="text-4xl md:text-5xl font-headline font-black text-white mb-2 tracking-tighter">Unit Authorized</h2>
-            <p class="text-on-surface-variant text-lg">Your team is successfully registered. Record your terminal access keys below:</p>
+            <h2 class="text-3xl lg:text-5xl font-headline font-black text-white mb-2 tracking-tighter">Unit Authorized</h2>
+            <p class="text-sm lg:text-lg text-on-surface-variant leading-relaxed">System synchronization complete. Maintain node designation keys:</p>
             
-            <div class="bg-surface-container-lowest/50 p-8 rounded-[40px] space-y-8 border border-white/5 my-10 backdrop-blur-sm shadow-inner">
+            <div class="bg-surface-container-lowest/50 p-6 lg:p-8 rounded-[32px] lg:rounded-[40px] space-y-4 lg:space-y-8 border border-white/5 my-6 lg:my-10 shadow-inner">
               <div class="space-y-2">
-                <span class="text-[10px] font-black tracking-[0.4em] text-on-surface-variant uppercase">Designation ID</span>
-                <div id="result-team-id" class="text-4xl font-headline font-black text-primary tracking-widest animate-glow"></div>
+                <span class="text-[9px] lg:text-[10px] font-black tracking-[0.4em] text-on-surface-variant uppercase">Designation ID</span>
+                <div id="result-team-id" class="text-3xl lg:text-4xl font-headline font-black text-primary tracking-widest animate-glow"></div>
               </div>
-              <div class="text-[9px] text-error font-bold uppercase tracking-widest mt-4">⚠️ Use your Team ID to initialize Ops</div>
+              <div class="text-[8px] lg:text-[9px] text-error font-bold uppercase tracking-widest mt-4">⚠️ Use this key for terminal authentication</div>
             </div>
             
-            <button onclick="window.location.hash='#/login'" class="w-full kinetic-gradient py-5 rounded-3xl font-headline font-black text-on-primary-fixed uppercase tracking-widest hover:scale-[1.05] transition-transform shadow-[0_15px_40px_rgba(167,165,255,0.2)]">
+            <button onclick="window.location.hash='#/login'" class="w-full kinetic-gradient py-4 lg:py-5 rounded-3xl font-headline font-black text-on-primary-fixed text-xs lg:text-sm uppercase tracking-widest hover:scale-[1.05] transition-transform">
               Enter Operations
             </button>
           </div>
         </div>
       </div>
+div>
     </main>
   `;
 

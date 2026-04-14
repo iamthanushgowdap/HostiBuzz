@@ -61,16 +61,22 @@ export async function renderLeaderboard(container) {
     : `${(events || []).find(e => e.id === selectedLeaderboardEvent)?.name || 'Event'} <span class="text-primary italic">Leaderboard</span>`;
 
   container.innerHTML = `
-    ${renderNavbar({ activeLink: 'leaderboard' })}
+    ${renderNavbar({ activeLink: 'leaderboard', hideMobileMenu: true })}
     <main class="min-h-[calc(100vh-76px)] p-6 lg:p-12 max-w-6xl mx-auto relative">
+      <!-- Back Button -->
+      <a href="#/" class="inline-flex items-center gap-2 text-on-surface-variant/60 hover:text-primary transition-all mb-8 group">
+        <span class="material-symbols-outlined text-sm group-hover:-translate-x-1 transition-transform">arrow_back</span>
+        <span class="text-[10px] font-headline font-bold uppercase tracking-[0.2em]">Back to Project Hub</span>
+      </a>
+
       <div class="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 blur-[150px] rounded-full z-[-1]"></div>
       <div class="fixed bottom-[-10%] right-[-10%] w-[30%] h-[30%] bg-secondary/10 blur-[150px] rounded-full z-[-1]"></div>
 
-      <header class="mb-16">
-        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-8">
+      <header class="mb-10 lg:mb-16">
+        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 lg:gap-8">
           <div>
-            <h1 class="text-5xl lg:text-7xl font-bold font-headline tracking-tighter text-white">${eventTitle}</h1>
-            <p class="text-on-surface-variant max-w-xl text-lg mt-4">Real-time performance metrics. Rankings update live as scores are submitted.</p>
+            <h1 class="text-4xl lg:text-6xl font-bold font-headline tracking-tighter text-white">${eventTitle}</h1>
+            <p class="text-on-surface-variant max-w-xl text-sm lg:text-lg mt-2 lg:mt-4">Real-time performance metrics updated live in the arena.</p>
           </div>
           
           ${(!user || user.role === 'admin') ? `
@@ -87,29 +93,29 @@ export async function renderLeaderboard(container) {
         </div>
       </header>
 
-      <!-- Top 3 Podium -->
+      <!-- Top 3 Podium (Always Horizontal) -->
       ${top3.length >= 3 ? `
-        <section class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20 items-end">
+        <section class="grid grid-cols-3 gap-2 lg:gap-8 mb-12 lg:mb-20 items-end px-1">
           ${[1, 0, 2].map(idx => {
             const t = top3[idx];
             if (!t) return '';
             const isFirst = idx === 0;
             const color = medals[idx];
             return `
-              <div class="relative group ${isFirst ? 'scale-105 z-10 order-1 md:order-2' : idx === 1 ? 'order-2 md:order-1 translate-y-4' : 'order-3 translate-y-6'}">
-                <div class="glass-panel ${isFirst ? 'p-10 rounded-[3rem]' : 'p-8 rounded-[2.5rem]'} flex flex-col items-center text-center relative border border-white/10 shadow-lg">
-                  <div class="absolute -top-${isFirst ? '10' : '8'} left-1/2 -translate-x-1/2">
-                    <div class="w-${isFirst ? '20' : '16'} h-${isFirst ? '20' : '16'} bg-surface-container-highest rounded-full flex items-center justify-center border-${isFirst ? '4' : '2'} glow-accent" style="border-color: ${color}">
-                      <span class="text-${isFirst ? '3' : '2'}xl font-bold font-headline" style="color: ${color}">${idx + 1}</span>
+              <div class="relative group ${isFirst ? 'scale-100 lg:scale-105 z-10 order-2' : idx === 1 ? 'order-1 translate-y-4' : 'order-3 translate-y-6'}">
+                <div class="glass-panel ${isFirst ? 'p-2 py-6 lg:p-10 rounded-xl lg:rounded-[3rem]' : 'p-2 py-4 lg:p-8 rounded-xl lg:rounded-[2.5rem]'} flex flex-col items-center text-center relative border border-white/10 shadow-lg">
+                  <div class="absolute -top-${isFirst ? '6 lg:10' : '4 lg:8'} left-1/2 -translate-x-1/2">
+                    <div class="w-8 h-8 lg:w-20 lg:h-20 bg-surface-container-highest rounded-full flex items-center justify-center border-${isFirst ? '2 lg:4' : '1 lg:2'} glow-accent" style="border-color: ${color}">
+                      <span class="text-[10px] lg:text-3xl font-bold font-headline" style="color: ${color}">${idx + 1}</span>
                     </div>
                   </div>
-                  <div class="w-${isFirst ? '20' : '16'} h-${isFirst ? '20' : '16'} rounded-full bg-gradient-to-br from-primary/20 to-secondary/20 flex items-center justify-center mt-6 mb-4">
-                    <span class="material-symbols-outlined text-3xl text-white">groups</span>
+                  <div class="w-8 h-8 lg:w-16 lg:h-16 rounded-full bg-gradient-to-br from-primary/10 to-secondary/20 flex items-center justify-center mt-4 lg:mt-6 mb-2 lg:mb-4">
+                    <span class="material-symbols-outlined text-lg lg:text-3xl text-white">groups</span>
                   </div>
-                  <h3 class="text-${isFirst ? '3' : '2'}xl font-bold font-headline text-white mb-1">${t.team_name}</h3>
-                  <p class="text-on-surface-variant text-sm mb-6">${t.team_id} ${selectedLeaderboardEvent === 'all' ? `• <span class="text-secondary">${t.eventName}</span>` : ''}</p>
-                  <div class="text-${isFirst ? '5' : '3'}xl font-black font-headline ${isFirst ? 'text-transparent bg-clip-text bg-gradient-to-br from-primary to-secondary' : ''}" style="${!isFirst ? `color: ${color}` : ''}">${t.total.toLocaleString()}</div>
-                  <p class="text-[10px] tracking-widest font-bold mt-1 uppercase" style="color: ${color}">${medalLabels[idx]}</p>
+                  <h3 class="text-[10px] lg:text-3xl font-bold font-headline text-white mb-0.5 lg:mb-1 truncate w-full px-1">${t.team_name}</h3>
+                  <p class="hidden lg:block text-on-surface-variant text-sm mb-6">${t.team_id} ${selectedLeaderboardEvent === 'all' ? `• <span class="text-secondary">${t.eventName}</span>` : ''}</p>
+                  <div class="text-xs lg:text-5xl font-black font-headline ${isFirst ? 'text-transparent bg-clip-text bg-gradient-to-br from-primary to-secondary' : ''}" style="${!isFirst ? `color: ${color}` : ''}">${t.total.toLocaleString()}</div>
+                  <p class="text-[8px] lg:text-[10px] tracking-widest font-bold mt-1 uppercase" style="color: ${color}">${medalLabels[idx]}</p>
                 </div>
               </div>
             `;
@@ -121,18 +127,19 @@ export async function renderLeaderboard(container) {
         </div>
       ` : ''}
 
-      <!-- Leaderboard Table -->
+      <!-- Leaderboard Data -->
       ${teamScores.length === 0 ? `
         <div class="text-center py-20 px-6 glass-panel rounded-[2rem] border border-dashed border-outline-variant/30">
           <span class="material-symbols-outlined text-6xl text-on-surface-variant/30 mb-4 block">emoji_events</span>
           <h2 class="text-xl font-headline font-bold text-white mb-2">No Teams Found</h2>
-          <p class="text-on-surface-variant">There are no teams or scores recorded for this view yet. Please check back later!</p>
+          <p class="text-sm text-on-surface-variant">There are no teams or scores recorded for this view yet. Please check back later!</p>
         </div>
       ` : `
-        <section class="glass-panel rounded-[2rem] overflow-hidden border border-outline-variant/10 mb-12">
+        <!-- DESKTOP TABLE VIEW -->
+        <section class="hidden lg:block glass-panel rounded-[2rem] overflow-hidden border border-outline-variant/10 mb-12 shadow-2xl">
           <table class="w-full text-left border-collapse">
             <thead>
-              <tr class="bg-surface-container-high/50 text-on-surface-variant font-headline text-xs uppercase tracking-widest">
+              <tr class="bg-surface-container-high/50 text-on-surface-variant font-headline text-[10px] uppercase tracking-[0.2em]">
                 <th class="px-8 py-6">Rank</th>
                 <th class="px-8 py-6">Team</th>
                 <th class="px-8 py-6">Round Scores</th>
@@ -143,13 +150,13 @@ export async function renderLeaderboard(container) {
               ${teamScores.map((t, i) => `
                 <tr class="${t.status === 'eliminated' ? 'opacity-50 grayscale' : ''} hover:bg-white/5 transition-all group">
                   <td class="px-8 py-6">
-                    <span class="text-xl font-bold font-headline text-on-surface-variant group-hover:text-white">#${String(i + 1).padStart(2, '0')}</span>
+                    <span class="text-xl font-black font-headline text-on-surface-variant group-hover:text-white">#${String(i + 1).padStart(2, '0')}</span>
                   </td>
                   <td class="px-8 py-6">
                     <div>
                       <div class="text-white font-bold font-headline flex items-center gap-2">
                         ${t.team_name}
-                        ${t.status === 'eliminated' ? '<span class="px-2 py-0.5 rounded-sm bg-error/20 text-error text-[10px] uppercase font-black uppercase">Eliminated</span>' : ''}
+                        ${t.status === 'eliminated' ? '<span class="px-2 py-0.5 rounded-sm bg-error/20 text-error text-[8px] uppercase font-black tracking-widest">Eliminated</span>' : ''}
                       </div>
                       <div class="text-[10px] text-on-surface-variant mt-1">${t.team_id} ${selectedLeaderboardEvent === 'all' ? `• <span class="text-secondary">${t.eventName}</span>` : ''}</div>
                     </div>
@@ -157,20 +164,53 @@ export async function renderLeaderboard(container) {
                   <td class="px-8 py-6">
                     <div class="flex gap-2 flex-wrap">
                       ${t.roundScores.map(rs => `
-                        <span class="px-2 py-1 bg-primary/10 text-primary text-[10px] font-bold rounded flex flex-col items-center">
+                        <span class="px-2.5 py-1.5 bg-primary/10 text-primary text-[10px] font-black rounded-lg flex flex-col items-center border border-primary/10">
                           <span>R${rs.round}: ${rs.score}</span>
                           ${rs.time ? `<span class="text-[8px] opacity-60 font-mono tracking-tighter mt-0.5">${rs.time}</span>` : ''}
                         </span>
-                      `).join('') || '<span class="text-xs text-on-surface-variant">No scores yet</span>'}
+                      `).join('') || '<span class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest">Awaiting Pulse</span>'}
                     </div>
                   </td>
                   <td class="px-8 py-6 text-right">
-                    <span class="text-xl font-bold font-headline text-white">${t.total.toLocaleString()}</span>
+                    <span class="text-2xl font-black font-headline text-white">${t.total.toLocaleString()}</span>
                   </td>
                 </tr>
               `).join('')}
             </tbody>
           </table>
+        </section>
+
+        <!-- MOBILE CARD STACK VIEW -->
+        <section class="lg:hidden space-y-4 mb-12 px-2">
+          ${teamScores.map((t, i) => `
+            <div class="${t.status === 'eliminated' ? 'opacity-60 grayscale' : ''} glass-panel p-5 rounded-3xl border border-white/5 shadow-xl relative overflow-hidden">
+               <div class="flex items-center justify-between mb-4 pb-4 border-b border-white/5">
+                 <div class="flex items-center gap-3">
+                   <div class="w-10 h-10 rounded-xl bg-surface-container-highest flex items-center justify-center font-headline font-black text-primary text-lg">
+                      ${i + 1}
+                   </div>
+                   <div>
+                     <h3 class="font-headline font-bold text-white text-base">${t.team_name}</h3>
+                     <p class="text-[9px] text-on-surface-variant uppercase tracking-[0.2em]">${t.team_id}</p>
+                   </div>
+                 </div>
+                 <div class="text-right">
+                    <div class="text-2xl font-black font-headline text-secondary tracking-tighter">${t.total.toLocaleString()}</div>
+                    <div class="text-[8px] font-bold text-on-surface-variant uppercase tracking-widest">Total Pulse</div>
+                 </div>
+               </div>
+               
+               <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
+                  ${t.roundScores.map(rs => `
+                    <div class="flex-shrink-0 bg-white/5 p-3 rounded-2xl border border-white/5 text-center min-w-[70px]">
+                       <div class="text-[8px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Round ${rs.round}</div>
+                       <div class="text-sm font-black text-white">${rs.score}</div>
+                       ${rs.time ? `<div class="text-[7px] text-primary font-mono mt-1">${rs.time}</div>` : ''}
+                    </div>
+                  `).join('') || '<div class="text-[9px] text-on-surface-variant font-bold italic py-2">No sequences recorded...</div>'}
+               </div>
+            </div>
+          `).join('')}
         </section>
       `}
 

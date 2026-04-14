@@ -89,93 +89,108 @@ export async function renderDebateRound(container, params, search = {}) {
       <div class="fixed top-1/4 -left-20 w-96 h-96 bg-tertiary/10 blur-[120px] rounded-full pointer-events-none -z-10"></div>
       
       <!-- Topic Card -->
-      <div class="glass-panel overflow-hidden rounded-3xl glow-accent border-tertiary/20 mb-8 flex flex-col md:flex-row min-h-[200px]">
+      <div class="glass-panel overflow-hidden rounded-[2.5rem] border-tertiary/20 mb-8 flex flex-col lg:flex-row min-h-[200px] border border-white/5 shadow-2xl relative group">
+        <div class="absolute -right-12 -top-12 w-32 h-32 bg-tertiary/5 blur-3xl rounded-full"></div>
         ${topic?.image_url ? `
-          <div class="md:w-1/4 h-48 md:h-auto overflow-hidden flex-shrink-0">
-            <img src="${topic.image_url}" class="w-full h-full object-cover" alt="Debate Topic" />
+          <div class="lg:w-1/4 h-56 lg:h-auto overflow-hidden flex-shrink-0 relative">
+             <div class="absolute inset-0 bg-gradient-to-t from-[#0a0e19] to-transparent lg:hidden z-10"></div>
+            <img src="${topic.image_url}" class="w-full h-full object-cover lg:scale-110 group-hover:scale-100 transition-transform duration-1000" alt="Debate Topic" />
           </div>
         ` : ''}
-        <div class="flex-1 p-8 md:p-10 flex flex-col justify-center">
-          <span class="text-[10px] font-headline tracking-[0.4em] text-tertiary uppercase block mb-3 flex items-center gap-2">
-            <span class="material-symbols-outlined text-sm">gavel</span>
-            Text-Based Debate · Motion
+        <div class="flex-1 p-6 lg:p-10 flex flex-col justify-center relative z-20">
+          <span class="text-[9px] lg:text-[10px] font-headline tracking-[0.4em] text-tertiary uppercase block mb-3 flex items-center gap-3 font-black">
+            <span class="material-symbols-outlined text-sm font-black">gavel</span>
+            Neural Response Node · Protocol
           </span>
-          <h2 class="text-2xl md:text-4xl font-headline font-bold text-white leading-tight mb-4">${topic?.topic || 'Topic yet to be assigned by admin'}</h2>
-          ${topic?.description ? `<p class="text-on-surface-variant leading-relaxed max-w-2xl">${topic.description}</p>` : ''}
-          <div class="mt-4 flex items-center gap-3">
-            <span class="px-3 py-1 bg-tertiary/10 text-tertiary rounded-full text-[10px] font-bold uppercase tracking-widest flex items-center gap-1">
-              <span class="material-symbols-outlined text-xs">schedule</span>
-              ${DEBATE_DURATION_SEC}s response window
+          <h2 class="text-2xl lg:text-4xl font-headline font-black text-white leading-tight mb-4 uppercase tracking-tighter">${topic?.topic || 'Topic Node Pending...'}</h2>
+          ${topic?.description ? `<p class="text-on-surface-variant/70 leading-relaxed max-w-2xl text-[11px] lg:text-sm font-medium uppercase tracking-widest">${topic.description}</p>` : ''}
+          <div class="mt-6 flex flex-wrap items-center gap-3">
+            <span class="px-3 py-1.5 bg-tertiary/20 text-tertiary border border-tertiary/20 rounded-full text-[9px] lg:text-[10px] font-black uppercase tracking-widest flex items-center gap-2">
+              <span class="material-symbols-outlined text-xs font-black">schedule</span>
+              ${DEBATE_DURATION_SEC}s Acquisition
             </span>
-            <span class="px-3 py-1 bg-surface-container-highest text-on-surface-variant rounded-full text-[10px] font-bold uppercase tracking-widest">
-              Type your argument below
+            <span class="px-3 py-1.5 bg-surface-container-highest/50 text-on-surface-variant/60 rounded-full text-[9px] lg:text-[10px] font-black uppercase tracking-widest border border-white/5">
+              Rhetorical Mode Active
             </span>
           </div>
         </div>
       </div>
 
       <!-- Timer Bar -->
-      <div class="mb-6 glass-panel p-4 rounded-2xl flex items-center gap-6">
-        <div class="flex items-center gap-3 shrink-0">
-          <span class="material-symbols-outlined text-tertiary text-2xl" id="debate-timer-icon">timer</span>
+      <div class="mb-8 glass-panel p-4 lg:p-5 rounded-2xl flex flex-col sm:flex-row items-center gap-4 lg:gap-8 border border-white/5 shadow-xl">
+        <div class="flex items-center gap-4 shrink-0 w-full sm:w-auto">
+          <button id="terminate-session" class="w-10 h-10 lg:w-12 lg:h-12 rounded-lg bg-white/5 flex items-center justify-center text-on-surface-variant/60 hover:text-error transition-colors" title="Terminate Session">
+            <span class="material-symbols-outlined text-sm lg:text-base">logout</span>
+          </button>
+          <div class="w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-tertiary/10 flex items-center justify-center border border-tertiary/20">
+            <span class="material-symbols-outlined text-tertiary text-2xl lg:text-3xl font-black" id="debate-timer-icon">timer</span>
+          </div>
           <div>
-            <div class="text-[10px] text-on-surface-variant uppercase tracking-widest font-headline">Time Remaining</div>
-            <div id="debate-timer" class="font-headline text-3xl font-black tabular-nums text-tertiary tracking-tight transition-colors">${initialDisplay}</div>
+            <div class="text-[9px] text-on-surface-variant/60 uppercase tracking-[0.3em] font-black">Sync Pulse Remaining</div>
+            <div id="debate-timer" class="font-headline text-2xl lg:text-3xl font-black tabular-nums text-tertiary tracking-tighter transition-colors leading-none">${initialDisplay}</div>
           </div>
         </div>
-        <div class="flex-1 h-2 bg-surface-container-highest rounded-full overflow-hidden">
-          <div id="debate-timer-bar" class="h-full bg-gradient-to-r from-tertiary to-primary rounded-full transition-all duration-100" style="width:100%"></div>
+        <div class="flex-1 h-3 lg:h-4 bg-surface-container-highest/30 rounded-full overflow-hidden w-full border border-white/5 p-0.5">
+          <div id="debate-timer-bar" class="h-full bg-gradient-to-r from-tertiary to-primary rounded-full transition-all duration-100 shadow-[0_0_20px_rgba(175,136,255,0.4)]" style="width:100%"></div>
         </div>
-        <div class="text-[10px] text-on-surface-variant font-headline uppercase tracking-widest shrink-0 text-right">
-          ${isLocked ? '<span class="text-secondary font-bold">SUBMITTED</span>' : isPaused ? '<span class="text-warning font-bold animate-pulse">PAUSED</span>' : '<span class="animate-pulse text-tertiary">LIVE</span>'}
+        <div class="text-[9px] text-on-surface-variant font-black uppercase tracking-[0.3em] shrink-0 text-right opacity-60">
+          ${isLocked ? '<span class="text-secondary font-black">SEALED</span>' : isPaused ? '<span class="text-warning font-black animate-pulse">LOCKED</span>' : '<span class="animate-pulse text-tertiary">TRANSMITTING</span>'}
         </div>
       </div>
 
       <!-- Response Area + tips -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div class="lg:col-span-8 space-y-4">
-          ${isLocked ? `
-            <div class="glass-panel p-8 rounded-2xl border-secondary/20 bg-secondary/5">
-              <div class="flex items-start gap-4">
-                <span class="material-symbols-outlined text-secondary text-4xl">check_circle</span>
-                <div>
-                  <h3 class="text-xl font-headline font-bold text-white mb-2">Response Finalized</h3>
-                  <p class="text-on-surface-variant text-sm leading-relaxed mb-6">Your typed argument has been securely recorded. Judges will evaluate all responses after the debate session ends.</p>
-                  <button onclick="window.location.hash='#/dashboard'" class="px-6 py-3 bg-secondary text-on-secondary rounded-xl font-headline font-bold text-xs uppercase tracking-widest hover:scale-105 transition-all shadow-lg">Back to Dashboard</button>
+        <div class="lg:col-span-8 space-y          ${isLocked ? `
+            <div class="glass-panel p-6 lg:p-8 rounded-[2rem] border-secondary/20 bg-secondary/5 slide-in-bottom relative overflow-hidden">
+              <div class="absolute -right-12 -top-12 w-32 h-32 bg-secondary/10 blur-3xl rounded-full"></div>
+              <div class="flex flex-col lg:flex-row items-center lg:items-start gap-6">
+                <div class="w-16 h-16 bg-secondary/20 text-secondary rounded-2xl flex items-center justify-center shrink-0 border border-secondary/20 rotate-12">
+                  <span class="material-symbols-outlined text-3xl">beenhere</span>
+                </div>
+                <div class="text-center lg:text-left">
+                  <h3 class="text-xl lg:text-2xl font-headline font-black text-white mb-2 uppercase tracking-tighter">Response Locked</h3>
+                  <p class="text-on-surface-variant/60 text-[11px] lg:text-sm leading-relaxed mb-6 font-bold uppercase tracking-widest">Rhetorical sequence has been recorded in the tactical hub. Standing by for orbital judging.</p>
+                  <button onclick="window.location.hash='#/dashboard'" class="w-full lg:w-fit px-8 py-4 bg-secondary text-on-secondary rounded-xl font-headline font-black text-[10px] uppercase tracking-[0.3em] hover:scale-105 transition-all shadow-xl">Return to Control</button>
                 </div>
               </div>
             </div>
           ` : ''}
 
-          <div class="glass-panel p-6 rounded-3xl space-y-4 ${isLocked ? 'opacity-50 pointer-events-none' : ''}">
-            <div class="flex items-center justify-between">
-              <h3 class="font-headline text-lg font-bold text-white flex items-center gap-2">
-                <span class="material-symbols-outlined text-tertiary">edit_note</span>
-                Type Your Argument
+          <div class="glass-panel p-6 lg:p-8 rounded-[2rem] space-y-6 ${isLocked ? 'hidden' : ''} border border-white/5 shadow-2xl relative overflow-hidden">
+            <div class="absolute -right-12 -bottom-12 w-48 h-48 bg-tertiary/5 blur-3xl rounded-full"></div>
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <h3 class="font-headline text-base lg:text-xl font-black text-white flex items-center gap-3 uppercase tracking-widest relative z-10">
+                <span class="material-symbols-outlined text-tertiary text-xl font-black">edit_note</span>
+                Architect Statement
               </h3>
-              <div class="flex items-center gap-2">
+              <div class="flex items-center gap-2 bg-surface-container-highest/30 px-3 py-1.5 rounded-full border border-white/5 relative z-10">
                 <span class="w-2 h-2 bg-tertiary rounded-full ${isPaused ? '' : 'animate-pulse'}"></span>
-                <span class="text-[10px] text-on-surface-variant uppercase font-bold tracking-widest">Text-Based · No Voice</span>
+                <span class="text-[9px] text-on-surface-variant/60 uppercase font-black tracking-widest">Neural Uplink Active</span>
               </div>
             </div>
-            <textarea id="debate-text" 
-              class="w-full bg-surface-container-lowest text-on-surface border-none rounded-2xl p-5 focus:ring-2 focus:ring-tertiary/40 placeholder:text-outline/30 resize-none font-body text-base leading-relaxed transition-all" 
-              style="min-height: 260px"
-              placeholder="State your position clearly. Provide supporting arguments, evidence, and rebuttals within the time limit..."
-              ${isLocked || isPaused ? 'disabled' : ''}>${existing?.text_content || ''}</textarea>
             
-            <div class="flex items-center justify-between text-xs text-on-surface-variant">
-              <span id="char-count" class="font-headline">0 characters</span>
-              <span class="italic opacity-60">Auto-saved · Auto-submitted on timeout</span>
+            <div class="relative group">
+              <div class="absolute -inset-1 bg-tertiary/10 rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition duration-500"></div>
+              <textarea id="debate-text" 
+                class="relative w-full bg-surface-container-lowest text-on-surface border-none rounded-2xl p-6 lg:p-8 focus:ring-1 focus:ring-tertiary/40 placeholder:text-outline/10 resize-none font-body text-sm lg:text-base leading-relaxed transition-all shadow-inner" 
+                style="min-height: 280px"
+                placeholder="Declare your position with maximum tactical clarity. Supply evidence and counter-logic within the pulse window..."
+                ${isLocked || isPaused ? 'disabled' : ''}>${existing?.text_content || ''}</textarea>
+            </div>
+            
+            <div class="flex items-center justify-between text-[9px] text-on-surface-variant font-black uppercase tracking-[0.2em] opacity-40">
+              <span id="char-count">0 NODES ACCESSED</span>
+              <span class="italic">AUTO-SYNC ACTIVE</span>
             </div>
 
             ${!isLocked ? `
-              <div class="flex gap-3">
-                <button id="save-debate-draft" class="px-6 py-4 rounded-xl border border-outline-variant/30 text-on-surface hover:bg-white/5 transition-all font-headline font-bold uppercase text-xs tracking-widest">
-                  <span class="flex items-center gap-2"><span class="material-symbols-outlined text-sm">save</span> Save Draft</span>
+              <div class="flex flex-col sm:flex-row gap-3 pt-4">
+                <button id="save-debate-draft" class="w-full sm:w-auto px-8 py-4 rounded-xl border border-white/10 text-on-surface transition-all font-headline font-black uppercase text-[10px] tracking-[0.3em] bg-white/5 hover:bg-white/10">
+                  <span class="flex items-center justify-center gap-2"><span class="material-symbols-outlined text-sm font-black">save</span> Sync Draft</span>
                 </button>
-                <button id="submit-debate" class="flex-1 py-4 rounded-xl bg-gradient-to-r from-tertiary to-primary text-on-primary-fixed font-headline font-bold uppercase tracking-[0.2em] shadow-[0_10px_40px_rgba(175,136,255,0.2)] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3">
-                  Finalize & Submit <span class="material-symbols-outlined">send</span>
+                <button id="submit-debate" class="flex-1 py-4 lg:py-5 rounded-xl bg-gradient-to-r from-tertiary to-primary text-on-primary-fixed font-headline font-black uppercase tracking-[0.3em] shadow-[0_20px_40px_rgba(175,136,255,0.2)] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 group text-xs">
+                  <span>Finalize & Transmit</span>
+                  <span class="material-symbols-outlined font-black group-hover:translate-x-1 transition-transform">send</span>
                 </button>
               </div>
             ` : ''}
@@ -185,26 +200,26 @@ export async function renderDebateRound(container, params, search = {}) {
         <!-- Tips Sidebar -->
         <div class="lg:col-span-4">
           <div class="bg-surface-container-low rounded-3xl p-6 border border-white/5 space-y-6 sticky top-6">
-            <h3 class="text-white font-headline font-bold flex items-center gap-2">
-              <span class="material-symbols-outlined text-tertiary">lightbulb</span>
-              Debate Tips
+            <h3 class="text-white font-headline font-black text-xs lg:text-sm flex items-center gap-3 uppercase tracking-widest">
+              <span class="material-symbols-outlined text-tertiary text-base font-black">lightbulb</span>
+              Rhetorical Specs
             </h3>
-            <ul class="space-y-4">
-              <li class="flex gap-3">
-                <span class="w-6 h-6 rounded-lg bg-tertiary/20 text-tertiary flex items-center justify-center text-xs font-bold shrink-0">1</span>
-                <p class="text-xs text-on-surface-variant leading-relaxed">State your position in the first sentence — be direct.</p>
+            <ul class="space-y-5">
+              <li class="flex items-start gap-4 group">
+                <span class="w-8 h-8 rounded-lg bg-tertiary/20 text-tertiary flex items-center justify-center text-[10px] font-black shrink-0 border border-tertiary/20 group-hover:bg-tertiary/40 transition-colors">01</span>
+                <p class="text-[10px] lg:text-xs text-on-surface-variant/80 leading-relaxed font-bold uppercase tracking-wider">State position within the first sequence node — be direct.</p>
               </li>
-              <li class="flex gap-3">
-                <span class="w-6 h-6 rounded-lg bg-tertiary/20 text-tertiary flex items-center justify-center text-xs font-bold shrink-0">2</span>
-                <p class="text-xs text-on-surface-variant leading-relaxed">Give 2–3 strong supporting points backed by reasoning or examples.</p>
+              <li class="flex items-start gap-4 group">
+                <span class="w-8 h-8 rounded-lg bg-tertiary/20 text-tertiary flex items-center justify-center text-[10px] font-black shrink-0 border border-tertiary/20 group-hover:bg-tertiary/40 transition-colors">02</span>
+                <p class="text-[10px] lg:text-xs text-on-surface-variant/80 leading-relaxed font-bold uppercase tracking-wider">Supply 2-3 logical support stacks with high-fidelity reasoning.</p>
               </li>
-              <li class="flex gap-3">
-                <span class="w-6 h-6 rounded-lg bg-tertiary/20 text-tertiary flex items-center justify-center text-xs font-bold shrink-0">3</span>
-                <p class="text-xs text-on-surface-variant leading-relaxed">Address the opposing side preemptively. Acknowledge then refute.</p>
+              <li class="flex items-start gap-4 group">
+                <span class="w-8 h-8 rounded-lg bg-tertiary/20 text-tertiary flex items-center justify-center text-[10px] font-black shrink-0 border border-tertiary/20 group-hover:bg-tertiary/40 transition-colors">03</span>
+                <p class="text-[10px] lg:text-xs text-on-surface-variant/80 leading-relaxed font-bold uppercase tracking-wider">Anticipate opposing logic. Address node and refute immediately.</p>
               </li>
-              <li class="flex gap-3">
-                <span class="w-6 h-6 rounded-lg bg-error/20 text-error flex items-center justify-center text-xs font-bold shrink-0">!</span>
-                <p class="text-xs text-error/80 leading-relaxed font-bold">Timer runs out → auto-submit. Don't wait until the last second.</p>
+              <li class="flex items-start gap-4 p-4 rounded-xl bg-error/5 border border-error/20">
+                <span class="material-symbols-outlined text-error text-xl font-black shrink-0">emergency_home</span>
+                <p class="text-[9px] text-error font-black uppercase tracking-[0.2em] leading-relaxed">Pulse Expiration → Forced Transmission node lock.</p>
               </li>
             </ul>
 
@@ -228,7 +243,7 @@ export async function renderDebateRound(container, params, search = {}) {
   if (textarea && charCount) {
     const update = () => {
       const len = textarea.value.length;
-      charCount.textContent = `${len} character${len !== 1 ? 's' : ''}`;
+      charCount.textContent = `${len} NODES ACCESSED`;
     };
     textarea.addEventListener('input', update);
     update();
@@ -337,4 +352,15 @@ export async function renderDebateRound(container, params, search = {}) {
     });
     debateTimer.start();
   }
+
+  // Terminate Session
+  container.querySelector('#terminate-session')?.addEventListener('click', async () => {
+    const { Notifier } = await import('../services/notifier.js');
+    Notifier.confirm(
+      'Terminate Session',
+      'Are you sure you want to exit the current round? Your progress is auto-saved, but you will leave the tactical terminal.',
+      () => navigate('/dashboard'),
+      { confirmText: 'Exit to Dashboard', type: 'warning' }
+    );
+  });
 }

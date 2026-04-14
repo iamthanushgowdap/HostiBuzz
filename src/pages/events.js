@@ -20,26 +20,32 @@ export async function renderEvents(container) {
   const pastEvents = events.filter(e => e.status === 'completed' || (e.event_date && new Date(e.event_date) < now));
 
   container.innerHTML = `
-    ${renderNavbar({ activeLink: 'events' })}
-    <main class="min-h-screen pt-24 pb-20 px-6 max-w-7xl mx-auto">
+    ${renderNavbar({ activeLink: 'events', hideMobileMenu: true })}
+    <main class="min-h-screen pt-20 pb-16 px-6 max-w-7xl mx-auto">
       
+      <!-- Back Button -->
+      <a href="#/" class="inline-flex items-center gap-2 text-on-surface-variant/60 hover:text-primary transition-all mb-8 group">
+        <span class="material-symbols-outlined text-sm group-hover:-translate-x-1 transition-transform">arrow_back</span>
+        <span class="text-[10px] font-headline font-bold uppercase tracking-[0.2em]">Back to Core</span>
+      </a>
+
       <!-- Header -->
-      <header class="mb-16 text-center">
-        <div class="flex items-center justify-center gap-2 text-primary text-xs font-headline font-bold tracking-[0.3em] uppercase mb-4">
-          <span class="w-8 h-[1px] bg-primary/30"></span>
+      <header class="mb-8 lg:mb-12 text-center">
+        <div class="flex items-center justify-center gap-2 text-primary text-[10px] lg:text-xs font-headline font-bold tracking-[0.3em] uppercase mb-4">
+          <span class="w-4 lg:w-8 h-[1px] bg-primary/30"></span>
           <span>Event Protocol</span>
-          <span class="w-8 h-[1px] bg-primary/30"></span>
+          <span class="w-4 lg:w-8 h-[1px] bg-primary/30"></span>
         </div>
-        <h1 class="text-5xl md:text-7xl font-headline font-bold text-white tracking-tighter mb-4">
+        <h1 class="text-4xl lg:text-7xl font-headline font-bold text-white tracking-tighter mb-4">
           Central <span class="inline-block px-[0.15em] -mx-[0.15em] text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary italic">Hub</span>
         </h1>
-        <p class="text-on-surface-variant max-w-2xl mx-auto text-lg">
+        <p class="text-on-surface-variant max-w-2xl mx-auto text-sm lg:text-lg leading-relaxed px-4">
           Browse active competitions, upcoming hackathons, and archived event sequences.
         </p>
       </header>
 
       <!-- Sections -->
-      <div class="space-y-24">
+      <div class="space-y-12">
         
         <!-- Live Section -->
         ${renderSection('Live Events', 'Competitions currently in progress or open for registration.', liveEvents, 'secondary', true)}
@@ -72,15 +78,15 @@ function renderSection(title, subtitle, list, colorClass, highlight = false) {
   
   return `
     <section>
-      <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-10 pb-6 border-b border-outline-variant/10">
+      <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4 mb-10 pb-6 border-b border-outline-variant/10">
         <div>
-          <h2 class="text-3xl font-headline font-bold text-white flex items-center gap-3">
-            <span class="w-3 h-3 rounded-full bg-${colorClass}${highlight ? ' animate-pulse' : ''}"></span>
+          <h2 class="text-2xl lg:text-3xl font-headline font-bold text-white flex items-center gap-3">
+            <span class="w-2.5 h-2.5 rounded-full bg-${colorClass}${highlight ? ' animate-pulse' : ''}"></span>
             ${title}
           </h2>
-          <p class="text-on-surface-variant mt-1">${subtitle}</p>
+          <p class="text-xs lg:text-sm text-on-surface-variant mt-1">${subtitle}</p>
         </div>
-        <div class="text-xs font-headline font-bold text-on-surface-variant/40 uppercase tracking-widest">
+        <div class="text-[10px] font-headline font-bold text-on-surface-variant/40 uppercase tracking-widest bg-white/5 py-1.5 px-3 rounded-full border border-white/5 lg:bg-transparent lg:border-none lg:px-0">
           ${list.length} Records Found
         </div>
       </div>
@@ -100,13 +106,13 @@ function renderEventCard(event) {
   const isRegistrationOpen = event.registration_open && event.status !== 'completed';
 
   return `
-    <div class="group bg-surface-container-low/40 rounded-3xl p-8 border border-outline-variant/10 hover:border-primary/30 transition-all duration-500 flex flex-col hover:bg-surface-container-low hover:translate-y-[-4px]">
-      <div class="flex justify-between items-start mb-6">
-        <div class="px-3 py-1 bg-surface-container-high rounded-full text-[10px] font-bold tracking-widest text-on-surface-variant uppercase border border-outline-variant/10">
+    <div class="group bg-surface-container-low/40 rounded-2xl p-5 border border-outline-variant/10 hover:border-primary/30 transition-all duration-500 flex flex-col hover:bg-surface-container-low hover:translate-y-[-4px]">
+      <div class="flex flex-col sm:flex-row justify-between items-start gap-4 mb-6">
+        <div class="px-3 py-1 bg-surface-container-high rounded-full text-[9px] font-bold tracking-[0.2em] text-on-surface-variant uppercase border border-outline-variant/10">
           ${event.slug || 'Global'}
         </div>
-        <div class="text-xs text-on-surface-variant flex items-center gap-1.5 font-medium">
-          <span class="material-symbols-outlined text-base">calendar_today</span>
+        <div class="text-[10px] text-on-surface-variant flex items-center gap-1.5 font-medium bg-white/5 py-1 px-3 rounded-full lg:bg-transparent lg:px-0">
+          <span class="material-symbols-outlined text-sm">calendar_today</span>
           ${dateStr}
         </div>
       </div>

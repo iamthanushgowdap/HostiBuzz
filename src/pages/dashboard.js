@@ -52,44 +52,45 @@ export async function renderDashboard(container, params = {}, search = {}, mockU
         <span class="text-[10px] font-black text-secondary uppercase tracking-[0.3em]">Diagnostic Mode // Live Audit of ${user.team_name}</span>
       </div>
     ` : ''}
-    <main class="min-h-[calc(100vh-76px)] p-6 lg:p-12 max-w-7xl mx-auto relative ${mockUser ? 'pt-20' : ''}">
+    <main class="min-h-[calc(100vh-76px)] p-5 lg:p-12 max-w-7xl mx-auto relative ${mockUser ? 'pt-20' : ''}">
+      
+      <!-- Back Button -->
+      <a href="#/events" class="inline-flex items-center gap-2 text-on-surface-variant/60 hover:text-primary transition-all mb-8 group">
+        <span class="material-symbols-outlined text-sm group-hover:-translate-x-1 transition-transform">arrow_back</span>
+        <span class="text-[10px] font-headline font-bold uppercase tracking-[0.2em]">Back to Hub</span>
+      </a>
+
       <div class="absolute top-0 right-0 w-[400px] h-[400px] bg-primary/5 blur-[120px] rounded-full pointer-events-none"></div>
       
       <!-- Header -->
-      <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6 mb-12">
-        <div>
-          <div class="flex items-center gap-4 text-primary text-xs font-headline tracking-[0.2em] uppercase mb-3">
+      <div class="flex flex-col lg:flex-row justify-between items-start lg:items-end gap-6 mb-6 lg:mb-12">
+        <div class="w-full lg:w-auto">
+          <div class="flex items-center justify-between lg:justify-start gap-4 text-primary text-[10px] lg:text-xs font-headline tracking-[0.2em] uppercase mb-4">
             <div class="flex items-center gap-2">
               <span class="material-symbols-outlined text-sm">satellite_alt</span>
-              <span>Event Command Center</span>
+              <span>Command Center</span>
             </div>
             <div id="socket-pulse-wrap" class="flex items-center gap-2 pl-4 border-l border-white/10">
                <div id="socket-pulse-dot" class="w-1.5 h-1.5 rounded-full bg-white/20"></div>
-               <span id="socket-pulse-text" class="text-[8px] font-bold text-on-surface-variant/60">Pulse Syncing...</span>
+               <span id="socket-pulse-text" class="text-[8px] font-bold text-on-surface-variant/60 uppercase">Syncing...</span>
             </div>
           </div>
-          <div class="flex items-center gap-4">
-            <h1 class="text-4xl md:text-5xl font-headline font-bold tracking-tighter text-white">${user.team_name}</h1>
+          <div class="flex flex-col md:flex-row md:items-center gap-4">
+            <h1 class="text-2xl md:text-4xl font-headline font-bold tracking-tighter text-white">${user.team_name}</h1>
             ${(freshTeam?.tab_switch_count > 0) ? `
-              <div class="hidden md:flex bg-error/20 text-error px-4 py-1.5 rounded-full items-center gap-2 border border-error/30 animate-pulse mt-1">
+              <div class="flex bg-error/20 text-error px-4 py-1.5 rounded-full items-center gap-2 border border-error/30 animate-pulse w-max">
                 <span class="material-symbols-outlined text-sm">warning</span>
-                <span class="text-[10px] font-bold tracking-widest uppercase font-headline">Anti-Cheat Flags: ${freshTeam.tab_switch_count}</span>
+                <span class="text-[10px] font-bold tracking-widest uppercase font-headline">Flags: ${freshTeam.tab_switch_count}</span>
               </div>
             ` : ''}
           </div>
-          <div class="flex flex-col md:flex-row md:items-center gap-2 md:gap-0 mt-2">
-            <p class="text-on-surface-variant">ID: <span class="text-primary font-mono">${user.team_id}</span> • ${event?.name || 'No active event'}</p>
-            ${(freshTeam?.tab_switch_count > 0) ? `
-              <div class="md:hidden flex bg-error/20 text-error px-4 py-1.5 rounded-full items-center gap-2 border border-error/30 animate-pulse w-max">
-                <span class="material-symbols-outlined text-sm">warning</span>
-                <span class="text-[10px] font-bold tracking-widest uppercase font-headline">Anti-Cheat Flags: ${freshTeam.tab_switch_count}</span>
-              </div>
-            ` : ''}
+          <div class="flex items-center mt-3">
+            <p class="text-xs lg:text-sm text-on-surface-variant">ID: <span class="text-primary font-mono">${user.team_id}</span> • ${event?.name || 'No active event'}</p>
           </div>
         </div>
-        <div class="flex items-center gap-4">
-          <div class="bg-surface-container-low p-4 rounded-2xl text-center">
-            <span class="text-xs font-headline font-bold tracking-widest text-on-surface-variant uppercase block">Total Score</span>
+        <div class="w-full lg:w-auto flex justify-end">
+          <div class="bg-surface-container-low p-4 rounded-2xl text-center w-full lg:w-32 border border-white/5 shadow-xl glass-panel">
+            <span class="text-[10px] font-headline font-bold tracking-widest text-on-surface-variant uppercase block mb-1">Total Score</span>
             <span class="text-3xl font-headline font-black text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">${totalScore}</span>
           </div>
         </div>
@@ -97,47 +98,47 @@ export async function renderDashboard(container, params = {}, search = {}, mockU
 
       <!-- Current Round Card -->
       ${currentRound ? `
-        <div class="glass-panel p-8 rounded-3xl mb-8 glow-accent relative overflow-hidden">
-          <div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-[80px] rounded-full pointer-events-none"></div>
-          <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
-            <div>
-              <div class="flex items-center gap-2 text-secondary text-xs font-headline tracking-[0.2em] uppercase mb-2">
-                <span class="w-2 h-2 bg-secondary rounded-full animate-pulse"></span>
+        <div class="glass-panel p-5 rounded-2xl mb-6 lg:mb-8 glow-accent relative overflow-hidden group">
+          <div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-[80px] rounded-full pointer-events-none group-hover:bg-primary/10 transition-colors"></div>
+          <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 lg:gap-8 relative z-10">
+            <div class="w-full">
+              <div class="flex items-center gap-2 text-secondary text-[10px] lg:text-xs font-headline tracking-[0.2em] uppercase mb-2">
+                <span class="w-1.5 h-1.5 bg-secondary rounded-full animate-pulse"></span>
                 <span>Active Round ${currentRound.round_number}</span>
               </div>
-              <h2 class="text-3xl font-headline font-bold text-white">${currentRound.title}</h2>
-              <p class="text-on-surface-variant mt-1 capitalize">${currentRound.round_type} Round • ${currentRound.duration_minutes} minutes</p>
+              <h2 class="text-2xl lg:text-3xl font-headline font-bold text-white tracking-tight">${currentRound.title}</h2>
+              <p class="text-xs lg:text-sm text-on-surface-variant mt-1 capitalize">${currentRound.round_type} Round • ${currentRound.duration_minutes} minutes</p>
             </div>
-            <div class="flex items-center gap-6">
-              <div class="text-right">
-                <span class="text-[10px] font-headline tracking-widest text-on-surface-variant uppercase">Time Remaining</span>
-                <div id="round-timer" class="text-4xl font-headline font-bold tabular-nums tracking-tight ${currentRound.status === 'paused' ? 'text-warning' : 'text-secondary'}">${currentRound.status === 'paused' ? 'PAUSED' : Timer.formatTime(currentRound.duration_minutes * 60 * 1000)}</div>
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 lg:gap-8 w-full lg:w-auto">
+              <div class="text-left lg:text-right bg-white/5 lg:bg-transparent p-4 lg:p-0 rounded-2xl border border-white/5 lg:border-none">
+                <span class="text-[9px] font-headline tracking-[0.2em] text-on-surface-variant uppercase block mb-1">Time Remaining</span>
+                <div id="round-timer" class="text-3xl lg:text-4xl font-headline font-black tabular-nums tracking-tighter ${currentRound.status === 'paused' ? 'text-warning' : 'text-secondary'}">${currentRound.status === 'paused' ? 'PAUSED' : Timer.formatTime(currentRound.duration_minutes * 60 * 1000)}</div>
               </div>
-              <button id="enter-round" class="px-8 py-4 rounded-xl kinetic-gradient text-on-primary-fixed font-headline font-bold text-lg flex items-center gap-3 transition-transform shadow-[0_10px_30px_rgba(167,165,255,0.3)] disabled:opacity-50 disabled:grayscale disabled:scale-100 hover:scale-105 active:scale-95" ${currentRound.status === 'paused' ? 'disabled' : ''}>
+              <button id="enter-round" class="w-full lg:w-auto px-8 py-4 rounded-2xl kinetic-gradient text-on-primary-fixed font-headline font-black text-sm lg:text-lg flex items-center justify-center gap-3 transition-all hover:scale-[1.03] active:scale-[0.97] shadow-xl disabled:opacity-30 disabled:grayscale disabled:scale-100" ${currentRound.status === 'paused' ? 'disabled' : ''}>
                 <span>${currentRound.status === 'paused' ? 'LOCKED' : 'ENTER ROUND'}</span>
-                <span class="material-symbols-outlined">${currentRound.status === 'paused' ? 'lock' : 'arrow_forward'}</span>
+                <span class="material-symbols-outlined text-lg lg:text-2xl">${currentRound.status === 'paused' ? 'lock' : 'arrow_forward'}</span>
               </button>
             </div>
           </div>
         </div>
       ` : `
-        <div class="bg-surface-container-low p-12 rounded-3xl mb-8 text-center">
+        <div class="bg-surface-container-low/50 backdrop-blur-sm p-8 lg:p-12 rounded-3xl mb-8 text-center border border-white/5">
           ${!event ? `
-            <span class="material-symbols-outlined text-5xl text-error/40 mb-4 block">error_outline</span>
-            <h2 class="text-2xl font-headline font-bold text-white mb-2">No Event Found</h2>
-            <p class="text-on-surface-variant">Your team is not linked to an active event. Contact the administrator.</p>
+            <span class="material-symbols-outlined text-4xl lg:text-5xl text-error/40 mb-4 block">error_outline</span>
+            <h2 class="text-xl lg:text-2xl font-headline font-bold text-white mb-2 tracking-tight">System Link Missing</h2>
+            <p class="text-xs lg:text-sm text-on-surface-variant leading-relaxed">No active event synchronization detected. Contact protocol administrator.</p>
           ` : rounds.every(r => r.status === 'completed') && rounds.length > 0 ? `
-            <span class="material-symbols-outlined text-5xl text-primary/40 mb-4 block">check_circle</span>
-            <h2 class="text-2xl font-headline font-bold text-white mb-2">All Rounds Complete</h2>
-            <p class="text-on-surface-variant">All ${rounds.length} rounds have been completed. Check the <a href="#/leaderboard" class="text-primary hover:underline">Leaderboard</a> for final standings.</p>
+            <span class="material-symbols-outlined text-4xl lg:text-5xl text-primary/40 mb-4 block">check_circle</span>
+            <h2 class="text-xl lg:text-2xl font-headline font-bold text-white mb-2 tracking-tight">Mission Accomplished</h2>
+            <p class="text-xs lg:text-sm text-on-surface-variant leading-relaxed">All ${rounds.length} operational phases complete. Monitor the <a href="#/leaderboard" class="text-primary hover:underline font-bold">Project Leaderboard</a> for final metrics.</p>
           ` : rounds.length === 0 ? `
-            <span class="material-symbols-outlined text-5xl text-on-surface-variant/40 mb-4 block">event_upcoming</span>
-            <h2 class="text-2xl font-headline font-bold text-white mb-2">Event Not Started</h2>
-            <p class="text-on-surface-variant">No rounds have been configured yet. The event organizer will set up rounds shortly.</p>
+            <span class="material-symbols-outlined text-4xl lg:text-5xl text-on-surface-variant/40 mb-4 block">event_upcoming</span>
+            <h2 class="text-xl lg:text-2xl font-headline font-bold text-white mb-2 tracking-tight">Initialization Pending</h2>
+            <p class="text-xs lg:text-sm text-on-surface-variant leading-relaxed">Event structure loading. Awaiting round deployment from command center.</p>
           ` : `
-            <span class="material-symbols-outlined text-5xl text-on-surface-variant/40 mb-4 block">hourglass_empty</span>
-            <h2 class="text-2xl font-headline font-bold text-white mb-2">Waiting for Next Round</h2>
-            <p class="text-on-surface-variant">The admin will start the next round shortly. Stay on this page — it will update automatically.</p>
+            <span class="material-symbols-outlined text-4xl lg:text-5xl text-on-surface-variant/40 mb-4 block">hourglass_empty</span>
+            <h2 class="text-xl lg:text-2xl font-headline font-bold text-white mb-2 tracking-tight">Awaiting Sync...</h2>
+            <p class="text-xs lg:text-sm text-on-surface-variant leading-relaxed">Protocol activation pending. The mission will resume automatically upon sync.</p>
           `}
         </div>
       `}
@@ -149,7 +150,7 @@ export async function renderDashboard(container, params = {}, search = {}, mockU
           const statusColor = r.status === 'completed' ? 'text-secondary' : r.status === 'active' ? 'text-primary' : 'text-on-surface-variant/40';
           const statusIcon = r.status === 'completed' ? 'check_circle' : r.status === 'active' ? 'radio_button_checked' : 'radio_button_unchecked';
           return `
-            <div class="bg-surface-container-low rounded-2xl p-6 hover:bg-surface-container transition-colors">
+            <div class="bg-surface-container-low rounded-2xl p-5 hover:bg-surface-container transition-colors">
               <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-3">
                   <span class="material-symbols-outlined text-2xl ${statusColor}">${roundTypeIcons[r.round_type] || 'extension'}</span>

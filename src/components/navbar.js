@@ -3,7 +3,7 @@ import { logout } from '../services/auth.js';
 
 export function renderNavbar(options = {}) {
   const user = getState('user');
-  const { activeLink = '', hideNavigation = false } = options;
+  const { activeLink = '', hideNavigation = false, hideMobileMenu = false } = options;
 
   const navLinks = !hideNavigation ? [
     { id: 'events', label: 'Events', href: '#/events', icon: 'event' },
@@ -17,20 +17,38 @@ export function renderNavbar(options = {}) {
   ] : [];
 
   return `
-    <nav class="glow-nav sticky top-0 z-50 shadow-[0_0_30px_rgba(167,165,255,0.08)]">
-      <div class="flex justify-between items-center w-full px-6 py-3 mx-auto">
+    <nav class="glow-nav sticky top-0 z-50 shadow-[0_0_30px_rgba(167,165,255,0.08)] backdrop-blur-md border-b border-white/5">
+      <div class="flex flex-col lg:flex-row justify-between items-center w-full px-4 lg:px-6 py-2 lg:py-3 mx-auto gap-2 lg:gap-0">
+        
+        <div class="flex items-center justify-between w-full lg:w-auto">
+          <!-- Logo -->
+          <div class="flex-shrink-0">
+            ${hideNavigation
+              ? `<span class="text-lg lg:text-xl font-bold tracking-tighter text-white font-headline cursor-default">HostiBuzz</span>`
+              : `<a href="#/" class="text-lg lg:text-xl font-bold tracking-tighter text-white font-headline hover:text-primary transition-colors">HostiBuzz</a>`
+            }
+          </div>
 
-        <!-- Logo -->
-        <div class="flex-shrink-0 mr-6">
-          ${hideNavigation
-            ? `<span class="text-xl font-bold tracking-tighter text-white font-headline cursor-default">HostiBuzz</span>`
-            : `<a href="#/" class="text-xl font-bold tracking-tighter text-white font-headline hover:text-primary transition-colors">HostiBuzz</a>`
-          }
+          <!-- Mobile Actions (Guest Mode) -->
+          ${!user && !hideNavigation ? `
+            <div class="lg:hidden flex items-center gap-2">
+              <a href="#/login" class="text-[9px] font-black uppercase tracking-widest text-on-surface-variant/60 hover:text-white transition-colors">Login</a>
+              <div class="w-1 h-1 bg-white/10 rounded-full"></div>
+              <a href="#/events" class="text-[9px] font-black uppercase tracking-widest text-primary">Register</a>
+            </div>
+          ` : ''}
+          
+          <!-- Mobile Logout (Admin/Team) -->
+          ${user && !hideNavigation ? `
+            <button id="nav-logout-mobile" class="lg:hidden w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-on-surface-variant/60 hover:text-error transition-colors">
+              <span class="material-symbols-outlined text-sm">logout</span>
+            </button>
+          ` : ''}
         </div>
 
-        <!-- Glowing Tab Nav Links -->
+        <!-- Glowing Tab Nav Links (DESKTOP) -->
         ${!hideNavigation && navLinks.length > 0 ? `
-          <div class="glow-nav-inner hidden md:block flex-1 max-w-[420px]" id="glow-nav-inner">
+          <div class="glow-nav-inner hidden lg:block flex-1 max-w-[420px]" id="glow-nav-inner">
             <ul class="glow-nav-list">
               ${navLinks.map(link => `
                 <li class="glow-nav-item${activeLink === link.id ? ' active' : ''}" data-href="${link.href}">
@@ -44,38 +62,51 @@ export function renderNavbar(options = {}) {
           </div>
         ` : ''}
 
-        <!-- Right Side Actions -->
-        <div class="flex items-center gap-3 ml-auto">
-          ${user ? `
-            <div class="hidden lg:flex items-center gap-2 bg-surface-container-high/60 px-3 py-1.5 rounded-full">
-              <span class="w-2 h-2 bg-secondary rounded-full animate-pulse"></span>
-              <span class="text-xs font-headline font-medium text-on-surface-variant">${user.role === 'admin' ? user.username : user.team_id}</span>
+        <!-- TACTICAL MOBILE NAV (The "Stylish" Replacer) -->
+        ${!hideNavigation && navLinks.length > 0 ? `
+          <div class="lg:hidden w-full overflow-x-auto no-scrollbar pb-1">
+            <div class="flex items-center justify-between gap-1 p-1 bg-white/5 rounded-xl border border-white/5">
+              ${navLinks.map(link => `
+                <a href="${link.href}" class="flex-1 flex flex-col items-center gap-1 py-2 px-1 rounded-lg transition-all ${activeLink === link.id ? 'bg-primary/20 text-primary border border-primary/20 shadow-[0_0_15px_rgba(167,165,255,0.15)]' : 'text-on-surface-variant/40 hover:text-white'}">
+                  <span class="material-symbols-outlined text-[18px]">${link.icon}</span>
+                  <span class="text-[7px] font-headline font-black uppercase tracking-[0.2em]">${link.label}</span>
+                </a>
+              `).join('')}
             </div>
-            ${user.role === 'admin' ? `<a href="#/admin" class="px-4 py-2 rounded-lg bg-gradient-to-r from-primary to-secondary text-black font-headline font-bold text-sm hover:scale-105 active:scale-95 transition-transform">Admin Panel</a>` : ''}
-            <button id="nav-logout" class="px-4 py-2 rounded-lg bg-surface-container-high text-on-surface-variant font-headline text-sm hover:bg-surface-container-highest transition-colors">Sign Out</button>
+          </div>
+        ` : ''}
+
+        <!-- Right Side Actions (DESKTOP ONLY) -->
+        <div class="hidden lg:flex items-center gap-3 ml-auto">
+          ${user ? `
+            <div class="flex items-center gap-2 bg-surface-container-high/60 px-3 py-1.5 rounded-full border border-white/5">
+              <span class="w-1.5 h-1.5 bg-secondary rounded-full animate-pulse"></span>
+              <span class="text-[10px] font-headline font-bold text-on-surface-variant uppercase tracking-widest truncate max-w-[80px]">${user.role === 'admin' ? user.username : user.team_id}</span>
+            </div>
+            ${user.role === 'admin' ? `<a href="#/admin" class="inline-flex px-4 py-2 rounded-lg bg-gradient-to-r from-primary to-secondary text-black font-headline font-black text-[10px] uppercase tracking-widest hover:scale-105 active:scale-95 transition-transform shadow-lg">Admin</a>` : ''}
+            <button id="nav-logout" class="px-4 py-2 rounded-lg bg-surface-container-high/80 text-on-surface-variant font-headline font-bold text-[10px] uppercase tracking-widest hover:bg-surface-container-highest hover:text-white transition-all border border-white/5 active:scale-95">Sign Out</button>
           ` : `
             <a href="#/login" class="px-4 py-2 rounded-lg bg-surface-container-high text-on-surface-variant font-headline text-sm hover:text-white transition-colors hidden sm:inline-flex">Team Login</a>
             <button class="creepy-btn" id="nav-register-btn" onclick="location.hash='#/events'">
-              <!-- Eyes on black back layer -->
               <span class="creepy-btn__eyes" id="nav-creepy-eyes">
                 <span class="creepy-btn__eye"><span class="creepy-btn__pupil" id="nav-pupil-1"></span></span>
                 <span class="creepy-btn__eye"><span class="creepy-btn__pupil" id="nav-pupil-2"></span></span>
               </span>
-              <!-- Cover slides UP on hover to reveal eyes -->
               <span class="creepy-btn__cover">Register</span>
             </button>
           `}
         </div>
-
       </div>
     </nav>
   `;
 }
 
 export function bindNavbarEvents() {
-  // Logout
+  // Logout (Desktop & Mobile)
   const logoutBtn = document.getElementById('nav-logout');
+  const logoutBtnMobile = document.getElementById('nav-logout-mobile');
   if (logoutBtn) logoutBtn.addEventListener('click', logout);
+  if (logoutBtnMobile) logoutBtnMobile.addEventListener('click', logout);
 
   // Glowing Tab Navigation
   const glowNavInner = document.getElementById('glow-nav-inner');

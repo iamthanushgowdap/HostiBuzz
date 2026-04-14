@@ -84,10 +84,53 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
   }
 
   container.innerHTML = `
-    ${renderNavbar({ activeLink: 'dashboard' })}
-    <div class="flex min-h-[calc(100vh-76px)]">
-      <!-- Sidebar -->
-      <aside class="hidden lg:flex flex-col w-72 bg-surface-container-low/80 backdrop-blur-lg border-r border-white/5">
+    ${renderNavbar({ activeLink: 'dashboard', hideMobileMenu: true })}
+    <div class="flex flex-col lg:flex-row min-h-[calc(100vh-76px)]">
+      <!-- Mobile Admin Header -->
+      <div class="lg:hidden flex items-center justify-between px-4 py-2 bg-surface-container-high/90 backdrop-blur-md border-b border-white/5 sticky top-[64px] z-30">
+        <div class="flex items-center gap-3">
+          <a href="#/" class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-on-surface-variant/40 hover:text-primary transition-colors">
+            <span class="material-symbols-outlined text-sm">arrow_back</span>
+          </a>
+          <button id="admin-sidebar-toggle" class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-primary group active:scale-95 transition-all">
+            <span class="material-symbols-outlined">menu_open</span>
+          </button>
+          <span class="font-headline font-bold text-sm text-white tracking-widest uppercase">Mission Control</span>
+        </div>
+        
+        <!-- Quick Pulse Stats (Mobile) -->
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
+          <span class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
+          <span class="text-[9px] font-bold text-secondary uppercase tracking-widest">Live</span>
+        </div>
+      </div>
+
+      <!-- Sidebar (Adaptive Drawer) -->
+      <aside id="admin-sidebar" class="fixed lg:relative inset-y-0 left-0 z-50 w-72 bg-surface-container-low/95 backdrop-blur-xl border-r border-white/5 translate-x-[-100%] lg:translate-x-0 transition-transform duration-300 ease-in-out lg:flex flex-col h-screen overflow-y-auto">
+        <!-- Close Button (Mobile Only) -->
+        <button id="close-admin-sidebar" class="lg:hidden absolute top-4 right-4 w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-on-surface-variant z-10">
+          <span class="material-symbols-outlined text-sm">close</span>
+        </button>
+
+        <!-- Platform Sync (Quick Links for Mobile) -->
+        <div class="lg:hidden px-4 py-4 bg-secondary/5 border-b border-white/5">
+          <p class="text-[8px] font-black text-secondary/60 uppercase tracking-[0.3em] mb-3 px-2">Platform Sync</p>
+          <div class="grid grid-cols-2 gap-2">
+            <a href="#/" class="flex items-center gap-2 py-2 px-3 bg-white/5 rounded-lg text-[10px] text-white font-headline border border-white/5">
+              <span class="material-symbols-outlined text-xs">home</span> Home
+            </a>
+            <a href="#/events" class="flex items-center gap-2 py-2 px-3 bg-white/5 rounded-lg text-[10px] text-white font-headline border border-white/5">
+              <span class="material-symbols-outlined text-xs">event</span> Events
+            </a>
+            <a href="#/leaderboard" class="flex items-center gap-2 py-2 px-3 bg-white/5 rounded-lg text-[10px] text-white font-headline border border-white/5">
+              <span class="material-symbols-outlined text-xs">leaderboard</span> Ranks
+            </a>
+            <button id="sidebar-logout" class="flex items-center gap-2 py-2 px-3 bg-error/10 rounded-lg text-[10px] text-error font-headline border border-error/20">
+              <span class="material-symbols-outlined text-xs">logout</span> Exit
+            </button>
+          </div>
+        </div>
+
         <div class="p-6 flex items-start justify-between">
           <div>
             <h3 class="text-lg font-black text-white font-headline leading-tight">Control Panel</h3>
@@ -173,23 +216,32 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
             <span class="material-symbols-outlined">how_to_reg</span>
             <span class="font-headline font-medium text-sm">Registration Page</span>
           </button>
+          
+          <!-- Sacrificial Spacer to push Registration Page up -->
+          <button data-tab="blank" class="admin-tab w-full flex items-center gap-3 text-slate-500/0 py-3 px-4 rounded-lg text-left pointer-events-none opacity-0">
+            <span class="material-symbols-outlined">blank</span>
+            <span class="font-headline font-medium text-sm">Blank</span>
+          </button>
         </nav>
       </aside>
 
+      <!-- Sidebar Backdrop (Mobile Only) -->
+      <div id="admin-sidebar-backdrop" class="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden transition-opacity duration-300"></div>
+
       <!-- Main Content -->
-      <main class="flex-1 p-6 lg:p-10 overflow-y-auto relative">
+      <main class="flex-1 p-4 lg:p-10 overflow-y-auto relative">
         <div class="absolute top-0 right-0 w-[400px] h-[400px] bg-primary/5 blur-[120px] rounded-full pointer-events-none"></div>
         <div id="admin-content" class="max-w-6xl mx-auto relative z-10 w-full"></div>
         
         <!-- Global Notification Sender -->
-        <div class="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-3 pointer-events-none">
-          <div id="broadcast-popup" class="hidden bg-surface-container-high/90 backdrop-blur-md p-4 rounded-2xl border border-white/10 w-72 shadow-2xl transition-all pointer-events-auto slide-in-bottom">
-            <h4 class="text-xs font-headline font-bold text-primary uppercase tracking-widest mb-3 flex items-center gap-2"><span class="material-symbols-outlined text-sm">wifi_tethering</span> Global Broadcast</h4>
-            <textarea id="broadcast-msg" class="w-full h-20 bg-surface-container-lowest text-white text-sm border-none rounded-xl p-3 resize-none focus:ring-1 focus:ring-primary mb-2 placeholder:text-slate-500" placeholder="Type a message to push to all teams instantly..."></textarea>
-            <button id="send-broadcast" class="w-full py-2 bg-primary text-on-primary-fixed rounded-xl font-headline font-bold text-xs uppercase tracking-widest hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2">Send Now</button>
+        <div class="fixed bottom-4 right-4 z-[60] flex flex-col items-end gap-3 pointer-events-none">
+          <div id="broadcast-popup" class="hidden bg-surface-container-high border border-white/10 w-[280px] p-4 rounded-2xl shadow-2xl transition-all pointer-events-auto shadow-primary/20">
+            <h4 class="text-[10px] font-headline font-bold text-primary uppercase tracking-widest mb-3 flex items-center gap-2"><span class="material-symbols-outlined text-sm">wifi_tethering</span> Mission Broadcast</h4>
+            <textarea id="broadcast-msg" class="w-full h-24 bg-surface-container-lowest text-white text-xs border-none rounded-xl p-3 resize-none focus:ring-1 focus:ring-primary mb-2 placeholder:text-slate-500" placeholder="Push a tactical update to all team terminals..."></textarea>
+            <button id="send-broadcast" class="w-full py-2.5 bg-primary text-on-primary-fixed rounded-xl font-headline font-black text-[10px] uppercase tracking-widest hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2">Execute Push</button>
           </div>
-          <button id="broadcast-toggle" class="w-14 h-14 bg-gradient-to-r from-primary to-secondary rounded-full shadow-[0_10px_30px_rgba(167,165,255,0.3)] flex items-center justify-center text-on-primary-fixed hover:scale-110 active:scale-95 transition-all pointer-events-auto shadow-primary/20">
-            <span class="material-symbols-outlined text-2xl">campaign</span>
+          <button id="broadcast-toggle" class="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-full shadow-lg flex items-center justify-center text-on-primary-fixed hover:scale-110 active:scale-95 transition-all pointer-events-auto border border-white/10">
+            <span class="material-symbols-outlined text-xl">campaign</span>
           </button>
         </div>
       </main>
@@ -239,9 +291,6 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
 
   bindNavbarEvents();
 
-  // ========================================
-  // PREVIEW ENGINE
-  // ========================================
   // ========================================
   // PREVIEW ENGINE
   // ========================================
@@ -349,6 +398,49 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
   // Subscribe to status changes
   if (socketStatusUnsubscribe) socketStatusUnsubscribe();
   socketStatusUnsubscribe = socketService.onStatusChange(updatePulseUI);
+
+  // ========================================
+  // MOBILE SIDEBAR TOGGLE
+  // ========================================
+  const sidebarToggle = document.getElementById('admin-sidebar-toggle');
+  const adminSidebar = document.getElementById('admin-sidebar');
+  const adminBackdrop = document.getElementById('admin-sidebar-backdrop');
+  const closeSidebarBtn = document.getElementById('close-admin-sidebar');
+
+  if (sidebarToggle && adminSidebar && adminBackdrop) {
+    const openSidebar = () => {
+      adminSidebar.classList.remove('translate-x-[-100%]');
+      adminBackdrop.classList.remove('hidden');
+      setTimeout(() => adminBackdrop.classList.add('opacity-100'), 10);
+      document.body.style.overflow = 'hidden';
+    };
+
+    const closeSidebar = () => {
+      adminSidebar.classList.add('translate-x-[-100%]');
+      adminBackdrop.classList.remove('opacity-100');
+      setTimeout(() => {
+        adminBackdrop.classList.add('hidden');
+        document.body.style.overflow = '';
+      }, 300);
+    };
+
+    sidebarToggle.addEventListener('click', openSidebar);
+    adminBackdrop.addEventListener('click', closeSidebar);
+    if (closeSidebarBtn) closeSidebarBtn.addEventListener('click', closeSidebar);
+
+    // Platform Sync: Logout
+    document.getElementById('sidebar-logout')?.addEventListener('click', async () => {
+      const { logout } = await import('../services/auth.js');
+      logout();
+    });
+
+    // Auto-close when switching events/tabs on mobile
+    adminSidebar.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        if (window.innerWidth < 1024) closeSidebar();
+      });
+    });
+  }
 
   // ========================================
   // ROUND AUDITION

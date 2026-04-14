@@ -22,19 +22,19 @@ export async function renderElimination(container) {
         <div class="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/5 rounded-full blur-[120px]"></div>
         <div class="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-error-dim/5 rounded-full blur-[150px]"></div>
       </div>
-      <div class="max-w-4xl w-full relative z-10">
-        <div class="text-center space-y-12">
+      <div class="max-w-4xl w-full relative z-10 px-6">
+        <div class="text-center space-y-8 lg:space-y-12">
           <div class="flex items-center justify-center space-x-2 mb-8">
             <span class="text-white font-headline font-black text-xl tracking-tighter opacity-40">HostiBuzz</span>
           </div>
           <div class="space-y-4">
-            <p class="text-on-surface-variant font-headline tracking-[0.3em] text-sm font-medium">TERMINATION NOTICE</p>
-            <h1 class="text-7xl md:text-9xl font-headline font-bold tracking-tighter text-white/90">ELIMINATED</h1>
+            <p class="text-on-surface-variant font-headline tracking-[0.3em] text-[10px] lg:text-sm font-medium">TERMINATION NOTICE</p>
+            <h1 class="text-5xl md:text-9xl font-headline font-bold tracking-tighter text-white/90">ELIMINATED</h1>
             <div class="w-32 h-1 bg-gradient-to-r from-transparent via-error-dim to-transparent mx-auto mt-6"></div>
           </div>
-          <div class="max-w-2xl mx-auto glass-panel p-8 md:p-12 rounded-xl shadow-2xl space-y-6">
-            <h2 class="text-2xl md:text-3xl font-headline font-semibold text-on-surface">${user.team_name}, your journey ends here.</h2>
-            <p class="text-on-surface-variant leading-relaxed text-lg max-w-lg mx-auto">
+          <div class="max-w-2xl mx-auto glass-panel p-6 md:p-12 rounded-2xl shadow-2xl space-y-4 lg:space-y-6">
+            <h2 class="text-xl md:text-3xl font-headline font-semibold text-on-surface">${user.team_name}, your journey ends here.</h2>
+            <p class="text-on-surface-variant leading-relaxed text-sm lg:text-lg max-w-lg mx-auto">
               While your active participation has concluded, your contributions remain part of the event's history. Thank you for pushing the boundaries.
             </p>
           </div>
