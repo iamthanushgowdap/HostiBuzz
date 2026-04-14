@@ -24,17 +24,17 @@ export function renderNavbar(options = {}) {
           <!-- Logo -->
           <div class="flex-shrink-0">
             ${hideNavigation
-              ? `<span class="text-lg lg:text-xl font-bold tracking-tighter text-white font-headline cursor-default">HostiBuzz</span>`
-              : `<a href="#/" class="text-lg lg:text-xl font-bold tracking-tighter text-white font-headline hover:text-primary transition-colors">HostiBuzz</a>`
+              ? `<span class="text-xl lg:text-xl font-bold tracking-tighter text-white font-headline cursor-default">HostiBuzz</span>`
+              : `<a href="#/" class="text-xl lg:text-xl font-bold tracking-tighter text-white font-headline hover:text-primary transition-colors">HostiBuzz</a>`
             }
           </div>
 
           <!-- Mobile Actions (Guest Mode) -->
           ${!user && !hideNavigation ? `
-            <div class="lg:hidden flex items-center gap-2">
-              <a href="#/login" class="text-[9px] font-black uppercase tracking-widest text-on-surface-variant/60 hover:text-white transition-colors">Login</a>
+            <div class="lg:hidden flex items-center gap-3">
+              <a href="#/login" class="text-[11px] font-black uppercase tracking-widest text-on-surface-variant/60 hover:text-white transition-colors">Login</a>
               <div class="w-1 h-1 bg-white/10 rounded-full"></div>
-              <a href="#/events" class="text-[9px] font-black uppercase tracking-widest text-primary">Register</a>
+              <a href="#/events" class="text-[11px] font-black uppercase tracking-widest text-primary">Register</a>
             </div>
           ` : ''}
           
