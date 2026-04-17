@@ -900,7 +900,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
             <span class="w-3 h-3 rounded-full ${event.status === 'active' ? 'bg-secondary animate-pulse' : event.status === 'completed' ? 'bg-primary' : 'bg-outline'}"></span>
             <span class="text-xs font-bold tracking-widest text-on-surface-variant uppercase">${event.status}</span>
           </div>
-          <h1 class="text-4xl md:text-5xl font-headline font-bold text-white tracking-tighter">${event.name}</h1>
+          <h1 class="text-4xl md:text-5xl font-headline font-bold text-on-surface tracking-tighter">${event.name}</h1>
           <p class="text-on-surface-variant mt-2">${event.organizer || ''} ${event.event_date ? '• ' + new Date(event.event_date).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : ''}</p>
           ${event.description ? `<p class="text-on-surface-variant/60 text-sm mt-1 max-w-2xl">${event.description}</p>` : ''}
         </div>
@@ -911,7 +911,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
         <div class="bg-surface-container-low p-5 rounded-2xl relative overflow-hidden group">
           <div class="relative z-10">
             <span class="text-[10px] font-headline tracking-widest text-on-surface-variant uppercase">Teams / Occupancy</span>
-            <div class="text-3xl font-headline font-black text-white mt-1">
+            <div class="text-3xl font-headline font-black text-on-surface mt-1">
               ${totalTeams}${maxTeams > 0 ? `<span class="text-lg text-on-surface-variant/40"> / ${maxTeams}</span>` : ''}
             </div>
             <span class="text-[10px] text-secondary">${activeTeams} active</span>
@@ -924,12 +924,12 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
         </div>
         <div class="bg-surface-container-low p-5 rounded-2xl">
           <span class="text-[10px] font-headline tracking-widest text-on-surface-variant uppercase">Rounds</span>
-          <div class="text-3xl font-headline font-black text-white mt-1">${(rounds || []).length}</div>
+          <div class="text-3xl font-headline font-black text-on-surface mt-1">${(rounds || []).length}</div>
           <span class="text-[10px] text-primary">${completedRounds} done</span>
         </div>
         <div class="bg-surface-container-low p-5 rounded-2xl">
           <span class="text-[10px] font-headline tracking-widest text-on-surface-variant uppercase">Active Round</span>
-          <div class="text-3xl font-headline font-black text-white mt-1">${activeRounds || '—'}</div>
+          <div class="text-3xl font-headline font-black text-on-surface mt-1">${activeRounds || '—'}</div>
         </div>
         <div class="bg-surface-container-low p-5 rounded-2xl">
           <span class="text-[10px] font-headline tracking-widest text-on-surface-variant uppercase">Registration</span>
@@ -940,100 +940,57 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
       </div>
 
       <!-- General Information & Registration Limits -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <div class="glass-panel p-6 rounded-2xl space-y-4">
-          <h3 class="font-headline font-bold text-white text-lg flex items-center gap-2">
-            <span class="material-symbols-outlined text-primary">edit_note</span>
-            General Information
-          </h3>
-          <div class="space-y-3">
-             <div class="space-y-1">
-              <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Event Name</label>
-              <input id="edit-event-name" value="${event.name || ''}" class="w-full bg-surface-container-lowest border-none rounded-xl py-2 px-3 text-white focus:ring-1 focus:ring-primary/40 text-sm" />
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div class="space-y-6">
+            <div class="space-y-2">
+              <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant ml-1">Event Tactical Name</label>
+              <input id="event-name" class="w-full bg-secondary/5 border border-primary/20 rounded-2xl py-4 px-5 text-on-surface font-headline placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 transition-all" value="${event.name || ''}" />
             </div>
-            <div class="grid grid-cols-2 gap-3">
-              <div class="space-y-1">
-                <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Organizer</label>
-                <input id="edit-event-organizer" value="${event.organizer || ''}" class="w-full bg-surface-container-lowest border-none rounded-xl py-2 px-3 text-white focus:ring-1 focus:ring-primary/40 text-sm" />
+            <div class="space-y-2">
+              <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant ml-1">Organizer / Command</label>
+              <input id="event-organizer" class="w-full bg-secondary/5 border border-primary/20 rounded-2xl py-4 px-5 text-on-surface font-headline placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 transition-all" value="${event.organizer || ''}" />
+            </div>
+            <div class="space-y-2">
+              <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant ml-1">Max Team Capacity</label>
+              <input id="event-max-teams" type="number" class="w-full bg-secondary/5 border border-primary/20 rounded-2xl py-4 px-5 text-on-surface font-headline placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 transition-all" value="${event.max_teams || 10}" />
+            </div>
+            <div class="space-y-2">
+              <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant ml-1">Event Slug (URL)</label>
+              <input id="event-slug" class="w-full bg-secondary/5 border border-primary/20 rounded-2xl py-4 px-5 text-on-surface font-headline placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 transition-all" value="${event.slug || ''}" />
+            </div>
+          </div>
+
+          <div class="space-y-6">
+             <div class="space-y-2">
+              <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant ml-1">Tactical Round Selection</label>
+              <div class="p-5 rounded-2xl bg-secondary/5 border border-primary/20 space-y-3">
+                 <div class="flex items-center justify-between">
+                   <span class="text-xs font-bold text-on-surface uppercase">Leaderboard Visibility</span>
+                   <input type="checkbox" id="show-leaderboard" class="w-5 h-5 rounded border-primary/20 text-primary focus:ring-primary/20" ${event.show_leaderboard !== false ? 'checked' : ''} />
+                 </div>
+                 <div class="flex items-center justify-between">
+                   <span class="text-xs font-bold text-on-surface uppercase">Registration Deep Link</span>
+                   <span class="text-[10px] font-mono text-primary font-bold">/register/${event.slug}</span>
+                 </div>
               </div>
-              <div class="space-y-1">
-                <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Event Date</label>
-                <input id="edit-event-date" type="datetime-local" style="color-scheme: dark" value="${event.event_date ? new Date(new Date(event.event_date).getTime() - (new Date().getTimezoneOffset() * 60000)).toISOString().slice(0, 16) : ''}" class="w-full bg-surface-container-lowest border-none rounded-xl py-2 px-3 text-white focus:ring-1 focus:ring-primary/40 text-sm" />
-              </div>
             </div>
-            <div class="space-y-1">
-              <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Description</label>
-              <textarea id="edit-event-desc" class="w-full bg-surface-container-lowest border-none rounded-xl py-2 px-3 text-white focus:ring-1 focus:ring-primary/40 text-sm h-16 resize-none">${event.description || ''}</textarea>
+            <div class="space-y-2">
+              <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant ml-1">Access Credentials (Optional)</label>
+              <input id="event-password" type="password" class="w-full bg-secondary/5 border border-primary/20 rounded-2xl py-4 px-5 text-on-surface font-headline placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 transition-all" placeholder="Enter password to secure registration" value="${event.password || ''}" />
             </div>
-          </div>
-          <button id="save-event-info" class="w-full py-3 rounded-xl bg-primary/20 text-primary font-headline font-bold text-xs uppercase tracking-widest hover:bg-primary/30 transition-all flex items-center justify-center gap-2">
-            <span class="material-symbols-outlined text-sm">save</span> Save General Info
-          </button>
-        </div>
-
-        <div class="glass-panel p-6 rounded-2xl space-y-4">
-          <h3 class="font-headline font-bold text-white text-lg flex items-center gap-2">
-            <span class="material-symbols-outlined text-primary">settings_input_component</span>
-            Registration Limits
-          </h3>
-          <div class="grid grid-cols-2 gap-4">
-            <div class="space-y-1">
-              <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Max Teams</label>
-              <input id="edit-max-teams" type="number" min="0" value="${event.max_teams || ''}" placeholder="Unlimited" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white focus:ring-1 focus:ring-primary/40" />
-            </div>
-            <div class="space-y-1">
-              <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Max Team Size</label>
-              <input id="edit-max-team-size" type="number" min="1" value="${event.max_team_size || 4}" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white focus:ring-1 focus:ring-primary/40" />
+            <div class="space-y-2">
+              <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant ml-1">Gemini AI API Key</label>
+              <input id="gemini-api-key" type="password" class="w-full bg-secondary/5 border border-primary/20 rounded-2xl py-4 px-5 text-on-surface font-headline placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 transition-all" placeholder="Enter Gemini Pro API Key" value="${event.config?.gemini_api_key || ''}" />
             </div>
           </div>
-          <button id="save-event-limits" class="w-full py-3 rounded-xl bg-primary/20 text-primary font-headline font-bold text-xs uppercase tracking-widest hover:bg-primary/30 transition-all flex items-center justify-center gap-2">
-            <span class="material-symbols-outlined text-sm">save</span> Update Limits
-          </button>
         </div>
-
-        <div class="glass-panel p-6 rounded-2xl space-y-4 glow-accent">
-          <h3 class="font-headline font-bold text-white text-lg flex items-center gap-2">
-            <span class="material-symbols-outlined text-secondary">psychology</span>
-            System Intelligence
-          </h3>
-          <div class="space-y-1">
-            <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Gemini Pro API Key</label>
-            <div class="p-3 bg-secondary/10 border border-secondary/20 rounded-xl mb-4">
-              <p class="text-[10px] text-secondary font-bold uppercase tracking-widest flex items-center gap-2">
-                <span class="material-symbols-outlined text-sm">psychology</span>
-                AI Evaluator (Coming Soon)
-              </p>
-              <p class="text-[10px] text-on-surface-variant mt-1">Direct scoring via Gemini AI is currently being optimized.</p>
-            </div>
-            <input id="edit-gemini-key" type="password" value="${event.config?.gemini_api_key || ''}" disabled placeholder="AI Configuration Locked..." class="w-full bg-surface-container-lowest/50 border-none rounded-xl py-3 px-4 text-on-surface-variant cursor-not-allowed font-mono text-xs" />
-          </div>
-          <button id="save-ai-config" class="w-full py-3 rounded-xl bg-secondary/20 text-secondary font-headline font-bold text-xs uppercase tracking-widest hover:bg-secondary/30 transition-all flex items-center justify-center gap-2">
-            <span class="material-symbols-outlined text-sm">save</span> Save AI Key
-          </button>
-        </div>
-
-        <div class="glass-panel p-6 rounded-2xl space-y-4">
-          <h3 class="font-headline font-bold text-white text-lg flex items-center gap-2">
-            <span class="material-symbols-outlined text-secondary">bolt</span>
-            Quick Actions
-          </h3>
-          <div class="flex flex-wrap gap-3">
-            <button data-action="toggle-status" class="event-action flex-1 px-5 py-3 rounded-xl font-headline font-bold text-xs uppercase tracking-widest transition-all hover:scale-105 active:scale-95 ${event.status === 'active' ? 'bg-error/20 text-error hover:bg-error/30' : 'bg-secondary/20 text-secondary hover:bg-secondary/30'}">
-              ${event.status === 'active' ? '⬛ End Event' : event.status === 'draft' ? '▶ Activate Event' : '🔄 Reactivate'}
-            </button>
-            <button data-action="toggle-registration" class="event-action flex-1 px-5 py-3 rounded-xl font-headline font-bold text-xs uppercase tracking-widest transition-all hover:scale-105 active:scale-95 ${event.registration_open ? 'bg-error/20 text-error hover:bg-error/30' : 'bg-primary/20 text-primary hover:bg-primary/30'}">
-              ${event.registration_open ? '🔒 Close Registration' : '📝 Open Registration'}
-            </button>
-          </div>
-        </div>
-      </div>
 
       <!-- Registration Link (shown when registration is open) -->
       ${event.registration_open ? `
         <div class="glass-panel p-6 rounded-2xl mb-8 glow-accent">
           <div class="flex items-center gap-3 mb-3">
             <span class="material-symbols-outlined text-secondary">share</span>
-            <h3 class="font-headline font-bold text-white text-lg">Registration Link</h3>
+            <h3 class="font-headline font-bold text-on-surface text-lg">Registration Link</h3>
           </div>
           <div class="flex items-center gap-3">
             <div class="flex-1 bg-surface-container-lowest rounded-xl py-3 px-4 font-mono text-sm text-primary truncate select-all" id="reg-link-display">
@@ -1142,45 +1099,59 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
       { value: 'debate', label: 'Tech Debate', icon: 'forum' }
     ];
 
+    const activeRoundNum = rounds.find(r => r.status === 'active')?.round_number;
+
     el.innerHTML = `
       <div class="flex items-end justify-between mb-8">
         <div>
-          <h1 class="text-3xl font-headline font-bold text-white">Rounds</h1>
-          <p class="text-on-surface-variant text-sm mt-1">${event.name} • ${rounds.length} rounds configured</p>
+          <h1 class="text-3xl font-headline font-bold text-on-surface">Event Settings</h1>
+          <p class="text-on-surface-variant text-sm mt-1">${event.name} • Operational Parameters</p>
+        </div>
+        <div class="flex gap-4">
+           <div class="bg-primary/5 px-6 py-3 rounded-2xl border border-primary/10 text-center">
+             <div class="text-[9px] text-primary font-black uppercase tracking-widest leading-none mb-1">Teams In Arena</div>
+             <div class="text-2xl font-headline font-bold text-on-surface">${teams.length}</div>
+           </div>
+           <div class="bg-secondary/5 px-6 py-3 rounded-2xl border border-secondary/10 text-center">
+             <div class="text-[9px] text-secondary font-black uppercase tracking-widest leading-none mb-1">Total Payload</div>
+             <div class="text-2xl font-headline font-bold text-on-surface">${rounds.length} Rounds</div>
+           </div>
+           <div class="bg-tertiary/5 px-6 py-3 rounded-2xl border border-tertiary/10 text-center">
+             <div class="text-[9px] text-tertiary font-black uppercase tracking-widest leading-none mb-1">Active Sector</div>
+             <div class="text-2xl font-headline font-bold text-on-surface">${activeRoundNum || '—'}</div>
+           </div>
         </div>
       </div>
 
-      <!-- Add Round -->
-      <div class="glass-panel p-6 rounded-2xl mb-8 space-y-4">
-        <h3 class="font-headline font-bold text-white">Add New Round</h3>
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
-          <div class="md:col-span-1">
-            <label class="text-[10px] font-bold tracking-widest text-on-surface-variant uppercase block mb-1">Order</label>
-            <input id="add-round-number" type="number" min="1" value="${rounds.length + 1}" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-3 text-white text-center font-headline font-bold" />
+      <div class="glass-panel p-8 rounded-[32px] border border-secondary/10 mb-8">
+        <div class="flex items-center gap-3 mb-8">
+          <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+            <span class="material-symbols-outlined">settings_suggest</span>
           </div>
-          <div class="md:col-span-4">
-            <label class="text-[10px] font-bold tracking-widest text-on-surface-variant uppercase block mb-1">Round Title</label>
-            <input id="add-round-title" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white focus:ring-1 focus:ring-secondary/40 placeholder:text-slate-600 font-headline" placeholder="e.g. Logical Quiz, Speed Coding" />
+          <h3 class="text-xl font-headline font-bold text-on-surface uppercase tracking-tight">Core Configuration</h3>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-end">
+          <div class="space-y-2">
+            <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-1">Tactical Objective</label>
+            <input id="round-title" class="w-full bg-secondary/5 border border-primary/20 rounded-2xl py-4 px-5 text-on-surface font-headline placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20" placeholder="e.g. Logic Blast" />
           </div>
-          <div class="md:col-span-3">
-            <label class="text-[10px] font-bold tracking-widest text-on-surface-variant uppercase block mb-1">Type</label>
-            <select id="add-round-type" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white">
-              ${roundTypes.map(t => `<option value="${t.value}">${t.label}</option>`).join('')}
+          <div class="space-y-2">
+            <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-1">Protocol Type</label>
+            <select id="round-type" class="w-full bg-secondary/5 border border-primary/20 rounded-2xl py-4 px-5 text-on-surface font-headline appearance-none cursor-pointer focus:ring-2 focus:ring-primary/20">
+              <option value="quiz">Quiz System</option>
+              <option value="logo">Logo Mastery</option>
+              <option value="prompt">Visual Prompt</option>
+              <option value="video">Cinematic Engine</option>
+              <option value="webdev">Terminal Dev</option>
+              <option value="debate">Verbal Combat</option>
             </select>
           </div>
-          <div class="md:col-span-1">
-            <label class="text-[10px] font-bold tracking-widest text-on-surface-variant uppercase block mb-1">Duration</label>
-            <input id="add-round-duration" type="number" min="1" value="40" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-3 text-white text-center" />
+          <div class="space-y-2 text-center">
+            <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant leading-none">Max Yield</label>
+            <input id="round-max-score" type="number" class="w-full bg-secondary/5 border border-primary/10 rounded-2xl py-4 px-5 text-on-surface font-headline text-center placeholder:text-slate-400" value="100" />
           </div>
-          <div class="md:col-span-1">
-            <label class="text-[10px] font-bold tracking-widest text-on-surface-variant uppercase block mb-1">Max Score</label>
-            <input id="add-round-max-score" type="number" min="1" value="100" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-3 text-white text-center font-bold text-secondary" />
-          </div>
-          <div class="md:col-span-1 flex items-end">
-            <button id="confirm-add-round" class="w-full py-3 rounded-xl kinetic-gradient text-on-primary-fixed font-headline font-bold text-sm hover:scale-105 active:scale-95 transition-transform flex items-center justify-center gap-2">
-              <span class="material-symbols-outlined text-sm">add</span> Add
-            </button>
-          </div>
+          <button id="add-round" class="w-full py-4 rounded-2xl kinetic-gradient text-on-primary-fixed font-headline font-bold text-xs uppercase tracking-widest shadow-lg hover:scale-105 active:scale-95 transition-all">Execute Add</button>
         </div>
       </div>
 
@@ -1281,17 +1252,17 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
     `;
 
     // Add round
-    document.getElementById('confirm-add-round')?.addEventListener('click', async () => {
-      const title = document.getElementById('add-round-title').value.trim();
+    document.getElementById('add-round')?.addEventListener('click', async () => {
+      const title = document.getElementById('round-title').value.trim();
       if (!title) return alert('Round title is required');
 
       const { error } = await supabase.from('rounds').insert({
         event_id: event.id,
-        round_number: parseInt(document.getElementById('add-round-number').value) || (rounds.length + 1),
-        round_type: document.getElementById('add-round-type').value,
+        round_number: rounds.length + 1,
+        round_type: document.getElementById('round-type').value,
         title,
-        duration_minutes: parseInt(document.getElementById('add-round-duration').value) || 40,
-        max_score: parseInt(document.getElementById('add-round-max-score').value) || 100
+        duration_minutes: 40,
+        max_score: parseInt(document.getElementById('round-max-score').value) || 100
       });
 
       if (error) return Notifier.toast('Error: ' + error.message, 'error');
@@ -1483,7 +1454,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
     el.innerHTML = `
       <div class="flex items-end justify-between mb-8">
         <div>
-          <h1 class="text-3xl font-headline font-bold text-white">Teams</h1>
+          <h1 class="text-3xl font-headline font-bold text-on-surface">Teams</h1>
           <p class="text-on-surface-variant text-sm mt-1">${event.name} • ${teams.length} teams</p>
         </div>
         <div class="flex items-center gap-3">
@@ -1494,7 +1465,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
           <div class="glass-panel px-4 py-2 rounded-xl flex items-center gap-3">
             <span class="material-symbols-outlined text-error text-sm">dangerous</span>
             <span class="text-xs font-headline text-on-surface-variant">Eliminate bottom</span>
-            <input id="eliminate-n" type="number" min="1" max="${teams.length}" value="1" class="w-14 bg-surface-container-lowest border-none rounded-lg py-1 px-2 text-white text-center text-sm font-headline" />
+            <input id="eliminate-n" type="number" min="1" max="${teams.length}" value="1" class="w-14 bg-surface-container-lowest border-none rounded-lg py-1 px-2 text-on-surface text-center text-sm font-headline" />
             <button id="eliminate-btn" class="px-3 py-1.5 rounded-lg bg-error/20 text-error font-headline font-bold text-xs hover:bg-error/30">Eliminate</button>
           </div>
         </div>
@@ -1807,16 +1778,16 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
                     ${round.round_type === 'quiz' ? `Question Reference` : round.round_type === 'logo' ? `Logo Mastery` : `Master Objective`}
                   </div>
                   ${round.round_type === 'quiz' ? `
-                    <div class="text-[11px] text-white/90 font-medium mb-1">${a.question_text || 'Unknown Question'}</div>
+                    <div class="text-[11px] text-on-surface font-medium mb-1">${a.question_text || 'Unknown Question'}</div>
                     <div class="text-xs text-primary font-bold flex items-center gap-1">
                       <span class="material-symbols-outlined text-sm">check_circle</span>
                       ${a.correct_answer || 'N/A'}
                     </div>
                   ` : round.round_type === 'logo' ? `
-                    <div class="text-[11px] text-white/90 font-bold">${a.company_name || 'Generic Tech'}</div>
+                    <div class="text-[11px] text-on-surface font-bold">${a.company_name || 'Generic Tech'}</div>
                     <div class="text-[10px] text-secondary/80 italic line-clamp-2">${a.requirements || 'Follow industry standards'}</div>
                   ` : `
-                    <div class="text-[11px] text-white/90 font-bold">${a.title || a.company_name || 'Standard Asset'}</div>
+                    <div class="text-[11px] text-on-surface font-bold">${a.title || a.company_name || 'Standard Asset'}</div>
                     <div class="text-[10px] text-on-surface-variant/70 italic line-clamp-2">${a.content || a.description || a.requirements || 'Verify accuracy'}</div>
                   `}
                 </div>
@@ -1825,10 +1796,10 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
           </div>
         </div>
 
-        <div class="glass-panel rounded-3xl overflow-hidden border border-white/5">
+        <div class="glass-panel rounded-3xl overflow-hidden border border-primary/10 bg-white">
           <table class="w-full text-left border-collapse">
             <thead>
-              <tr class="bg-white/5 text-on-surface-variant font-headline text-[10px] uppercase tracking-widest">
+              <tr class="bg-secondary/5 text-on-surface-variant font-headline text-[10px] uppercase tracking-widest border-b border-primary/10">
                 <th class="px-6 py-4">Team</th>
                 <th class="px-6 py-4">Submission Context</th>
                 <th class="px-6 py-4 w-24 text-center">Score</th>
@@ -1836,7 +1807,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
                 <th class="px-6 py-4 w-20">Status</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-white/5">
+            <tbody class="divide-y divide-primary/5">
               ${teams.map(t => {
                 const sub = submissions?.find(s => s.team_id === t.id);
                 if (!sub) return '';
@@ -1865,7 +1836,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
                   contextHtml = `
                     <div class="space-y-3">
                       ${sub.text_content ? `
-                        <div class="p-3 rounded-xl bg-white/5 border border-white/5 text-[11px] text-white/80 leading-relaxed whitespace-pre-wrap">
+                        <div class="p-3 rounded-xl bg-secondary/5 border border-primary/10 text-[11px] text-on-surface leading-relaxed whitespace-pre-wrap">
                           ${sub.text_content}
                         </div>
                       ` : ''}
@@ -1905,9 +1876,9 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
                 }
 
                 return `
-                  <tr class="hover:bg-white/5 transition-all">
+                  <tr class="hover:bg-secondary/5 transition-all">
                     <td class="px-6 py-5">
-                      <div class="font-headline font-bold text-white text-sm">${t.team_name}</div>
+                      <div class="font-headline font-bold text-on-surface text-sm">${t.team_name}</div>
                     </td>
                     <td class="px-6 py-5">
                       <div class="max-h-48 overflow-y-auto pr-2 custom-scrollbar">
@@ -1915,13 +1886,13 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
                       </div>
                     </td>
                     <td class="px-6 py-5">
-                      <input type="number" data-team="${t.id}" class="audit-score-input w-20 bg-secondary/5 border border-primary/10 rounded-xl py-2 px-2 text-center text-sm text-primary" value="${p.score}" />
+                      <input type="number" data-team="${t.id}" class="audit-score-input w-20 bg-secondary/5 border border-primary/20 rounded-xl py-2 px-2 text-center text-sm text-primary font-bold focus:ring-2 focus:ring-primary/20" value="${p.score}" />
                     </td>
                     <td class="px-6 py-5">
-                      <textarea data-team="${t.id}" class="audit-feedback-input w-full bg-secondary/5 border border-primary/10 rounded-xl py-2 px-3 text-xs text-secondary h-12 resize-none placeholder:text-slate-400">${p.feedback}</textarea>
+                      <textarea data-team="${t.id}" class="audit-feedback-input w-full bg-secondary/5 border border-primary/20 rounded-xl py-2 px-3 text-xs text-secondary h-12 resize-none placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20">${p.feedback}</textarea>
                     </td>
                     <td class="px-6 py-5 text-center">
-                      <span class="text-[8px] font-bold uppercase tracking-widest px-2 py-1 rounded-lg ${p.status === 'suggested' ? 'bg-secondary/20 text-secondary animate-pulse' : p.status === 'final' ? 'bg-primary/20 text-primary' : 'bg-white/5 text-on-surface-variant'}">${p.status}</span>
+                      <span class="text-[8px] font-bold uppercase tracking-widest px-2 py-1 rounded-lg ${p.status === 'suggested' ? 'bg-secondary/20 text-secondary animate-pulse' : p.status === 'final' ? 'bg-primary/20 text-primary' : 'bg-slate-100 text-on-surface-variant'}">${p.status}</span>
                     </td>
                   </tr>
                 `;
@@ -1951,23 +1922,23 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
 
       <!-- Inline Score Matrix (Score Entry Form Removed) -->
 
-      <div class="glass-panel rounded-2xl overflow-x-auto border border-outline-variant/10">
+      <div class="glass-panel rounded-2xl overflow-x-auto border border-primary/10 bg-white">
         <table class="w-full text-left border-collapse">
           <thead>
-            <tr class="bg-surface-container-high/50 text-on-surface-variant font-headline text-[10px] uppercase tracking-widest">
-              <th class="px-5 py-4 sticky left-0 bg-surface-container-high/50">Team</th>
+            <tr class="bg-secondary/5 text-on-surface-variant font-headline text-[10px] uppercase tracking-widest border-b border-primary/10">
+              <th class="px-5 py-4 sticky left-0 bg-slate-50 z-20">Team</th>
               ${rounds.map(r => `<th class="px-5 py-4 text-center">R${r.round_number}</th>`).join('')}
               <th class="px-5 py-4 text-center font-bold">Total</th>
               <th class="px-5 py-4 text-center w-10">Review</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-outline-variant/10">
+          <tbody class="divide-y divide-primary/5">
             ${teams.map(t => {
               let total = 0;
               return `
-                <tr class="hover:bg-white/5 transition-all">
-                  <td class="px-5 py-3 sticky left-0 bg-surface-container">
-                    <span class="font-headline font-bold text-white text-sm">${t.team_id}</span>
+                <tr class="hover:bg-secondary/5 transition-all">
+                  <td class="px-5 py-3 sticky left-0 bg-white z-10 border-r border-primary/5">
+                    <span class="font-headline font-bold text-on-surface text-sm">${t.team_id}</span>
                   </td>
                   ${rounds.map(r => {
                     const s = eventScores.find(sc => sc.team_id === t.id && sc.round_id === r.id);
@@ -2089,7 +2060,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
               formattedContent += `
                 <div class="space-y-4">
                   ${s.text_content ? `
-                    <div class="p-4 rounded-2xl bg-white/5 border border-white/5 text-sm text-white/80 leading-relaxed italic">
+                    <div class="p-4 rounded-2xl bg-secondary/5 border border-primary/10 text-sm text-on-surface leading-relaxed italic">
                       "${s.text_content}"
                     </div>
                   ` : ''}
@@ -2120,7 +2091,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
                       </div>
                       <div>
                         <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-[0.2em] mb-0.5">Round Data // ${r.round_type}</div>
-                        <div class="text-sm font-headline font-black text-white uppercase tracking-wider">${r.title}</div>
+                        <div class="text-sm font-headline font-black text-on-surface uppercase tracking-wider">${r.title}</div>
                       </div>
                     </div>
                     <div class="flex items-center gap-4">
@@ -2244,16 +2215,16 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
               <button id="toggle-bulk-mode" class="text-xs font-headline font-bold text-primary hover:underline uppercase tracking-widest">Switch to Bulk Import</button>
             </div>
             
-            <div id="individual-add-form" class="space-y-3">
-              <textarea id="q-text" class="w-full bg-secondary/5 border border-primary/10 rounded-xl py-3 px-4 text-on-surface h-20 resize-none placeholder:text-slate-400 focus:ring-2 focus:ring-primary/10" placeholder="Enter question text..."></textarea>
+            <div id="individual-add-form" class="space-y-4">
+              <textarea id="q-text" class="w-full bg-secondary/5 border border-primary/20 rounded-xl py-3 px-4 text-on-surface h-20 resize-none placeholder:text-slate-500 focus:ring-2 focus:ring-primary/10" placeholder="Enter question text..."></textarea>
               <div class="grid grid-cols-2 gap-3">
-                <input id="q-opt-0" class="bg-secondary/5 border border-primary/10 rounded-xl py-3 px-4 text-on-surface placeholder:text-slate-400 text-sm focus:ring-2 focus:ring-primary/10" placeholder="Option A" />
-                <input id="q-opt-1" class="bg-secondary/5 border border-primary/10 rounded-xl py-3 px-4 text-on-surface placeholder:text-slate-400 text-sm focus:ring-2 focus:ring-primary/10" placeholder="Option B" />
-                <input id="q-opt-2" class="bg-secondary/5 border border-primary/10 rounded-xl py-3 px-4 text-on-surface placeholder:text-slate-400 text-sm focus:ring-2 focus:ring-primary/10" placeholder="Option C" />
-                <input id="q-opt-3" class="bg-secondary/5 border border-primary/10 rounded-xl py-3 px-4 text-on-surface placeholder:text-slate-400 text-sm focus:ring-2 focus:ring-primary/10" placeholder="Option D" />
+                <input id="q-opt-0" class="bg-secondary/5 border border-primary/20 rounded-xl py-3 px-4 text-on-surface placeholder:text-slate-500 text-sm focus:ring-2 focus:ring-primary/10" placeholder="Option A" />
+                <input id="q-opt-1" class="bg-secondary/5 border border-primary/20 rounded-xl py-3 px-4 text-on-surface placeholder:text-slate-500 text-sm focus:ring-2 focus:ring-primary/10" placeholder="Option B" />
+                <input id="q-opt-2" class="bg-secondary/5 border border-primary/20 rounded-xl py-3 px-4 text-on-surface placeholder:text-slate-500 text-sm focus:ring-2 focus:ring-primary/10" placeholder="Option C" />
+                <input id="q-opt-3" class="bg-secondary/5 border border-primary/20 rounded-xl py-3 px-4 text-on-surface placeholder:text-slate-500 text-sm focus:ring-2 focus:ring-primary/10" placeholder="Option D" />
               </div>
               <div class="flex gap-3">
-                <select id="q-correct" class="bg-secondary/5 border border-primary/10 rounded-xl py-3 px-4 text-on-surface text-sm flex-1 cursor-pointer">
+                <select id="q-correct" class="bg-secondary/5 border border-primary/20 rounded-xl py-3 px-4 text-on-surface text-sm flex-1 cursor-pointer">
                   <option value="0">Correct: A</option>
                   <option value="1">Correct: B</option>
                   <option value="2">Correct: C</option>
@@ -2261,7 +2232,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
                 </select>
                 <div class="flex flex-col">
                   <label class="text-[8px] font-bold text-on-surface-variant uppercase ml-2 mb-1">Award Marks</label>
-                  <input id="q-points" type="number" min="1" value="1" class="w-24 bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white text-center font-headline font-bold text-secondary" />
+                  <input id="q-points" type="number" min="1" value="1" class="w-24 bg-secondary/5 border border-primary/20 rounded-xl py-3 px-4 text-primary text-center font-headline font-bold" />
                 </div>
                 <button id="add-q" class="px-6 py-3 rounded-xl kinetic-gradient text-on-primary-fixed font-headline font-bold text-sm hover:scale-105 active:scale-95 transition-transform">Add Question</button>
               </div>
@@ -2281,7 +2252,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
   }
 ]</pre>
               </div>
-              <textarea id="q-json-input" class="w-full bg-surface-container-lowest border-none rounded-xl py-4 px-4 text-white h-48 font-mono text-xs resize-none focus:ring-1 focus:ring-primary/40" placeholder="Paste your question array here..."></textarea>
+              <textarea id="q-json-input" class="w-full bg-slate-50 border border-primary/10 rounded-xl py-4 px-4 text-slate-900 h-48 font-mono text-xs resize-none focus:ring-1 focus:ring-primary/40 placeholder:text-slate-400" placeholder="Paste your question array here..."></textarea>
               <button id="import-q-json" class="w-full py-4 rounded-xl kinetic-gradient text-on-primary-fixed font-headline font-bold text-sm tracking-widest uppercase hover:scale-[1.02] active:scale-[0.98] transition-all">Import All Questions</button>
             </div>
           </div>
@@ -2295,7 +2266,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
                     <span class="text-[10px] text-on-surface-variant font-headline font-bold uppercase tracking-widest">Q${i + 1}</span>
                     <span class="px-2 py-0.5 rounded-full bg-secondary/10 text-secondary text-[8px] font-black uppercase tracking-widest border border-secondary/20">${q.points || 1} Marks</span>
                   </div>
-                  <p class="text-sm text-white mt-1">${q.question_text}</p>
+                  <p class="text-sm text-on-surface mt-1">${q.question_text}</p>
                   <div class="flex gap-2 mt-2 flex-wrap text-left">
                     ${(() => {
                       const opts = typeof q.options === 'string' && q.options.startsWith('[') ? JSON.parse(q.options) : (q.options || []);
@@ -2362,12 +2333,12 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
             <p class="text-xs text-on-surface-variant">Upload an Image file and enter how many seconds it should be clearly visible before applying a blur overlay. For projector mode, leave the file blank.</p>
             <div class="flex max-md:flex-col gap-3 items-start">
               <div class="flex-1 space-y-3 w-full">
-                <input type="file" id="p-file" accept="image/*" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-on-primary-fixed hover:file:bg-primary/80" />
-                <textarea id="p-seed" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white text-sm placeholder:text-slate-600 font-mono h-24" placeholder="Enter Master Prompt (The exact description used to generate this image)..."></textarea>
+                <input type="file" id="p-file" accept="image/*" class="w-full bg-secondary/5 border border-primary/20 rounded-xl py-3 px-4 text-on-surface text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-on-primary-fixed hover:file:bg-primary/80" />
+                <textarea id="p-seed" class="w-full bg-secondary/5 border border-primary/20 rounded-xl py-3 px-4 text-on-surface text-sm placeholder:text-slate-500 font-mono h-24" placeholder="Enter Master Prompt (The exact description used to generate this image)..."></textarea>
               </div>
               <div class="flex flex-col gap-3 w-full md:w-auto">
-                <input id="p-duration" type="number" value="30" class="w-full md:w-32 bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white text-center font-bold" placeholder="Time (s)" />
-                <input id="p-marks" type="number" value="1" class="w-full md:w-32 bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white text-center font-bold text-secondary" placeholder="Marks" />
+                <input id="p-duration" type="number" value="30" class="w-full md:w-32 bg-secondary/5 border border-primary/20 rounded-xl py-3 px-4 text-on-surface text-center font-bold" placeholder="Time (s)" />
+                <input id="p-marks" type="number" value="1" class="w-full md:w-32 bg-secondary/5 border border-primary/20 rounded-xl py-3 px-4 text-on-surface text-center font-bold text-secondary" placeholder="Marks" />
                 <button id="add-prompt" class="px-6 py-3 rounded-xl kinetic-gradient text-on-primary-fixed font-headline font-bold text-sm hover:scale-105 active:scale-95 transition-transform flex-shrink-0 disabled:opacity-50 flex items-center justify-center gap-2">Add Image</button>
               </div>
             </div>
@@ -2384,7 +2355,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
                        <span class="text-[10px] text-on-surface-variant font-headline font-bold uppercase tracking-widest">P${i + 1}</span>
                        <span class="px-2 py-0.5 rounded-full bg-secondary/10 text-secondary text-[8px] font-black uppercase tracking-widest border border-secondary/20">${l.points || 1} Marks</span>
                     </div>
-                    <h4 class="font-headline font-bold text-white uppercase tracking-widest text-sm">Timer: ${l.display_duration_seconds}s</h4>
+                    <h4 class="font-headline font-bold text-on-surface uppercase tracking-widest text-sm">Timer: ${l.display_duration_seconds}s</h4>
                     <p class="text-[10px] text-on-surface-variant mt-1 line-clamp-1 italic max-w-sm">${l.seed_description || 'No Master Prompt'}</p>
                   </div>
                 </div>
@@ -2405,21 +2376,21 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
             <div class="space-y-4">
               <div class="space-y-2">
                 <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block">Debate Topic</label>
-                <textarea id="d-topic" class="w-full bg-surface-container-lowest border-none rounded-xl py-4 px-4 text-white font-headline text-lg resize-none placeholder:text-outline/30" placeholder="Enter the main debate topic/motion...">${assets[0]?.topic || ''}</textarea>
+                <textarea id="d-topic" class="w-full bg-secondary/5 border border-primary/20 rounded-xl py-4 px-4 text-on-surface font-headline text-lg resize-none placeholder:text-slate-500">${assets[0]?.topic || ''}</textarea>
               </div>
               
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-2">
                   <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block">Context / Description</label>
-                  <textarea id="d-desc" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white h-32 resize-none placeholder:text-outline/30 text-sm" placeholder="Provide background information or guidelines...">${assets[0]?.description || ''}</textarea>
+                  <textarea id="d-desc" class="w-full bg-secondary/5 border border-primary/20 rounded-xl py-3 px-4 text-on-surface h-32 resize-none placeholder:text-slate-500 text-sm" placeholder="Provide background information or guidelines...">${assets[0]?.description || ''}</textarea>
                 </div>
                 <div class="space-y-2">
                   <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block">Reference Image (Optional)</label>
-                  <div class="bg-surface-container-lowest rounded-xl p-4 flex flex-col items-center justify-center border-2 border-dashed border-outline-variant/20 hover:border-tertiary/40 transition-colors cursor-pointer relative group h-32">
+                  <div class="bg-secondary/5 rounded-xl p-4 flex flex-col items-center justify-center border-2 border-dashed border-primary/20 hover:border-tertiary/40 transition-colors cursor-pointer relative group h-32">
                     <input type="file" id="d-file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer z-10" />
                     ${assets[0]?.image_url ? `
                       <img src="${assets[0].image_url}" class="absolute inset-0 w-full h-full object-cover rounded-xl opacity-40 group-hover:opacity-60 transition-opacity" />
-                      <div class="relative z-20 text-white font-bold text-xs uppercase tracking-widest bg-black/40 px-3 py-1 rounded-full">Change Image</div>
+                      <div class="relative z-20 text-on-surface font-bold text-xs uppercase tracking-widest bg-white/80 backdrop-blur-md px-3 py-1 rounded-full">Change Image</div>
                     ` : `
                       <span class="material-symbols-outlined text-on-surface-variant/40 mb-2">image</span>
                       <span class="text-[10px] text-on-surface-variant uppercase font-bold">Click to Upload</span>
@@ -2431,7 +2402,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
               <div class="flex gap-4">
                 <div class="space-y-2">
                   <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block">Max Prep Time (s)</label>
-                  <input id="d-duration" type="number" value="${assets[0]?.duration_seconds || 60}" class="w-32 bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white font-headline text-center" />
+                  <input id="d-duration" type="number" value="${assets[0]?.duration_seconds || 60}" class="w-32 bg-secondary/5 border border-primary/20 rounded-xl py-3 px-4 text-on-surface font-headline text-center" />
                 </div>
                 <div class="flex-1 flex items-end">
                   <button id="save-debate-config" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-tertiary to-primary text-on-primary-fixed font-headline font-bold text-sm tracking-widest uppercase hover:scale-[1.02] active:scale-[0.98] transition-transform">Save Debate Configuration</button>
@@ -2441,8 +2412,8 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
           </div>
         ` : (selectedRound?.round_type === 'video' || selectedRound?.round_type === 'webdev') ? `
           <!-- COMMON CONFIG UI FOR VIDEO/WEBDEV -->
-          <div class="glass-panel p-8 rounded-2xl mb-8 space-y-6 glow-accent">
-            <h3 class="font-headline font-bold text-white text-xl flex items-center gap-3">
+          <div class="glass-panel p-8 rounded-2xl mb-8 space-y-6 border border-primary/10">
+            <h3 class="font-headline font-bold text-on-surface text-xl flex items-center gap-3">
               <span class="material-symbols-outlined text-secondary">${selectedRound.round_type === 'video' ? 'videocam' : 'code'}</span>
               Manage ${selectedRound.round_type === 'video' ? 'Video Prompt' : 'Web Dev Guidelines'}: <span class="text-secondary">${selectedRound.title}</span>
             </h3>
@@ -2450,7 +2421,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
             <div class="space-y-4">
               <div class="space-y-2">
                 <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block">Instructions & Guidelines</label>
-                <textarea id="config-guidelines" class="w-full bg-surface-container-lowest border-none rounded-xl py-4 px-4 text-white h-48 resize-none placeholder:text-outline/30 text-sm leading-relaxed" placeholder="Enter detailed round instructions for the participants...">${(() => {
+                <textarea id="config-guidelines" class="w-full bg-secondary/5 border border-primary/20 rounded-xl py-4 px-4 text-on-surface h-48 resize-none placeholder:text-slate-500 text-sm leading-relaxed" placeholder="Enter detailed round instructions for the participants...">${(() => {
                   let cfg = selectedRound.config || {};
                   if (typeof cfg === 'string') try { cfg = JSON.parse(cfg); } catch(e) { cfg = {}; }
                   return cfg.guidelines || '';
@@ -2465,13 +2436,13 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
           </div>
         ` : `
           <!-- LOGO ADD UI -->
-          <div class="glass-panel p-6 rounded-2xl mb-8 space-y-4 glow-accent">
+          <div class="glass-panel p-6 rounded-2xl mb-8 space-y-4 border border-primary/10">
             <h3 class="font-headline font-bold text-on-surface">Add Logo Target to: <span class="text-primary">${selectedRound?.title}</span></h3>
             <p class="text-xs text-on-surface-variant">Provide the correct brand name. If you want players to see the image on their device, select an Image file to upload. Leave the file blank to run Projector-Only Mode.</p>
             <div class="flex max-md:flex-col gap-3 items-center">
-              <input id="l-brand" class="flex-1 bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white placeholder:text-slate-600 font-headline uppercase" placeholder="Correct Brand Name (e.g. Tesla)" />
-              <input type="file" id="l-file" accept="image/*" class="flex-1 bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-on-primary-fixed hover:file:bg-primary/80" />
-              <input id="l-marks" type="number" value="1" class="w-24 bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white text-center" placeholder="Marks" />
+              <input id="l-brand" class="flex-1 bg-secondary/5 border border-primary/20 rounded-xl py-3 px-4 text-on-surface placeholder:text-slate-500 font-headline uppercase" placeholder="Correct Brand Name (e.g. Tesla)" />
+              <input type="file" id="l-file" accept="image/*" class="flex-1 bg-secondary/5 border border-primary/20 rounded-xl py-3 px-4 text-on-surface text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-on-primary-fixed hover:file:bg-primary/80" />
+              <input id="l-marks" type="number" value="1" class="w-24 bg-secondary/5 border border-primary/20 rounded-xl py-3 px-4 text-primary text-center font-bold" placeholder="Marks" />
               <button id="add-logo" class="px-6 py-3 rounded-xl kinetic-gradient text-on-primary-fixed font-headline font-bold text-sm hover:scale-105 active:scale-95 transition-transform flex-shrink-0 disabled:opacity-50 flex items-center gap-2">Add Logo Target</button>
             </div>
           </div>
@@ -2967,25 +2938,25 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
             <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Banner Image</label>
             <div class="flex gap-3">
               <input id="reg-banner-file" type="file" accept="image/*" class="hidden" />
-              <button id="reg-banner-pick" class="flex-1 py-3 px-4 rounded-xl border border-dashed border-white/20 text-on-surface-variant hover:border-primary/40 hover:text-primary transition-all font-headline text-sm flex items-center justify-center gap-2">
+              <button id="reg-banner-pick" class="flex-1 py-3 px-4 rounded-xl border border-dashed border-primary/30 text-on-surface-variant hover:border-primary/60 hover:text-primary transition-all font-headline text-sm flex items-center justify-center gap-2 bg-secondary/5">
                 <span class="material-symbols-outlined text-sm">upload</span> Upload Banner
               </button>
             </div>
             ${cfg.banner_url ? `
-              <div class="relative rounded-xl overflow-hidden h-24 bg-surface-container-lowest">
+              <div class="relative rounded-xl overflow-hidden h-24 bg-secondary/5 border border-primary/10">
                 <img id="reg-banner-preview" src="${cfg.banner_url}" class="w-full h-full object-cover" />
-                <button id="reg-banner-remove" class="absolute top-2 right-2 w-6 h-6 bg-error/80 text-white rounded-full text-xs flex items-center justify-center hover:bg-error">×</button>
+                <button id="reg-banner-remove" class="absolute top-2 right-2 w-6 h-6 bg-error/90 text-white rounded-full text-xs flex items-center justify-center hover:bg-error shadow-lg">×</button>
               </div>
-            ` : `<div id="reg-banner-preview-area" class="h-24 rounded-xl bg-surface-container-lowest flex items-center justify-center text-on-surface-variant/30 text-xs italic">No banner uploaded</div>`}
+            ` : `<div id="reg-banner-preview-area" class="h-24 rounded-xl bg-secondary/5 border border-primary/10 flex items-center justify-center text-on-surface-variant/30 text-xs italic">No banner uploaded</div>`}
           </div>
           <div class="space-y-3">
             <div class="space-y-1">
               <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Page Headline</label>
-              <input id="reg-headline" class="w-full bg-secondary/5 border border-primary/10 rounded-xl py-3 px-4 text-on-surface focus:ring-2 focus:ring-primary/20 placeholder:text-slate-400 font-headline" placeholder="e.g. Join the Arena · HostiBuzz 2026" value="${cfg.headline || ''}" />
+              <input id="reg-headline" class="w-full bg-secondary/5 border border-primary/10 rounded-xl py-3 px-4 text-on-surface focus:ring-2 focus:ring-primary/20 placeholder:text-slate-500 font-headline font-bold" placeholder="e.g. Join the Arena · HostiBuzz 2026" value="${cfg.headline || ''}" />
             </div>
             <div class="space-y-1">
               <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Subheading / Instructions</label>
-              <textarea id="reg-subheading" class="w-full bg-secondary/5 border border-primary/10 rounded-xl py-3 px-4 text-on-surface focus:ring-2 focus:ring-primary/20 placeholder:text-slate-400 h-16 resize-none text-sm" placeholder="e.g. Register your team below. Each team may have up to 4 members.">${cfg.subheading || ''}</textarea>
+              <textarea id="reg-subheading" class="w-full bg-secondary/5 border border-primary/10 rounded-xl py-3 px-4 text-on-surface focus:ring-2 focus:ring-primary/20 placeholder:text-slate-500 h-16 resize-none text-sm leading-relaxed" placeholder="e.g. Register your team below. Each team may have up to 4 members.">${cfg.subheading || ''}</textarea>
             </div>
           </div>
         </div>
@@ -3020,25 +2991,25 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
         </div>
 
         <div id="reg-fields-list" class="space-y-3">
-          ${extraFields.length === 0 ? '<p class="text-center text-on-surface-variant/30 italic text-sm py-4">No custom fields yet. Click "+ Add Field" to start.</p>' : extraFields.map((f, i) => `
-            <div class="bg-surface-container-lowest rounded-xl p-4 flex flex-col md:flex-row gap-3 items-start md:items-center" data-field-idx="${i}">
+          ${extraFields.length === 0 ? '<p class="text-center text-on-surface-variant/30 italic text-sm py-8">No custom fields configured. Click "+ Add Field" to start building your form.</p>' : extraFields.map((f, i) => `
+            <div class="bg-secondary/5 rounded-2xl p-5 flex flex-col md:flex-row gap-4 items-start md:items-center border border-primary/10 shadow-sm" data-field-idx="${i}">
               <div class="flex-1 grid grid-cols-1 md:grid-cols-3 gap-3">
-                <input class="field-label bg-surface-container border-none rounded-lg py-2 px-3 text-white text-sm placeholder:text-slate-600" placeholder="Field Label" value="${f.label || ''}" />
-                <select class="field-type bg-surface-container border-none rounded-lg py-2 px-3 text-white text-sm">
-                  <option value="text" ${f.type === 'text' ? 'selected' : ''}>Text</option>
-                  <option value="email" ${f.type === 'email' ? 'selected' : ''}>Email</option>
-                  <option value="tel" ${f.type === 'tel' ? 'selected' : ''}>Phone</option>
-                  <option value="textarea" ${f.type === 'textarea' ? 'selected' : ''}>Long Text</option>
+                <input class="field-label bg-white border border-primary/10 rounded-xl py-2.5 px-4 text-on-surface text-sm placeholder:text-slate-400 font-bold" placeholder="Field Label (e.g. Roll Number)" value="${f.label || ''}" />
+                <select class="field-type bg-white border border-primary/10 rounded-xl py-2.5 px-4 text-on-surface text-sm font-headline cursor-pointer">
+                  <option value="text" ${f.type === 'text' ? 'selected' : ''}>Text Field</option>
+                  <option value="email" ${f.type === 'email' ? 'selected' : ''}>Email Address</option>
+                  <option value="tel" ${f.type === 'tel' ? 'selected' : ''}>Phone Number</option>
+                  <option value="textarea" ${f.type === 'textarea' ? 'selected' : ''}>Long Text Area</option>
                   <option value="select" ${f.type === 'select' ? 'selected' : ''}>Dropdown Select</option>
                 </select>
-                <input class="field-options bg-surface-container border-none rounded-lg py-2 px-3 text-white text-sm placeholder:text-slate-600 ${f.type === 'select' ? '' : 'opacity-40 pointer-events-none'}" placeholder="Options (comma-separated)" value="${(f.options || []).join(', ')}" title="Only for dropdown fields" />
+                <input class="field-options bg-white border border-primary/10 rounded-xl py-2.5 px-4 text-on-surface text-sm placeholder:text-slate-400 ${f.type === 'select' ? '' : 'opacity-40 pointer-events-none'}" placeholder="Options (A, B, C...)" value="${(f.options || []).join(', ')}" title="Only for dropdown fields" />
               </div>
-              <div class="flex items-center gap-3 shrink-0">
-                <label class="flex items-center gap-2 text-xs text-on-surface-variant cursor-pointer">
-                  <input type="checkbox" class="field-required rounded" ${f.required ? 'checked' : ''} />
+              <div class="flex items-center gap-4 shrink-0">
+                <label class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-on-surface-variant cursor-pointer group">
+                  <input type="checkbox" class="field-required w-4 h-4 rounded border-primary/20 text-primary focus:ring-primary/20" ${f.required ? 'checked' : ''} />
                   Required
                 </label>
-                <button class="del-reg-field w-8 h-8 rounded-lg bg-error/10 text-error flex items-center justify-center hover:bg-error/20 transition-colors">
+                <button class="del-reg-field w-10 h-10 rounded-xl bg-error/10 text-error flex items-center justify-center hover:bg-error/20 transition-all border border-error/10">
                   <span class="material-symbols-outlined text-sm">delete</span>
                 </button>
               </div>
