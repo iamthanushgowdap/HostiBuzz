@@ -64,6 +64,7 @@ export class Timer {
   }
 }
 
+export function renderPreRoundCountdown(round, container, renderFn) {
   // Instant Launch Protocol: Overlay disabled as per user request
   return false;
 }
