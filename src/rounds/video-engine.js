@@ -6,7 +6,7 @@ import { navigate } from '../router.js';
 import { startAntiCheat, stopAntiCheat } from '../services/anti-cheat.js';
 import { Notifier } from '../services/notifier.js';
 import { timeSync } from '../services/timeSync.js';
-import { socketService } from '../services/socket-service.js';
+import { socketService } from '../services/socket.js';
 import { pauseFooterClock, resumeFooterClock } from '../components/footer.js';
 
 export async function renderVideoRound(container, params, search = {}) {

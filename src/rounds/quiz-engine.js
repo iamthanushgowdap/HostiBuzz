@@ -9,7 +9,7 @@ import { Ticker } from '../components/ticker.js';
 import { Notifier } from '../services/notifier.js';
 import { pauseFooterClock, resumeFooterClock } from '../components/footer.js';
 import { timeSync } from '../services/timeSync.js';
-import { socketService } from '../services/socket-service.js';
+import { socketService } from '../services/socket.js';
 
 let timer = null;
 

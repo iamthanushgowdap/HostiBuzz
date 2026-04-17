@@ -7,7 +7,7 @@ import { startAntiCheat, stopAntiCheat } from '../services/anti-cheat.js';
 import { ActivityBroadcast } from '../services/activity-broadcast.js';
 import { Ticker } from '../components/ticker.js';
 import { timeSync } from '../services/timeSync.js';
-import { socketService } from '../services/socket-service.js';
+import { socketService } from '../services/socket.js';
 import { pauseFooterClock, resumeFooterClock } from '../components/footer.js';
 
 export async function renderWebdevRound(container, params, search = {}) {
