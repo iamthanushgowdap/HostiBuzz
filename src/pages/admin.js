@@ -892,117 +892,177 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
     const totalTeams = (teams || []).length;
     const maxTeams = event.max_teams || 0;
     const occupancyPercent = maxTeams > 0 ? Math.min(100, (totalTeams / maxTeams) * 100) : 0;
+    const eventConfig = typeof event.config === 'string' ? JSON.parse(event.config) : (event.config || {});
 
     el.innerHTML = `
       <div class="flex items-start justify-between mb-8">
         <div>
           <div class="flex items-center gap-3 mb-2">
             <span class="w-3 h-3 rounded-full ${event.status === 'active' ? 'bg-secondary animate-pulse' : event.status === 'completed' ? 'bg-primary' : 'bg-outline'}"></span>
-            <span class="text-xs font-bold tracking-widest text-on-surface-variant uppercase">${event.status}</span>
+            <span class="text-xs font-bold tracking-widest text-on-surface-variant uppercase">${event.status} Command</span>
           </div>
           <h1 class="text-4xl md:text-5xl font-headline font-bold text-on-surface tracking-tighter">${event.name}</h1>
-          <p class="text-on-surface-variant mt-2">${event.organizer || ''} ${event.event_date ? '• ' + new Date(event.event_date).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' }) : ''}</p>
-          ${event.description ? `<p class="text-on-surface-variant/60 text-sm mt-1 max-w-2xl">${event.description}</p>` : ''}
+          <p class="text-on-surface-variant mt-2 font-medium">${event.organizer || 'Unnamed Command'} • Operational Hub</p>
         </div>
       </div>
 
       <!-- Stats Grid -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        <div class="bg-surface-container-low p-5 rounded-2xl relative overflow-hidden group">
-          <div class="relative z-10">
-            <span class="text-[10px] font-headline tracking-widest text-on-surface-variant uppercase">Teams / Occupancy</span>
-            <div class="text-3xl font-headline font-black text-on-surface mt-1">
-              ${totalTeams}${maxTeams > 0 ? `<span class="text-lg text-on-surface-variant/40"> / ${maxTeams}</span>` : ''}
-            </div>
-            <span class="text-[10px] text-secondary">${activeTeams} active</span>
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="glass-panel p-6 rounded-3xl border border-primary/10 bg-white shadow-sm">
+          <div class="text-[10px] font-bold tracking-widest text-on-surface-variant uppercase mb-2">Teams / Occupancy</div>
+          <div class="text-3xl font-headline font-black text-on-surface">
+            ${totalTeams}<span class="text-lg text-on-surface-variant/30"> / ${maxTeams || 50}</span>
           </div>
-          ${maxTeams > 0 ? `
-            <div class="absolute bottom-0 left-0 h-1 bg-secondary/20 w-full">
-              <div class="h-full bg-secondary transition-all duration-1000" style="width: ${occupancyPercent}%"></div>
-            </div>
-          ` : ''}
-        </div>
-        <div class="bg-surface-container-low p-5 rounded-2xl">
-          <span class="text-[10px] font-headline tracking-widest text-on-surface-variant uppercase">Rounds</span>
-          <div class="text-3xl font-headline font-black text-on-surface mt-1">${(rounds || []).length}</div>
-          <span class="text-[10px] text-primary">${completedRounds} done</span>
-        </div>
-        <div class="bg-surface-container-low p-5 rounded-2xl">
-          <span class="text-[10px] font-headline tracking-widest text-on-surface-variant uppercase">Active Round</span>
-          <div class="text-3xl font-headline font-black text-on-surface mt-1">${activeRounds || '—'}</div>
-        </div>
-        <div class="bg-surface-container-low p-5 rounded-2xl">
-          <span class="text-[10px] font-headline tracking-widest text-on-surface-variant uppercase">Registration</span>
-          <div class="text-xl font-headline font-black mt-1 ${event.registration_open ? (occupancyPercent >= 100 && maxTeams > 0 ? 'text-error' : 'text-secondary') : 'text-error'}">
-            ${event.registration_open ? (occupancyPercent >= 100 && maxTeams > 0 ? 'FULL' : 'OPEN') : 'CLOSED'}
+          <div class="w-full h-1.5 bg-secondary/10 rounded-full mt-3 overflow-hidden">
+            <div class="h-full bg-secondary transition-all" style="width: ${occupancyPercent}%"></div>
           </div>
+        </div>
+        <div class="glass-panel p-6 rounded-3xl border border-primary/10 bg-white shadow-sm">
+          <div class="text-[10px] font-bold tracking-widest text-on-surface-variant uppercase mb-2">Total Payload</div>
+          <div class="text-3xl font-headline font-black text-on-surface">${(rounds || []).length}</div>
+          <div class="text-xs font-bold text-primary mt-1 uppercase">${completedRounds} Done</div>
+        </div>
+        <div class="glass-panel p-6 rounded-3xl border border-primary/10 bg-white shadow-sm">
+          <div class="text-[10px] font-bold tracking-widest text-on-surface-variant uppercase mb-2">Current Sector</div>
+          <div class="text-3xl font-headline font-black text-on-surface">${activeRounds || '—'}</div>
+          <div class="text-xs font-bold text-secondary mt-1 uppercase">Active Round</div>
+        </div>
+        <div class="glass-panel p-6 rounded-3xl border border-primary/10 bg-white shadow-sm">
+          <div class="text-[10px] font-bold tracking-widest text-on-surface-variant uppercase mb-2">Registration Status</div>
+          <div class="text-xl font-headline font-black ${event.registration_open ? 'text-secondary' : 'text-error'} uppercase">
+            ${event.registration_open ? 'Open' : 'Locked'}
+          </div>
+          <div class="text-xs font-bold text-on-surface-variant/40 mt-1 uppercase">${event.registration_open ? 'Accepting Squads' : 'Closed to Public'}</div>
         </div>
       </div>
 
-      <!-- General Information & Registration Limits -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <div class="space-y-6">
-            <div class="space-y-2">
-              <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant ml-1">Event Tactical Name</label>
-              <input id="event-name" class="w-full bg-secondary/5 border border-primary/20 rounded-2xl py-4 px-5 text-on-surface font-headline placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 transition-all" value="${event.name || ''}" />
+          <!-- Card 01: General Information -->
+          <div class="glass-panel p-8 rounded-[32px] border border-primary/10 bg-white space-y-6">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                <span class="material-symbols-outlined">edit_square</span>
+              </div>
+              <h3 class="font-headline font-bold text-on-surface uppercase tracking-tight">General Information</h3>
             </div>
-            <div class="space-y-2">
-              <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant ml-1">Organizer / Command</label>
-              <input id="event-organizer" class="w-full bg-secondary/5 border border-primary/20 rounded-2xl py-4 px-5 text-on-surface font-headline placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 transition-all" value="${event.organizer || ''}" />
-            </div>
-            <div class="space-y-2">
-              <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant ml-1">Max Team Capacity</label>
-              <input id="event-max-teams" type="number" class="w-full bg-secondary/5 border border-primary/20 rounded-2xl py-4 px-5 text-on-surface font-headline placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 transition-all" value="${event.max_teams || 10}" />
-            </div>
-            <div class="space-y-2">
-              <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant ml-1">Event Slug (URL)</label>
-              <input id="event-slug" class="w-full bg-secondary/5 border border-primary/20 rounded-2xl py-4 px-5 text-on-surface font-headline placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 transition-all" value="${event.slug || ''}" />
+            
+            <div class="space-y-4">
+              <div class="space-y-1">
+                <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-1">Event Tactical Name</label>
+                <input id="edit-event-name" class="w-full bg-secondary/5 border border-primary/20 rounded-xl py-3 px-4 text-on-surface font-headline focus:ring-2 focus:ring-primary/20 transition-all font-bold" value="${event.name || ''}" />
+              </div>
+              <div class="space-y-1">
+                <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-1">Organizer / Command</label>
+                <input id="edit-event-organizer" class="w-full bg-secondary/5 border border-primary/20 rounded-xl py-3 px-4 text-on-surface focus:ring-2 focus:ring-primary/20 transition-all" value="${event.organizer || ''}" />
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="space-y-1">
+                  <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-1">Deployment Date</label>
+                  <input id="edit-event-date" type="date" class="w-full bg-secondary/5 border border-primary/20 rounded-xl py-3 px-4 text-on-surface focus:ring-2 focus:ring-primary/20" value="${event.event_date || ''}" />
+                </div>
+                <div class="space-y-1">
+                  <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-1">Event URL Slug</label>
+                  <div class="w-full bg-slate-100 border border-primary/10 rounded-xl py-3 px-4 text-on-surface-variant font-mono text-xs flex items-center gap-2">
+                    <span class="material-symbols-outlined text-xs">link</span> ${event.slug || 'no-slug-set'}
+                  </div>
+                </div>
+              </div>
+              <div class="space-y-1">
+                <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-1">Mission Intelligence / Briefing</label>
+                <textarea id="edit-event-desc" class="w-full bg-secondary/5 border border-primary/20 rounded-xl py-3 px-4 text-on-surface h-24 resize-none focus:ring-2 focus:ring-primary/20 text-sm leading-relaxed">${event.description || ''}</textarea>
+              </div>
+              <button id="save-event-info" class="w-full py-3.5 rounded-xl kinetic-gradient text-on-primary-fixed font-headline font-bold text-sm tracking-widest uppercase hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-sm">save</span> Commit Core Details
+              </button>
             </div>
           </div>
 
-          <div class="space-y-6">
-             <div class="space-y-2">
-              <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant ml-1">Tactical Round Selection</label>
-              <div class="p-5 rounded-2xl bg-secondary/5 border border-primary/20 space-y-3">
-                 <div class="flex items-center justify-between">
-                   <span class="text-xs font-bold text-on-surface uppercase">Leaderboard Visibility</span>
-                   <input type="checkbox" id="show-leaderboard" class="w-5 h-5 rounded border-primary/20 text-primary focus:ring-primary/20" ${event.show_leaderboard !== false ? 'checked' : ''} />
-                 </div>
-                 <div class="flex items-center justify-between">
-                   <span class="text-xs font-bold text-on-surface uppercase">Registration Deep Link</span>
-                   <span class="text-[10px] font-mono text-primary font-bold">/register/${event.slug}</span>
-                 </div>
+          <div class="space-y-8">
+            <!-- Card 02: Registration Limits -->
+            <div class="glass-panel p-8 rounded-[32px] border border-secondary/10 bg-white">
+              <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center">
+                  <span class="material-symbols-outlined">group_add</span>
+                </div>
+                <h3 class="font-headline font-bold text-on-surface uppercase tracking-tight">Squadron Limits</h3>
+              </div>
+              <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="space-y-1">
+                  <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-1">Max Teams</label>
+                  <input id="edit-max-teams" type="number" class="w-full bg-secondary/5 border border-primary/20 rounded-xl py-3 px-4 text-on-surface font-headline font-bold focus:ring-2 focus:ring-primary/20" value="${event.max_teams || 50}" />
+                </div>
+                <div class="space-y-1">
+                  <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-1">Max Per Team</label>
+                  <input id="edit-max-team-size" type="number" class="w-full bg-secondary/5 border border-primary/20 rounded-xl py-3 px-4 text-on-surface font-headline font-bold focus:ring-2 focus:ring-primary/20" value="${event.max_team_size || 4}" />
+                </div>
+              </div>
+              <button id="save-event-limits" class="w-full py-3.5 rounded-xl border border-secondary/20 text-secondary font-headline font-bold text-xs tracking-widest uppercase hover:bg-secondary/5 transition-all">Save Tactical Capacity</button>
+            </div>
+
+            <!-- Card 03: System Intelligence -->
+            <div class="glass-panel p-8 rounded-[32px] border border-tertiary/10 bg-white">
+              <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 rounded-xl bg-tertiary/10 text-tertiary flex items-center justify-center">
+                  <span class="material-symbols-outlined">psychology</span>
+                </div>
+                <h3 class="font-headline font-bold text-on-surface uppercase tracking-tight">AI Protocol Configuration</h3>
+              </div>
+              <div class="space-y-4">
+                <div class="space-y-1">
+                  <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-1">Gemini AI Access Key</label>
+                  <input id="edit-gemini-key" type="password" class="w-full bg-secondary/5 border border-primary/20 rounded-xl py-3 px-4 text-on-surface font-mono text-xs focus:ring-2 focus:ring-primary/20" placeholder="Enter API Key to enable AI evaluations..." value="${eventConfig.gemini_api_key || ''}" />
+                </div>
+                <button id="save-ai-config" class="w-full py-3.5 rounded-xl border border-tertiary/20 text-tertiary font-headline font-bold text-xs tracking-widest uppercase hover:bg-tertiary/5 transition-all">Enable Intelligence Engine</button>
               </div>
             </div>
-            <div class="space-y-2">
-              <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant ml-1">Access Credentials (Optional)</label>
-              <input id="event-password" type="password" class="w-full bg-secondary/5 border border-primary/20 rounded-2xl py-4 px-5 text-on-surface font-headline placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 transition-all" placeholder="Enter password to secure registration" value="${event.password || ''}" />
-            </div>
-            <div class="space-y-2">
-              <label class="text-[10px] font-bold uppercase tracking-[0.2em] text-on-surface-variant ml-1">Gemini AI API Key</label>
-              <input id="gemini-api-key" type="password" class="w-full bg-secondary/5 border border-primary/20 rounded-2xl py-4 px-5 text-on-surface font-headline placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 transition-all" placeholder="Enter Gemini Pro API Key" value="${event.config?.gemini_api_key || ''}" />
+          </div>
+      </div>
+
+      <!-- Module 04: Tactical Controls -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+        <div class="glass-panel p-6 rounded-3xl border border-primary/10 bg-white flex flex-col justify-between shadow-sm">
+          <div class="mb-4">
+            <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest mb-1">Squadron Entry</div>
+            <div class="flex items-center gap-2">
+              <div class="w-2 h-2 rounded-full ${event.registration_open ? 'bg-secondary animate-pulse' : 'bg-error'}"></div>
+              <span class="text-sm font-headline font-bold ${event.registration_open ? 'text-secondary' : 'text-error'} uppercase">${event.registration_open ? 'Open' : 'Locked'}</span>
             </div>
           </div>
+          <button class="event-action w-full py-3 rounded-xl border border-primary/10 text-on-surface-variant font-headline font-bold text-[10px] uppercase tracking-widest hover:bg-secondary/5" data-action="toggle-registration">
+            ${event.registration_open ? 'Close Registration' : 'Live Registration'}
+          </button>
         </div>
 
-      <!-- Registration Link (shown when registration is open) -->
-      ${event.registration_open ? `
-        <div class="glass-panel p-6 rounded-2xl mb-8 glow-accent">
-          <div class="flex items-center gap-3 mb-3">
-            <span class="material-symbols-outlined text-secondary">share</span>
-            <h3 class="font-headline font-bold text-on-surface text-lg">Registration Link</h3>
-          </div>
-          <div class="flex items-center gap-3">
-            <div class="flex-1 bg-surface-container-lowest rounded-xl py-3 px-4 font-mono text-sm text-primary truncate select-all" id="reg-link-display">
-              ${window.location.origin}${window.location.pathname}#/register/${event.slug || generateSlug(event.name)}
+        <div class="glass-panel p-6 rounded-3xl border border-primary/10 bg-white flex flex-col justify-between shadow-sm">
+          <div class="mb-4">
+            <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest mb-1">Event Readiness</div>
+            <div class="flex items-center gap-2">
+              <div class="w-2 h-2 rounded-full ${event.status === 'active' ? 'bg-primary' : 'bg-slate-300'}"></div>
+              <span class="text-sm font-headline font-bold ${event.status === 'active' ? 'text-primary' : 'text-on-surface-variant'} uppercase">${event.status === 'active' ? 'Active' : 'Preparation'}</span>
             </div>
-            <button id="copy-reg-link" class="px-5 py-3 rounded-xl bg-secondary/20 text-secondary font-headline font-bold text-sm hover:bg-secondary/30 transition-colors flex items-center gap-2 flex-shrink-0">
-              <span class="material-symbols-outlined text-sm">content_copy</span> Copy
+          </div>
+          <button class="event-action w-full py-3 rounded-xl ${event.status === 'active' ? 'bg-error/10 text-error' : 'bg-primary/20 text-primary'} font-headline font-bold text-[10px] uppercase tracking-widest hover:scale-[1.02] transition-all" data-action="toggle-status">
+            ${event.status === 'active' ? 'End Mission' : 'Activate Arena'}
+          </button>
+        </div>
+
+        <div class="glass-panel p-6 rounded-3xl border border-primary/10 bg-white shadow-sm">
+          <div class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest mb-3">Public Registration Link</div>
+          <div class="flex items-center gap-2">
+            <div class="flex-1 bg-slate-50 border border-primary/10 rounded-xl py-2 px-3 font-mono text-[10px] text-secondary truncate">
+              /register/${event.slug}
+            </div>
+            <button class="w-10 h-10 rounded-xl bg-secondary/10 text-secondary flex items-center justify-center hover:bg-secondary/20" onclick="navigator.clipboard.writeText(window.location.origin + '/#/register/${event.slug}')">
+              <span class="material-symbols-outlined text-sm">content_copy</span>
             </button>
           </div>
+          <button class="w-full mt-3 py-2.5 rounded-xl bg-secondary/10 text-secondary font-headline font-bold text-[10px] uppercase tracking-widest hover:bg-secondary/20" onclick="window.open('/#/register/${event.slug}', '_blank')">
+            Launch Preview
+          </button>
         </div>
-      ` : ''}
+      </div>
     `;
+  }
 
     // Event limit save handler
     document.getElementById('save-event-limits')?.addEventListener('click', async () => {
@@ -1089,7 +1149,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
   // ========================================
   // ROUNDS TAB
   // ========================================
-  function renderRoundsTab(el, event, rounds) {
+  function renderRoundsTab(el, event, rounds, teams) {
     const roundTypes = [
       { value: 'quiz', label: 'Quiz (MCQ)', icon: 'quiz' },
       { value: 'logo', label: 'Logo Identification', icon: 'image_search' },
@@ -1104,8 +1164,8 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
     el.innerHTML = `
       <div class="flex items-end justify-between mb-8">
         <div>
-          <h1 class="text-3xl font-headline font-bold text-on-surface">Event Settings</h1>
-          <p class="text-on-surface-variant text-sm mt-1">${event.name} • Operational Parameters</p>
+          <h1 class="text-3xl font-headline font-bold text-on-surface">Mission Protocol</h1>
+          <p class="text-on-surface-variant text-sm mt-1">${event.name} • Round Parameters</p>
         </div>
         <div class="flex gap-4">
            <div class="bg-primary/5 px-6 py-3 rounded-2xl border border-primary/10 text-center">
@@ -1123,88 +1183,93 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
         </div>
       </div>
 
-      <div class="glass-panel p-8 rounded-[32px] border border-secondary/10 mb-8">
+      <!-- Add New Round Module -->
+      <div class="glass-panel p-8 rounded-[32px] border border-primary/10 bg-white mb-8">
         <div class="flex items-center gap-3 mb-8">
           <div class="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
-            <span class="material-symbols-outlined">settings_suggest</span>
+            <span class="material-symbols-outlined">add_task</span>
           </div>
-          <h3 class="text-xl font-headline font-bold text-on-surface uppercase tracking-tight">Core Configuration</h3>
+          <h3 class="text-xl font-headline font-bold text-on-surface uppercase tracking-tight">Deploy New Round</h3>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-end">
           <div class="space-y-2">
             <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-1">Tactical Objective</label>
-            <input id="round-title" class="w-full bg-secondary/5 border border-primary/20 rounded-2xl py-4 px-5 text-on-surface font-headline placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20" placeholder="e.g. Logic Blast" />
+            <input id="round-title" class="w-full bg-secondary/5 border border-primary/20 rounded-2xl py-4 px-5 text-on-surface font-headline placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 transition-all font-bold" placeholder="e.g. Logic Blast" />
           </div>
           <div class="space-y-2">
             <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-1">Protocol Type</label>
-            <select id="round-type" class="w-full bg-secondary/5 border border-primary/20 rounded-2xl py-4 px-5 text-on-surface font-headline appearance-none cursor-pointer focus:ring-2 focus:ring-primary/20">
-              <option value="quiz">Quiz System</option>
-              <option value="logo">Logo Mastery</option>
-              <option value="prompt">Visual Prompt</option>
-              <option value="video">Cinematic Engine</option>
-              <option value="webdev">Terminal Dev</option>
-              <option value="debate">Verbal Combat</option>
+            <select id="round-type" class="w-full bg-secondary/5 border border-primary/20 rounded-2xl py-4 px-5 text-on-surface font-headline appearance-none cursor-pointer focus:ring-2 focus:ring-primary/20 transition-all">
+              <optgroup label="Questionnaire" class="bg-white text-secondary">
+                <option value="quiz">Quiz System (MCQ)</option>
+              </optgroup>
+              <optgroup label="Visual Intelligence" class="bg-white text-secondary">
+                <option value="logo">Logo Mastery</option>
+                <option value="prompt">Generative Prompt</option>
+              </optgroup>
+              <optgroup label="Development & Creative" class="bg-white text-secondary">
+                <option value="webdev">Terminal Web Dev</option>
+                <option value="video">Cinematic Engine</option>
+              </optgroup>
+              <optgroup label="Verbal Combat" class="bg-white text-secondary">
+                <option value="debate">Tech Debate</option>
+              </optgroup>
             </select>
           </div>
           <div class="space-y-2 text-center">
-            <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant leading-none">Max Yield</label>
-            <input id="round-max-score" type="number" class="w-full bg-secondary/5 border border-primary/10 rounded-2xl py-4 px-5 text-on-surface font-headline text-center placeholder:text-slate-400" value="100" />
+            <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block mb-1">Max Yield</label>
+            <input id="round-max-score" type="number" class="w-full bg-secondary/5 border border-primary/10 rounded-2xl py-4 px-5 text-on-surface font-headline text-center placeholder:text-slate-400 font-bold" value="100" />
           </div>
-          <button id="add-round" class="w-full py-4 rounded-2xl kinetic-gradient text-on-primary-fixed font-headline font-bold text-xs uppercase tracking-widest shadow-lg hover:scale-105 active:scale-95 transition-all">Execute Add</button>
+          <button id="add-round" class="w-full h-[62px] rounded-2xl kinetic-gradient text-on-primary-fixed font-headline font-bold text-sm tracking-widest uppercase hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg">
+            <span class="material-symbols-outlined">rocket_launch</span> Deploy Round
+          </button>
         </div>
       </div>
 
-      <!-- Existing Rounds -->
-      <div class="space-y-3" id="rounds-list">
-        ${rounds.length === 0 ? '<p class="text-center text-on-surface-variant/40 py-8 italic">No rounds added yet. Add your first round above.</p>' : rounds.map(r => {
-          const typeInfo = roundTypes.find(t => t.value === r.round_type) || {};
-          return `
-            <div class="bg-surface-container-low p-5 rounded-2xl flex flex-col xl:flex-row xl:items-center justify-between gap-4 group hover:bg-surface-container transition-all">
-              <div class="flex items-center gap-4">
-                <div class="w-10 h-10 rounded-xl ${r.status === 'completed' ? 'bg-primary/20' : r.status === 'active' ? 'bg-secondary/20' : r.status === 'paused' ? 'bg-warning/20' : 'bg-surface-container-highest'} flex items-center justify-center">
-                  <span class="material-symbols-outlined ${r.status === 'completed' ? 'text-primary' : r.status === 'active' ? 'text-secondary' : r.status === 'paused' ? 'text-warning' : 'text-on-surface-variant'}">${typeInfo.icon || 'extension'}</span>
-                </div>
-                <div>
-                  <div class="flex items-center gap-2">
-                    <span class="text-xs font-bold text-on-surface-variant/40 font-headline">R${r.round_number}</span>
-                    <h4 class="font-headline font-bold text-on-surface">${r.title}</h4>
+      <!-- Active Deployment List -->
+      <div class="space-y-6">
+        <h3 class="font-headline font-bold text-on-surface-variant text-[10px] uppercase tracking-[0.3em] ml-2">Active Sequence Deployment</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          ${rounds.sort((a,b) => a.round_number - b.round_number).map(r => {
+            const typeInfo = roundTypes.find(t => t.value === r.round_type) || { label: r.round_type, icon: 'extension' };
+            return `
+              <div class="glass-panel p-6 rounded-[28px] border border-primary/10 bg-white group hover:border-primary/30 transition-all shadow-sm">
+                <div class="flex items-center justify-between mb-5">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl ${r.status === 'active' ? 'bg-secondary/10 text-secondary border border-secondary/20' : r.status === 'completed' ? 'bg-primary/10 text-primary border border-primary/20' : 'bg-slate-50 text-slate-400 border border-primary/5'} flex items-center justify-center transition-colors">
+                      <span class="material-symbols-outlined">${typeInfo.icon}</span>
+                    </div>
+                    <div>
+                      <div class="text-[8px] font-bold uppercase tracking-widest text-on-surface-variant/50">Round ${r.round_number} // ${r.round_type}</div>
+                      <div class="font-headline font-bold text-on-surface text-sm uppercase truncate max-w-[120px]">${r.title}</div>
+                    </div>
                   </div>
-                  <div class="text-[10px] text-on-surface-variant capitalize">
-                    ${typeInfo.label || r.round_type} • ${r.duration_minutes} min • <span class="text-secondary font-bold">Max: ${r.max_score || 100} pts</span>
-                    ${r.status === 'active' && r.started_at ? ` • Since: ${new Date(r.started_at).toLocaleTimeString()}` : ''}
-                    ${r.status === 'paused' ? '<span class="text-warning font-bold underline animate-pulse ml-2">LOCKED</span>' : ''}
+                  <div class="flex flex-col items-end">
+                    <span class="text-[8px] font-bold uppercase tracking-widest ${r.status === 'active' ? 'text-secondary animate-pulse' : r.status === 'completed' ? 'text-primary' : 'text-on-surface-variant/30'}">${r.status}</span>
+                    <span class="text-[10px] font-bold text-secondary">${r.max_score || 100} PTS</span>
+                  </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3">
+                  <button class="round-action flex items-center justify-center gap-2 py-3 rounded-xl ${r.status === 'active' ? 'bg-primary/10 text-primary' : 'bg-secondary/10 text-secondary'} font-headline font-bold text-[9px] uppercase tracking-widest hover:scale-[1.02] transition-all" data-id="${r.id}" data-action="toggle-status">
+                    <span class="material-symbols-outlined text-xs">${r.status === 'active' ? 'done_all' : 'play_arrow'}</span>
+                    ${r.status === 'active' ? 'Complete' : 'Activate'}
+                  </button>
+                  <div class="flex gap-2">
+                    <button class="round-action flex-1 flex items-center justify-center rounded-xl border border-primary/10 text-on-surface-variant hover:bg-secondary/5 transition-colors" data-id="${r.id}" data-action="configure">
+                      <span class="material-symbols-outlined text-[16px]">tune</span>
+                    </button>
+                    <button class="round-action flex-1 flex items-center justify-center rounded-xl bg-error/5 text-error/40 hover:bg-error/10 hover:text-error transition-colors" data-id="${r.id}" data-action="delete">
+                      <span class="material-symbols-outlined text-[16px]">delete</span>
+                    </button>
                   </div>
                 </div>
               </div>
-                <div class="flex items-center flex-wrap gap-2">
-                  ${r.status === 'pending' ? `<button data-round-action="start" data-round-id="${r.id}" class="round-ctrl px-3 py-1.5 rounded-lg bg-secondary/10 text-secondary font-headline font-bold text-xs border border-secondary/20 hover:bg-secondary/30 transition-colors">▶ START</button>` : ''}
-                  ${r.status === 'active' ? `
-                    <button data-round-action="pause" data-round-id="${r.id}" class="round-ctrl px-3 py-1.5 rounded-lg bg-warning/10 text-warning font-headline font-bold text-xs border border-warning/20 hover:bg-warning/20 transition-colors">⏸ PAUSE (LOCK)</button>
-                    <button data-round-action="complete" data-round-id="${r.id}" class="round-ctrl px-3 py-1.5 rounded-lg bg-error/10 text-error font-headline font-bold text-xs border border-error/20 hover:bg-error/30 transition-colors">⬛ END</button>
-                  ` : ''}
-                  ${r.status === 'paused' ? `
-                    <button data-round-action="resume" data-round-id="${r.id}" class="round-ctrl px-3 py-1.5 rounded-lg bg-secondary/10 text-secondary font-headline font-bold text-xs border border-secondary/20 hover:bg-secondary/30 transition-colors">▶ RESUME (UNLOCK)</button>
-                    <button data-round-action="complete" data-round-id="${r.id}" class="round-ctrl px-3 py-1.5 rounded-lg bg-error/10 text-error font-headline font-bold text-xs border border-error/20 hover:bg-error/30 transition-colors">⬛ END</button>
-                    <button data-round-action="restart" data-round-id="${r.id}" class="round-ctrl px-3 py-1.5 rounded-lg bg-primary/10 text-primary font-headline font-bold text-xs border border-primary/20 hover:bg-primary/30 transition-colors">🔄 RESTART</button>
-                  ` : ''}
-                  ${r.status === 'completed' ? `
-                    <button data-round-action="manage-intel" data-round-id="${r.id}" class="round-ctrl px-3 py-1.5 rounded-lg bg-secondary/10 text-secondary font-headline font-bold text-xs border border-secondary/20 hover:bg-secondary/30 transition-colors flex items-center gap-1">
-                      <span class="material-symbols-outlined text-xs">manage_search</span> REVIEW
-                    </button>
-                    <button data-round-action="restart" data-round-id="${r.id}" class="round-ctrl px-3 py-1.5 rounded-lg bg-primary/10 text-primary font-headline font-bold text-xs border border-primary/20 hover:bg-primary/30 transition-colors">🔄 RESTART FRESH</button>
-                  ` : ''}
-
-                  <div class="w-px h-6 bg-primary/10 mx-2 hidden sm:block"></div>
-                  <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${r.status === 'active' ? 'bg-secondary/10 text-secondary' : r.status === 'paused' ? 'bg-warning/10 text-warning' : r.status === 'completed' ? 'bg-primary/10 text-primary' : 'bg-surface-container-highest text-on-surface-variant'}">${r.status}</span>
-                  <button type="button" data-round-action="preview" data-round-id="${r.id}" class="round-ctrl round-preview w-8 h-8 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center hover:bg-secondary/20 transition-colors shrink-0" title="Preview Participant View"><span class="material-symbols-outlined text-sm">visibility</span></button>
-                  <button type="button" data-edit-round="${r.id}" class="edit-round w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center hover:bg-primary/20 transition-colors shrink-0"><span class="material-symbols-outlined text-sm">edit</span></button>
-                  <button type="button" data-del-round="${r.id}" class="del-round w-8 h-8 rounded-lg bg-error/10 text-error flex items-center justify-center hover:bg-error/20 transition-colors shrink-0"><span class="material-symbols-outlined text-sm">delete</span></button>
-                </div>
-            </div>
-          `;
-        }).join('')}
+            `;
+          }).join('')}
+        </div>
       </div>
+    `;
 
       <!-- Edit Round Modal -->
       <div id="edit-round-modal" class="hidden fixed inset-0 bg-surface/80 backdrop-blur-md z-50 flex items-center justify-center p-6">
@@ -1910,18 +1975,9 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
   // SCORES TAB
   // ========================================
   function renderScoresTab(el, event, rounds, teams, allScores) {
-    const eventScores = allScores.filter(s => teams.some(t => t.id === s.team_id));
-
     el.innerHTML = `
       <div class="flex items-end justify-between mb-8">
         <div>
-          <h1 class="text-3xl font-headline font-bold text-on-surface">Scores</h1>
-          <p class="text-on-surface-variant text-sm mt-1">${event.name} • Manual & auto-evaluated scores</p>
-        </div>
-      </div>
-
-      <!-- Inline Score Matrix (Score Entry Form Removed) -->
-
       <div class="glass-panel rounded-2xl overflow-x-auto border border-primary/10 bg-white">
         <table class="w-full text-left border-collapse">
           <thead>
