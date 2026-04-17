@@ -40,7 +40,8 @@ export async function renderDebateRound(container, params, search = {}) {
     return; 
   }
 
-  if (!isPreview && renderPreRoundCountdown(round, container, renderDebateRound)) return;
+  // Instant Launch Protocol: Overlay disabled as per user request
+  // if (!isPreview && renderPreRoundCountdown(round, container, renderDebateRound)) return;
 
   const isPaused = round.status === 'paused';
   
@@ -56,8 +57,8 @@ export async function renderDebateRound(container, params, search = {}) {
 
   // Compute remaining time for paused state
   let pausedRemaining = DEBATE_DURATION_MS;
-  if (isPaused && round.started_at) {
-    const startedAt = new Date(round.started_at).getTime() + 5000;
+  if (!isPreview && isPaused && round.started_at) {
+    const startedAt = new Date(round.started_at).getTime();
     let pausedAt = timeSync.getSyncedTime();
     try {
       const cfg = typeof round.config === 'string' ? JSON.parse(round.config) : (round.config || {});
@@ -262,8 +263,8 @@ export async function renderDebateRound(container, params, search = {}) {
     const text = document.getElementById('debate-text')?.value?.trim() || '';
     
     try {
-      // Calculate synchronized time taken
-      const competitionStart = new Date(round.started_at).getTime() + 5000;
+      // Calculate synchronized time taken based on Instant Launch
+      const competitionStart = new Date(round.started_at).getTime();
       const time_taken_ms = Math.max(0, timeSync.getSyncedTime() - competitionStart);
 
       const { error } = await supabase.from('submissions').upsert({
@@ -331,10 +332,9 @@ export async function renderDebateRound(container, params, search = {}) {
     }, 3000);
   }
 
-  // Debate timer is based on topic.duration_seconds (NOT round.duration_minutes)
-  // It starts counting from round.started_at + 5s grace
+  // It starts counting from round.started_at exactly
   if (round.started_at && !isLocked && !isPaused && !isPreview) {
-    const startedAt = new Date(round.started_at).getTime() + 5000;
+    const startedAt = new Date(round.started_at).getTime();
     const elapsed = timeSync.getSyncedTime() - startedAt;
     const remaining = Math.max(0, DEBATE_DURATION_MS - elapsed);
 

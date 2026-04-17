@@ -1381,8 +1381,8 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
 
         if (action === 'start') {
           updates.status = 'active';
-          // Future-Start Protocol: 5s buffer for network sync
-          updates.started_at = new Date(timeSync.getSyncedTime() + 5000).toISOString();
+          // Instant-Start Protocol: No buffer, start exactly now
+          updates.started_at = new Date(timeSync.getSyncedTime()).toISOString();
           await supabase.from('events').update({ current_round_id: roundId }).eq('id', event.id);
           
           // Instant Socket Trigger
@@ -1403,9 +1403,9 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
             const nowTime = timeSync.getSyncedTime();
             const pausedDurationMs = nowTime - pausedAtTime;
             
-            // Shift started_at forward mathematically to sustain timer accuracy
             if (round.started_at) {
               const staticStartTime = new Date(round.started_at).getTime();
+              // Standardize resume without the 5s grace buffer
               updates.started_at = new Date(staticStartTime + pausedDurationMs).toISOString();
             }
             updates.config = { ...currentConfig };

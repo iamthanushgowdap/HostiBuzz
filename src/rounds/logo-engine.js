@@ -44,7 +44,8 @@ export async function renderLogoRound(container, params, search = {}, mockUser =
     return; 
   }
 
-  if (!isPreview && renderPreRoundCountdown(round, container, renderLogoRound)) return;
+  // Instant Launch Protocol: Overlay disabled as per user request
+  // if (!isPreview && renderPreRoundCountdown(round, container, renderLogoRound)) return;
 
   const { data: logos } = await supabase.from('logo_assets')
     .select('*')
@@ -143,8 +144,8 @@ export async function renderLogoRound(container, params, search = {}, mockUser =
       onConfirm: async () => {
         isFinal = true;
         
-        // Calculate synchronized time taken
-        const competitionStart = new Date(round.started_at).getTime() + 5000;
+        // Calculate synchronized time taken based on Instant Launch
+        const competitionStart = new Date(round.started_at).getTime();
         const time_taken_ms = Math.max(0, timeSync.getSyncedTime() - competitionStart);
 
         await supabase.from('submissions').upsert({
@@ -217,8 +218,8 @@ export async function renderLogoRound(container, params, search = {}, mockUser =
       return;
     }
 
-    // SLIDESHOW CALIBRATION: Sync based on absolute server start + grace
-    const syncStart = new Date(round.started_at).getTime() + 5000;
+    // SLIDESHOW CALIBRATION: Sync based on absolute server start (Instant Launch)
+    const syncStart = new Date(round.started_at).getTime();
     const now = timeSync.getSyncedTime();
     const elapsedSec = (now - syncStart) / 1000;
     const slideIndex = Math.floor(elapsedSec / SECONDS_PER_LOGO);

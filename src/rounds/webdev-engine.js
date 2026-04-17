@@ -43,7 +43,8 @@ export async function renderWebdevRound(container, params, search = {}) {
     return; 
   }
 
-  if (!isPreview && renderPreRoundCountdown(round, container, renderWebdevRound)) return;
+  // Instant Launch Protocol: Overlay disabled as per user request
+  // if (!isPreview && renderPreRoundCountdown(round, container, renderWebdevRound)) return;
 
   const isPaused = round.status === 'paused';
   
@@ -274,8 +275,8 @@ export async function renderWebdevRound(container, params, search = {}) {
     }
 
     try {
-      // Calculate synchronized time taken
-      const competitionStart = new Date(round.started_at).getTime() + 5000;
+      // Calculate synchronized time taken based on Instant Launch
+      const competitionStart = new Date(round.started_at).getTime();
       const time_taken_ms = Math.max(0, timeSync.getSyncedTime() - competitionStart);
 
       const { error } = await supabase.from('submissions').upsert({

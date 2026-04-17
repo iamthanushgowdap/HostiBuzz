@@ -41,7 +41,8 @@ export async function renderVideoRound(container, params, search = {}) {
     return; 
   }
 
-  if (!isPreview && renderPreRoundCountdown(round, container, renderVideoRound)) return;
+  // Instant Launch Protocol: Overlay disabled as per user request
+  // if (!isPreview && renderPreRoundCountdown(round, container, renderVideoRound)) return;
 
   const isPaused = round.status === 'paused';
   
@@ -165,8 +166,8 @@ export async function renderVideoRound(container, params, search = {}) {
     }
 
     try {
-      // Calculate synchronized time taken
-      const competitionStart = new Date(round.started_at).getTime() + 5000;
+      // Calculate synchronized time taken based on Instant Launch
+      const competitionStart = new Date(round.started_at).getTime();
       const time_taken_ms = Math.max(0, timeSync.getSyncedTime() - competitionStart);
 
       const { error } = await supabase.from('submissions').upsert({
@@ -232,7 +233,7 @@ export async function renderVideoRound(container, params, search = {}) {
       }
     }).startFromServer(round.started_at, round.duration_minutes);
   } else if (!isPreview && isPaused) {
-    const startedAt = new Date(round.started_at).getTime() + 5000;
+    const startedAt = new Date(round.started_at).getTime();
     let pausedAt = Date.now();
     try {
       const cfg = typeof round.config === 'string' ? JSON.parse(round.config) : (round.config || {});

@@ -44,7 +44,8 @@ export async function renderPromptRound(container, params, search = {}) {
     return; 
   }
 
-  if (!isPreview && renderPreRoundCountdown(round, container, renderPromptRound)) return;
+  // Instant Launch Protocol: Overlay disabled as per user request
+  // if (!isPreview && renderPreRoundCountdown(round, container, renderPromptRound)) return;
 
   const { data: promptImage } = await supabase.from('prompt_images').select('*').eq('round_id', round.id).limit(1).maybeSingle();
   const { data: existing } = await supabase.from('submissions').select('*').eq('team_id', user.id).eq('round_id', round.id).maybeSingle();
@@ -194,8 +195,8 @@ export async function renderPromptRound(container, params, search = {}) {
       showConfirm: true,
       confirmText: "Submit Prompt",
       onConfirm: async () => {
-        // Calculate synchronized time taken
-        const competitionStart = new Date(round.started_at).getTime() + 5000;
+        // Calculate synchronized time taken based on Instant Launch
+        const competitionStart = new Date(round.started_at).getTime();
         const time_taken_ms = Math.max(0, timeSync.getSyncedTime() - competitionStart);
 
         await supabase.from('submissions').upsert({
@@ -227,7 +228,7 @@ export async function renderPromptRound(container, params, search = {}) {
       }
       if (isPaused) return;
 
-      const startedAt = new Date(round.started_at).getTime() + 5000;
+      const startedAt = new Date(round.started_at).getTime();
       const elapsedSec = (timeSync.getSyncedTime() - startedAt) / 1000;
       const timeRem = Math.max(0, Math.ceil(displayDuration - elapsedSec));
       
@@ -249,8 +250,8 @@ export async function renderPromptRound(container, params, search = {}) {
         onComplete: async () => {
           clearInterval(syncInterval);
           if (!existing?.is_final) {
-            // Calculate synchronized time taken
-            const competitionStart = new Date(round.started_at).getTime() + 5000;
+            // Calculate synchronized time taken based on Instant Launch
+            const competitionStart = new Date(round.started_at).getTime();
             const time_taken_ms = Math.max(0, timeSync.getSyncedTime() - competitionStart);
 
             await supabase.from('submissions').upsert({ 

@@ -48,7 +48,8 @@ export async function renderQuizRound(container, params, search = {}, mockUser =
     return;
   }
 
-  if (!isPreview && renderPreRoundCountdown(round, container, renderQuizRound)) return;
+  // Instant Launch Protocol: Overlay disabled as per user request
+  // if (!isPreview && renderPreRoundCountdown(round, container, renderQuizRound)) return;
 
   const isPaused = round.status === 'paused';
   
@@ -198,8 +199,8 @@ export async function renderQuizRound(container, params, search = {}, mockUser =
       summary: wrongItems.length === 0 ? "Perfect Score: All questions answered correctly!" : null
     });
 
-    // Calculate synchronized time taken
-    const competitionStart = new Date(round.started_at).getTime() + 5000;
+    // Calculate synchronized time taken based on Instant Launch (no offset)
+    const competitionStart = new Date(round.started_at).getTime();
     const time_taken_ms = Math.max(0, timeSync.getSyncedTime() - competitionStart);
 
     // Save final state
