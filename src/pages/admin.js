@@ -1062,7 +1062,6 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
         </div>
       </div>
     `;
-  }
 
     // Event limit save handler
     document.getElementById('save-event-limits')?.addEventListener('click', async () => {
@@ -1144,6 +1143,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
         renderAdmin(container);
       }
     });
+
   }
 
   // ========================================
@@ -1308,9 +1308,6 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
               <input id="edit-round-max-score" type="number" min="1" class="w-full bg-surface-container-lowest border border-primary/5 rounded-xl py-3 px-4 text-secondary font-headline font-black text-xl" />
             </div>
           </div>
-          <button id="save-edit-round" class="kinetic-gradient w-full py-4 rounded-xl font-headline font-bold text-white flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-transform shadow-lg">
-            <span class="material-symbols-outlined">save</span> Save Changes
-          </button>
         </div>
       </div>
     `;
