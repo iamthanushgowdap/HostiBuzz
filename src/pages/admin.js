@@ -9,6 +9,7 @@ import { renderDashboard } from './dashboard.js';
 import { Ticker } from '../components/ticker.js';
 import { ActivityBroadcast } from '../services/activity-broadcast.js';
 import { AIEvaluator } from '../services/ai-evaluator.js';
+import { timeSync } from '../services/timeSync.js';
 import Prism from 'prismjs';
 import 'prismjs/themes/prism-tomorrow.css'; 
 import 'prismjs/components/prism-javascript';
@@ -1380,7 +1381,8 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
 
         if (action === 'start') {
           updates.status = 'active';
-          updates.started_at = new Date().toISOString();
+          // Future-Start Protocol: 5s buffer for network sync
+          updates.started_at = new Date(timeSync.getSyncedTime() + 5000).toISOString();
           await supabase.from('events').update({ current_round_id: roundId }).eq('id', event.id);
           
           // Instant Socket Trigger
@@ -1398,7 +1400,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
           updates.status = 'active';
           if (currentConfig.paused_at) {
             const pausedAtTime = new Date(currentConfig.paused_at).getTime();
-            const nowTime = Date.now();
+            const nowTime = timeSync.getSyncedTime();
             const pausedDurationMs = nowTime - pausedAtTime;
             
             // Shift started_at forward mathematically to sustain timer accuracy

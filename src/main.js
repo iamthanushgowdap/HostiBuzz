@@ -59,5 +59,8 @@ initRealtimeNotifier();
 import { socketService } from './services/socket.js';
 socketService.init();
 
-console.log('%c⚡ HostiBuzz v1.0', 'color: #a7a5ff; font-size: 16px; font-weight: bold; font-family: "Space Grotesk"');
+import { timeSync } from './services/timeSync.js';
+timeSync.sync();
+
+console.log('%c⚡ HostiBuzz v2.1.0', 'color: #a7a5ff; font-size: 16px; font-weight: bold; font-family: "Space Grotesk"');
 console.log('%cOpen Source Technical Event Hosting Platform', 'color: #53ddfc; font-size: 12px');

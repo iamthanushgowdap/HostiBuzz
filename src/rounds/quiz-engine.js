@@ -7,10 +7,14 @@ import { navigate } from '../router.js';
 import { ActivityBroadcast } from '../services/activity-broadcast.js';
 import { Ticker } from '../components/ticker.js';
 import { Notifier } from '../services/notifier.js';
+import { pauseFooterClock, resumeFooterClock } from '../components/footer.js';
 
 let timer = null;
 
 export async function renderQuizRound(container, params, search = {}, mockUser = null) {
+  // Eco-Mode: Pause background processing
+  pauseFooterClock();
+
   const isPreview = search.mode === 'preview' || !!mockUser;
   const previewRoundId = search.roundId;
   const user = mockUser || getState('user');
@@ -209,6 +213,7 @@ export async function renderQuizRound(container, params, search = {}, mockUser =
     ActivityBroadcast.push('activity', `Team "${user.team_name}" just submitted for ${round.title}!`);
     
     Notifier.toast(`Quiz submitted! Result: ${score}/${maxScore}`, 'success');
+    resumeFooterClock();
     navigate('/dashboard');
   }
 
@@ -352,7 +357,10 @@ export async function renderQuizRound(container, params, search = {}, mockUser =
     Notifier.confirm(
       'Terminate Session',
       'Are you sure you want to exit the current round? Your progress is auto-saved, but you will leave the tactical terminal.',
-      () => navigate('/dashboard'),
+      () => {
+        resumeFooterClock();
+        navigate('/dashboard');
+      },
       { confirmText: 'Exit to Dashboard', type: 'warning' }
     );
   });

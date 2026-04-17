@@ -1,4 +1,6 @@
-// Timer utility synced with server time
+import { timeSync } from './timeSync.js';
+
+// Timer utility synced with absolute server time
 export class Timer {
   constructor({ durationMs, onTick, onComplete }) {
     this.durationMs = durationMs;
@@ -6,14 +8,13 @@ export class Timer {
     this.onComplete = onComplete;
     this.remaining = durationMs;
     this.interval = null;
-    this.startTime = null;
+    this.endTime = null;
   }
 
   start() {
-    this.startTime = Date.now();
+    this.endTime = timeSync.getSyncedTime() + this.durationMs;
     this.interval = setInterval(() => {
-      const elapsed = Date.now() - this.startTime;
-      this.remaining = Math.max(0, this.durationMs - elapsed);
+      this.remaining = Math.max(0, this.endTime - timeSync.getSyncedTime());
       
       if (this.onTick) this.onTick(this.remaining);
       
@@ -21,31 +22,30 @@ export class Timer {
         this.stop();
         if (this.onComplete) this.onComplete();
       }
-    }, 100);
+    }, 500); // Optimized for lower CPU load
   }
 
   startFromServer(startedAt, durationMinutes) {
-    const serverStart = new Date(startedAt).getTime() + 10000;
-    const totalMs = durationMinutes * 60 * 1000;
-    const elapsed = Date.now() - serverStart;
-    this.durationMs = totalMs;
-    this.remaining = Math.max(0, totalMs - elapsed);
+    // Standardize round start with a server timestamp
+    const serverStart = new Date(startedAt).getTime();
+    this.durationMs = durationMinutes * 60 * 1000;
+    this.endTime = serverStart + this.durationMs;
+    
+    this.remaining = Math.max(0, this.endTime - timeSync.getSyncedTime());
     
     if (this.remaining <= 0) {
       if (this.onComplete) this.onComplete();
       return;
     }
     
-    this.startTime = Date.now() - elapsed;
     this.interval = setInterval(() => {
-      const e = Date.now() - this.startTime;
-      this.remaining = Math.max(0, this.durationMs - e);
+      this.remaining = Math.max(0, this.endTime - timeSync.getSyncedTime());
       if (this.onTick) this.onTick(this.remaining);
       if (this.remaining <= 0) {
         this.stop();
         if (this.onComplete) this.onComplete();
       }
-    }, 100);
+    }, 500);
   }
 
   stop() {
@@ -67,7 +67,9 @@ export class Timer {
 export function renderPreRoundCountdown(round, container, renderFn) {
   if (round.status !== 'active' || !round.started_at) return false;
   
-  const elapsed = Date.now() - new Date(round.started_at).getTime();
+  const serverStart = new Date(round.started_at).getTime();
+  const now = timeSync.getSyncedTime();
+  const elapsed = now - serverStart;
   const GRACE_MS = 10000; 
   
   if (elapsed < GRACE_MS) {
@@ -86,16 +88,17 @@ export function renderPreRoundCountdown(round, container, renderFn) {
       container.appendChild(overlay);
       
       const interval = setInterval(() => {
-        const e = Date.now() - new Date(round.started_at).getTime();
+        const e = timeSync.getSyncedTime() - serverStart;
         const rem = Math.ceil((GRACE_MS - e) / 1000);
         if (rem <= 0) {
           clearInterval(interval);
           overlay.remove();
           renderFn(container);
         } else {
-          document.getElementById('pre-round-counter').textContent = rem;
+          const el = document.getElementById('pre-round-counter');
+          if (el) el.textContent = rem;
         }
-      }, 100);
+      }, 200);
     }
     return true; 
   }

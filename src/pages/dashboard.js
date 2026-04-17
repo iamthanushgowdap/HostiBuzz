@@ -13,31 +13,31 @@ let roundTimer = null;
 export async function renderDashboard(container, params = {}, search = {}, mockUser = null) {
   const user = mockUser || getState('user');
   Ticker.init(container);
-  
+
   // Admin Redirection (Skip if mockUser is provided for preview)
   if (!mockUser && user.role === 'admin') {
     navigate('/admin');
     return;
   }
-  
+
   // Re-fetch team from DB to get the latest event_id (in case localStorage is stale)
   const { data: freshTeam } = await supabase.from('teams').select('*').eq('id', user.id).single();
   const eventId = freshTeam?.event_id || user.event_id;
-  
+
   // Fetch event & its rounds separately to avoid ambiguous FK error
   let event = null;
   if (eventId) {
     const { data, error } = await supabase.from('events').select('*').eq('id', eventId).single();
     if (error) console.error('Dashboard event fetch error:', error);
-    
+
     const { data: roundsData } = await supabase.from('rounds').select('*').eq('event_id', eventId);
-    
+
     event = data;
     if (event) event.rounds = roundsData || [];
   }
   const currentRound = event?.rounds?.find(r => r.status === 'active' || r.status === 'paused') || null;
   const rounds = (event?.rounds || []).sort((a, b) => a.round_number - b.round_number);
-  
+
   // Fetch team scores
   const { data: scores } = await supabase.from('scores').select('*, rounds(title, round_number)').eq('team_id', user.id);
   const totalScore = scores?.reduce((sum, s) => sum + Number(s.score), 0) || 0;
@@ -146,10 +146,10 @@ export async function renderDashboard(container, params = {}, search = {}, mockU
       <!-- Rounds Grid -->
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
         ${rounds.map(r => {
-          const scoreData = scores?.find(s => s.round_id === r.id);
-          const statusColor = r.status === 'completed' ? 'text-secondary' : r.status === 'active' ? 'text-primary' : 'text-on-surface-variant/40';
-          const statusIcon = r.status === 'completed' ? 'check_circle' : r.status === 'active' ? 'radio_button_checked' : 'radio_button_unchecked';
-          return `
+    const scoreData = scores?.find(s => s.round_id === r.id);
+    const statusColor = r.status === 'completed' ? 'text-secondary' : r.status === 'active' ? 'text-primary' : 'text-on-surface-variant/40';
+    const statusIcon = r.status === 'completed' ? 'check_circle' : r.status === 'active' ? 'radio_button_checked' : 'radio_button_unchecked';
+    return `
             <div class="bg-surface-container-low rounded-2xl p-5 hover:bg-surface-container transition-colors">
               <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-3">
@@ -180,7 +180,7 @@ export async function renderDashboard(container, params = {}, search = {}, mockU
               `}
             </div>
           `;
-        }).join('')}
+  }).join('')}
       </div>
 
       <!-- Team Members -->
@@ -221,12 +221,12 @@ export async function renderDashboard(container, params = {}, search = {}, mockU
       try {
         const cfg = typeof currentRound.config === 'string' ? JSON.parse(currentRound.config) : (currentRound.config || {});
         if (cfg.paused_at) pausedAt = new Date(cfg.paused_at).getTime();
-      } catch (e) {}
-      
+      } catch (e) { }
+
       const totalMs = currentRound.duration_minutes * 60 * 1000;
       const elapsedSoFar = pausedAt - startedAt;
       remaining = Math.max(0, totalMs - elapsedSoFar);
-      
+
       const timerEl = document.getElementById('round-timer');
       if (timerEl) timerEl.textContent = Timer.formatTime(remaining);
     } else {
@@ -341,9 +341,9 @@ export async function renderDashboard(container, params = {}, search = {}, mockU
       const status = data.status === 'active' ? 'RESUMED' : data.status.toUpperCase();
       const type = data.status === 'completed' ? 'info' : 'warning';
       const verb = data.status === 'active' ? 'Resumed' : data.status === 'paused' ? 'Paused' : 'Completed';
-      
+
       Notifier.toast(`📢 ${title} ${status}`, type, { duration: 5000 });
-      
+
       if (data.status === 'paused' || data.status === 'completed') {
         Notifier.modal({
           title: `Round ${verb}`,
@@ -429,13 +429,13 @@ export async function renderDashboard(container, params = {}, search = {}, mockU
 
         <div class="space-y-6 max-h-[50vh] overflow-y-auto pr-2 custom-scrollbar feedback-content text-left">
           ${(() => {
-            const rawNotes = score.evaluator_notes || "No detailed feedback provided yet.";
-            try {
-              const data = JSON.parse(rawNotes);
-              if (data.items && Array.isArray(data.items)) {
-                if (data.summary && data.items.length === 0) return `<p class="text-sm text-on-surface-variant p-4 bg-primary/5 rounded-xl border border-primary/10 text-center">${data.summary}</p>`;
-                
-                return data.items.map(item => `
+        const rawNotes = score.evaluator_notes || "No detailed feedback provided yet.";
+        try {
+          const data = JSON.parse(rawNotes);
+          if (data.items && Array.isArray(data.items)) {
+            if (data.summary && data.items.length === 0) return `<p class="text-sm text-on-surface-variant p-4 bg-primary/5 rounded-xl border border-primary/10 text-center">${data.summary}</p>`;
+
+            return data.items.map(item => `
                   <div class="glass-panel p-5 rounded-3xl border-white/5 bg-white/5 space-y-4">
                     ${data.type === 'logo' && item.label ? `
                       <div class="w-full h-32 bg-white rounded-xl overflow-hidden p-2">
@@ -460,10 +460,10 @@ export async function renderDashboard(container, params = {}, search = {}, mockU
                     </div>
                   </div>
                 `).join('');
-              }
-            } catch (e) { /* Not JSON, use fallback below */ }
+          }
+        } catch (e) { /* Not JSON, use fallback below */ }
 
-            return `
+        return `
               <div class="space-y-4">
                 <div class="p-6 rounded-3xl bg-surface-container-highest border border-white/5 text-on-surface-variant italic leading-relaxed relative overflow-hidden group">
                   <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
@@ -492,7 +492,7 @@ export async function renderDashboard(container, params = {}, search = {}, mockU
                 </div>
               </div>
             `;
-          })()}
+      })()}
         </div>
 
         <div class="mt-8 pt-6 border-t border-outline-variant/10 text-center">

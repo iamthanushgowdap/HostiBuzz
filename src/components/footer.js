@@ -59,8 +59,25 @@ export function renderFooter() {
   `;
 }
 
+/* ── Global Footer Performance Controls ───────────────── */
+let footerAnims = [];
+
+export function pauseFooterClock() {
+  console.log('Eco-Mode: Pausing footer animations.');
+  footerAnims.forEach(anim => anim.pause());
+}
+
+export function resumeFooterClock() {
+  console.log('Eco-Mode: Resuming footer animations.');
+  footerAnims.forEach(anim => anim.resume());
+}
+
 export function initFooterClock() {
   if (typeof gsap === 'undefined' || !document.getElementById('footer-spider-svg')) return;
+
+  // Clear previous anims if re-initialized
+  footerAnims.forEach(a => a.kill());
+  footerAnims = [];
 
   const face01d = document.getElementById('spider-face01')?.getAttribute('d');
   const face02d = document.getElementById('spider-face02')?.getAttribute('d');
@@ -98,36 +115,36 @@ export function initFooterClock() {
   gsap.set(min, { rotation: minRot, transformOrigin: '50% 50%' });
   gsap.set(hr,  { rotation: hrRot,  transformOrigin: '50% 50%' });
 
-  gsap.to('.footer-cw.footer-t24',  1, { rotation: '-=15', transformOrigin: '50% 50%', ease: 'bounce', onComplete() { this.invalidate().delay(1).restart(true); } });
-  gsap.to('.footer-cw.footer-t20',  1, { rotation: '-=18', transformOrigin: '50% 50%', ease: 'bounce', onComplete() { this.invalidate().delay(1).restart(true); } });
-  gsap.to('.footer-ccw.footer-t12', 1, { rotation: '+=30', transformOrigin: '50% 50%', ease: 'bounce', onComplete() { this.invalidate().delay(1).restart(true); } });
+  footerAnims.push(gsap.to('.footer-cw.footer-t24',  1, { rotation: '-=15', transformOrigin: '50% 50%', ease: 'bounce', onComplete() { this.invalidate().delay(1).restart(true); } }));
+  footerAnims.push(gsap.to('.footer-cw.footer-t20',  1, { rotation: '-=18', transformOrigin: '50% 50%', ease: 'bounce', onComplete() { this.invalidate().delay(1).restart(true); } }));
+  footerAnims.push(gsap.to('.footer-ccw.footer-t12', 1, { rotation: '+=30', transformOrigin: '50% 50%', ease: 'bounce', onComplete() { this.invalidate().delay(1).restart(true); } }));
 
-  gsap.to(sec, 0.5, {
+  footerAnims.push(gsap.to(sec, 0.5, {
     rotation: secRot, transformOrigin: '50% 50%', ease: 'bounce',
     onComplete() {
       secRot();
       if (gsap.getProperty(sec, 'rotation') >= 360) gsap.set(sec, { rotation: 0, transformOrigin: '50% 50%' });
       this.invalidate().delay(0).restart(true);
     }
-  });
-  gsap.to(min, 0.5, {
+  }));
+  footerAnims.push(gsap.to(min, 0.5, {
     rotation: minRot, transformOrigin: '50% 50%', ease: 'none',
     onComplete() {
       if (gsap.getProperty(min, 'rotation') >= 360) gsap.set(min, { rotation: 0, transformOrigin: '50% 50%' });
       this.invalidate().delay(5).restart(true);
     }
-  });
-  gsap.to(hr, 0.5, {
+  }));
+  footerAnims.push(gsap.to(hr, 0.5, {
     rotation: hrRot, transformOrigin: '50% 50%', ease: 'none',
     onComplete() {
       if (gsap.getProperty(hr, 'rotation') >= 360) gsap.set(hr, { rotation: 0, transformOrigin: '50% 50%' });
       this.invalidate().delay(30).restart(true);
     }
-  });
+  }));
 
   if (typeof MorphSVGPlugin !== 'undefined') {
-    gsap.timeline({ repeat: -1, repeatDelay: 5 })
-      .to('#footer-face', { duration: 0.5, morphSVG: '#spider-face02', repeat: 4, yoyo: true, ease: 'power1.out' });
+    footerAnims.push(gsap.timeline({ repeat: -1, repeatDelay: 5 })
+      .to('#footer-face', { duration: 0.5, morphSVG: '#spider-face02', repeat: 4, yoyo: true, ease: 'power1.out' }));
   }
 
   document.getElementById('footer-clock-area')?.classList.add('footer-clock-ready');
