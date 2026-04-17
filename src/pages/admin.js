@@ -1269,7 +1269,6 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
           }).join('')}
         </div>
       </div>
-    `;
 
       <!-- Edit Round Modal -->
       <div id="edit-round-modal" class="hidden fixed inset-0 bg-surface/80 backdrop-blur-md z-50 flex items-center justify-center p-6">
