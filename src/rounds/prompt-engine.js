@@ -225,7 +225,6 @@ export async function renderPromptRound(container, params, search = {}) {
         clearInterval(syncInterval);
         return;
       }
-      }
       if (isPaused) return;
 
       const startedAt = new Date(round.started_at).getTime() + 5000;
