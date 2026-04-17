@@ -56,7 +56,7 @@ export async function renderRegister(container, params = {}) {
 
   // Build extra field HTML
   function renderExtraField(f) {
-    const baseClass = 'w-full bg-surface-container-lowest border border-primary/5 rounded-2xl py-4 px-5 text-on-surface focus:ring-2 focus:ring-secondary/40 placeholder:text-slate-400 text-sm transition-all focus:bg-surface-container-low';
+    const baseClass = 'w-full bg-secondary/5 border border-primary/10 rounded-2xl py-4 px-5 text-on-surface focus:ring-2 focus:ring-secondary/40 placeholder:text-slate-400 text-sm transition-all focus:bg-secondary/10';
     if (f.type === 'textarea') {
       return `<textarea id="ef_${f.id}" name="${f.id}" class="${baseClass} h-32 resize-none" placeholder="${f.label}${f.required ? ' *' : ''}" ${f.required ? 'required' : ''}></textarea>`;
     }

@@ -131,7 +131,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
 
         <div class="p-6 flex items-start justify-between">
           <div>
-            <h3 class="text-lg font-black text-white font-headline leading-tight">Control Panel</h3>
+            <h3 class="text-lg font-black text-on-surface font-headline leading-tight">Control Panel</h3>
             <p class="text-[10px] text-on-surface-variant uppercase tracking-[0.2em]">ADMIN // ${user.username}</p>
           </div>
           
@@ -149,7 +149,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
             Preview Engine
           </h4>
           <div class="flex flex-col gap-2">
-            <select id="preview-team-select" class="w-full bg-surface-container-lowest border-none rounded-lg py-2 px-3 text-[10px] text-white font-headline">
+            <select id="preview-team-select" class="w-full bg-secondary/5 border border-primary/10 rounded-lg py-2 px-3 text-[10px] text-on-surface font-headline focus:ring-1 focus:ring-primary/40 appearance-none">
               <option value="">Select Team to Preview...</option>
               ${teams.map(t => `<option value="${t.id}">${t.team_name}</option>`).join('')}
             </select>
@@ -235,7 +235,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
         <div class="fixed bottom-4 right-4 z-[60] flex flex-col items-end gap-3 pointer-events-none">
           <div id="broadcast-popup" class="hidden bg-surface-container-high border border-white/10 w-[280px] p-4 rounded-2xl shadow-2xl transition-all pointer-events-auto shadow-primary/20">
             <h4 class="text-[10px] font-headline font-bold text-primary uppercase tracking-widest mb-3 flex items-center gap-2"><span class="material-symbols-outlined text-sm">wifi_tethering</span> Mission Broadcast</h4>
-            <textarea id="broadcast-msg" class="w-full h-24 bg-surface-container-lowest text-white text-xs border-none rounded-xl p-3 resize-none focus:ring-1 focus:ring-primary mb-2 placeholder:text-slate-500" placeholder="Push a tactical update to all team terminals..."></textarea>
+            <textarea id="broadcast-msg" class="w-full h-24 bg-secondary/5 text-on-surface text-xs border border-primary/10 rounded-xl p-3 resize-none focus:ring-1 focus:ring-primary mb-2 placeholder:text-slate-400" placeholder="Push a tactical update to all team terminals..."></textarea>
             <button id="send-broadcast" class="w-full py-2.5 bg-primary text-on-primary-fixed rounded-xl font-headline font-black text-[10px] uppercase tracking-widest hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2">Execute Push</button>
           </div>
           <button id="broadcast-toggle" class="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-full shadow-lg flex items-center justify-center text-on-primary-fixed hover:scale-110 active:scale-95 transition-all pointer-events-auto border border-white/10">
@@ -255,7 +255,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
     <div id="create-event-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-6">
       <div class="glass-panel p-8 rounded-3xl max-w-lg w-full border border-white/10 space-y-6">
         <div class="flex justify-between items-center">
-          <h2 class="text-2xl font-headline font-bold text-white">Create New Event</h2>
+          <h2 class="text-2xl font-headline font-bold text-on-surface">Create New Event</h2>
           <button id="close-create-modal" class="w-8 h-8 rounded-lg bg-surface-container-highest flex items-center justify-center text-on-surface-variant hover:text-white transition-colors">
             <span class="material-symbols-outlined text-sm">close</span>
           </button>
@@ -264,19 +264,19 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
         <div class="space-y-4">
           <div class="space-y-2">
             <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Event Name *</label>
-            <input id="new-event-name" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white focus:ring-1 focus:ring-secondary/40 placeholder:text-slate-600 font-headline" placeholder="e.g. HostiBuzz 2026, TechNova, HackFest" />
+            <input id="new-event-name" class="w-full bg-secondary/5 border border-primary/10 rounded-xl py-3 px-4 text-on-surface focus:ring-1 focus:ring-secondary/40 placeholder:text-slate-400 font-headline" placeholder="e.g. HostiBuzz 2026, TechNova, HackFest" />
           </div>
           <div class="space-y-2">
             <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Organizer</label>
-            <input id="new-event-organizer" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white focus:ring-1 focus:ring-secondary/40 placeholder:text-slate-600" placeholder="e.g. CS Department, IEEE Chapter" />
+            <input id="new-event-organizer" class="w-full bg-secondary/5 border border-primary/10 rounded-xl py-3 px-4 text-on-surface focus:ring-1 focus:ring-secondary/40 placeholder:text-slate-400" placeholder="e.g. CS Department, IEEE Chapter" />
           </div>
           <div class="space-y-2">
             <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Description</label>
-            <textarea id="new-event-desc" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white focus:ring-1 focus:ring-secondary/40 placeholder:text-slate-600 h-20 resize-none" placeholder="What's this event about?"></textarea>
+            <textarea id="new-event-desc" class="w-full bg-secondary/5 border border-primary/10 rounded-xl py-3 px-4 text-on-surface focus:ring-1 focus:ring-secondary/40 placeholder:text-slate-400 h-20 resize-none" placeholder="What's this event about?"></textarea>
           </div>
           <div class="space-y-2">
             <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Event Date</label>
-            <input id="new-event-date" type="datetime-local" style="color-scheme: dark" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white focus:ring-1 focus:ring-secondary/40" />
+            <input id="new-event-date" type="datetime-local" class="w-full bg-secondary/5 border border-primary/10 rounded-xl py-3 px-4 text-on-surface focus:ring-1 focus:ring-secondary/40" />
           </div>
         </div>
 
@@ -654,20 +654,20 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
       el.innerHTML = `
         <div class="space-y-6">
           <div class="flex items-center justify-between">
-            <h2 class="text-3xl font-headline font-bold text-white tracking-tight">Export / Import Engine</h2>
+            <h2 class="text-3xl font-headline font-bold text-on-surface tracking-tight">Export / Import Engine</h2>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- Export Section -->
             <div class="glass-panel p-6 rounded-2xl space-y-4">
-              <h3 class="font-headline font-bold text-white text-lg flex items-center gap-2">
+              <h3 class="font-headline font-bold text-on-surface text-lg flex items-center gap-2">
                 <span class="material-symbols-outlined text-primary">cloud_download</span>
                 Export for AI Evaluation
               </h3>
               <p class="text-xs text-on-surface-variant leading-relaxed">Select a round to export all team submissions in an AI-ready JSON format. This file includes detailed evaluation instructions for the HostiBuzz AI scoring pipeline.</p>
               
               <div class="space-y-3 pt-2">
-                <select id="export-round-select" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white focus:ring-1 focus:ring-primary/40 text-sm">
+                <select id="export-round-select" class="w-full bg-secondary/5 border border-primary/10 rounded-xl py-3 px-4 text-on-surface focus:ring-1 focus:ring-primary/40 text-sm appearance-none cursor-pointer">
                   ${(rounds || []).filter(r => r.round_type !== 'elimination').map(r => `<option value="${r.id}">Round ${r.round_number}: ${r.title}</option>`).join('')}
                 </select>
                 <button id="download-round-json" class="w-full py-4 kinetic-gradient text-on-primary-fixed font-headline font-bold text-xs uppercase tracking-widest rounded-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2">
@@ -678,14 +678,14 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
 
             <!-- Import Section -->
             <div class="glass-panel p-6 rounded-2xl space-y-4">
-              <h3 class="font-headline font-bold text-white text-lg flex items-center gap-2">
+              <h3 class="font-headline font-bold text-on-surface text-lg flex items-center gap-2">
                 <span class="material-symbols-outlined text-secondary">cloud_upload</span>
                 Import AI Results
               </h3>
               <p class="text-xs text-on-surface-variant leading-relaxed">Paste the AI-generated JSON results or upload the file. You will see a data verification table before any changes are applied to the database.</p>
               
               <div class="space-y-4 pt-2">
-                <textarea id="import-json-paste" class="w-full h-32 bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white focus:ring-1 focus:ring-secondary/40 text-xs font-mono placeholder:text-slate-600 resize-none" placeholder="Paste AI JSON here..."></textarea>
+                <textarea id="import-json-paste" class="w-full h-32 bg-secondary/5 border border-primary/10 rounded-xl py-3 px-4 text-on-surface focus:ring-1 focus:ring-secondary/40 text-xs font-mono placeholder:text-slate-400 resize-none" placeholder="Paste AI JSON here..."></textarea>
                 
                 <div class="flex gap-2">
                   <button id="import-paste-btn" class="flex-1 py-3 bg-secondary/20 text-secondary font-headline font-bold text-xs uppercase tracking-widest rounded-lg hover:bg-secondary/30 transition-all flex items-center justify-center gap-2">
@@ -1523,7 +1523,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
                   <div class="flex items-center gap-3">
                     <span data-team-id="${t.id}" class="presence-dot w-2 h-2 rounded-full ${onlineTeams.has(t.id) ? 'bg-secondary animate-pulse' : 'bg-outline'}"></span>
                     <div>
-                      <div class="font-headline font-bold text-white text-sm">${t.team_name}</div>
+                      <div class="font-headline font-bold text-on-surface text-sm">${t.team_name}</div>
                       <div class="text-[10px] text-on-surface-variant font-mono">${t.team_id}</div>
                     </div>
                   </div>
@@ -1620,11 +1620,11 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
           <div class="w-16 h-16 bg-secondary/20 rounded-2xl flex items-center justify-center text-secondary mx-auto mb-4">
             <span class="material-symbols-outlined text-3xl">enhanced_encryption</span>
           </div>
-          <h3 class="text-2xl font-headline font-bold text-white uppercase tracking-tighter">Security Authorization</h3>
+          <h3 class="text-2xl font-headline font-bold text-on-surface uppercase tracking-tighter">Security Authorization</h3>
           <p class="text-on-surface-variant text-sm">Sensitive Operation: Re-enter your Administrator password to reveal team secrets.</p>
           
           <div class="space-y-4">
-            <input id="admin-verify-pw" type="password" class="w-full bg-surface-container-lowest border-none rounded-2xl py-4 px-5 text-white focus:ring-2 focus:ring-secondary/40 placeholder:text-slate-600 text-center text-lg" placeholder="••••••••" />
+            <input id="admin-verify-pw" type="password" class="w-full bg-secondary/5 border border-secondary/20 rounded-2xl py-4 px-5 text-on-surface focus:ring-2 focus:ring-secondary/40 placeholder:text-slate-400 text-center text-lg" placeholder="••••••••" />
             <div id="verify-error" class="hidden text-error text-xs font-bold uppercase tracking-widest animate-shake">Invalid Authorization Code</div>
           </div>
 
@@ -1776,7 +1776,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
               <span class="material-symbols-outlined text-sm">arrow_back</span>
               <span class="text-xs font-bold uppercase tracking-widest">Back</span>
             </button>
-            <h1 class="text-3xl font-headline font-bold text-white">Round Review</h1>
+            <h1 class="text-3xl font-headline font-bold text-on-surface">Round Review</h1>
             <p class="text-on-surface-variant text-sm mt-1">Audit Mode: ${round.title} (${submissions?.length || 0} Submissions)</p>
           </div>
             <div class="flex items-center gap-3">
@@ -1792,7 +1792,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
         <div class="mb-8 p-6 rounded-3xl bg-primary/5 border border-primary/10">
           <div class="flex items-center gap-3 mb-4">
             <span class="material-symbols-outlined text-primary">fact_check</span>
-            <h3 class="font-headline font-bold text-white text-sm uppercase tracking-widest">Master Reference Key</h3>
+            <h3 class="font-headline font-bold text-on-surface text-sm uppercase tracking-widest">Master Reference Key</h3>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 overflow-y-auto max-h-48 custom-scrollbar pr-2">
             ${assets ? assets.map(a => `
@@ -1915,10 +1915,10 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
                       </div>
                     </td>
                     <td class="px-6 py-5">
-                      <input type="number" data-team="${t.id}" class="audit-score-input w-20 bg-surface-container-lowest border border-white/5 rounded-xl py-2 px-2 text-center text-sm text-primary" value="${p.score}" />
+                      <input type="number" data-team="${t.id}" class="audit-score-input w-20 bg-secondary/5 border border-primary/10 rounded-xl py-2 px-2 text-center text-sm text-primary" value="${p.score}" />
                     </td>
                     <td class="px-6 py-5">
-                      <textarea data-team="${t.id}" class="audit-feedback-input w-full bg-surface-container-lowest border border-white/5 rounded-xl py-2 px-3 text-xs text-secondary h-12 resize-none">${p.feedback}</textarea>
+                      <textarea data-team="${t.id}" class="audit-feedback-input w-full bg-secondary/5 border border-primary/10 rounded-xl py-2 px-3 text-xs text-secondary h-12 resize-none placeholder:text-slate-400">${p.feedback}</textarea>
                     </td>
                     <td class="px-6 py-5 text-center">
                       <span class="text-[8px] font-bold uppercase tracking-widest px-2 py-1 rounded-lg ${p.status === 'suggested' ? 'bg-secondary/20 text-secondary animate-pulse' : p.status === 'final' ? 'bg-primary/20 text-primary' : 'bg-white/5 text-on-surface-variant'}">${p.status}</span>
@@ -1944,7 +1944,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
     el.innerHTML = `
       <div class="flex items-end justify-between mb-8">
         <div>
-          <h1 class="text-3xl font-headline font-bold text-white">Scores</h1>
+          <h1 class="text-3xl font-headline font-bold text-on-surface">Scores</h1>
           <p class="text-on-surface-variant text-sm mt-1">${event.name} • Manual & auto-evaluated scores</p>
         </div>
       </div>
@@ -1974,7 +1974,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
                     if (s) total += Number(s.score);
                     return `
                       <td class="px-2 py-3 text-center">
-                        <input type="number" data-team-id="${t.id}" data-round-id="${r.id}" class="inline-score-input w-20 bg-surface-container-lowest border border-transparent rounded-lg py-2 px-2 text-center text-sm font-headline text-white hover:border-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all ${!s ? 'opacity-40' : ''}" value="${s ? s.score : ''}" placeholder="—" />
+                        <input type="number" data-team-id="${t.id}" data-round-id="${r.id}" class="inline-score-input w-20 bg-secondary/5 border border-primary/10 rounded-lg py-2 px-2 text-center text-sm font-headline text-on-surface hover:border-primary/30 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 transition-all ${!s ? 'opacity-40' : ''}" value="${s ? s.score : ''}" placeholder="—" />
                       </td>
                     `;
                   }).join('')}
@@ -2217,7 +2217,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
     el.innerHTML = `
       <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 class="text-3xl font-headline font-bold text-white">Round Assets</h1>
+          <h1 class="text-3xl font-headline font-bold text-on-surface">Round Assets</h1>
           <p class="text-on-surface-variant text-sm mt-1">${assetRounds.length} asset-based round(s) configured</p>
         </div>
         ${selectedRound ? `
@@ -2231,7 +2231,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
       ${assetRounds.length === 0 ? '<div class="text-center py-12"><p class="text-on-surface-variant">No asset-based rounds added yet.</p></div>' : `
         <div class="glass-panel p-6 rounded-2xl mb-8">
           <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-3">Select Round to Manage Configuration</label>
-          <select id="bank-round-select" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white font-headline">
+          <select id="bank-round-select" class="w-full bg-secondary/5 border border-primary/10 rounded-xl py-3 px-4 text-on-surface font-headline focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer appearance-none">
             ${assetRounds.map(r => `<option value="${r.id}" ${r.id === selectedBankRoundId ? 'selected' : ''}>R${r.round_number}: ${r.title} (${r.round_type})</option>`).join('')}
           </select>
         </div>
@@ -2240,20 +2240,20 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
           <!-- QUIZ ADD UI -->
           <div class="glass-panel p-6 rounded-2xl mb-8 space-y-6">
             <div class="flex items-center justify-between">
-              <h3 class="font-headline font-bold text-white">Add Individual Question</h3>
+              <h3 class="font-headline font-bold text-on-surface">Add Individual Question</h3>
               <button id="toggle-bulk-mode" class="text-xs font-headline font-bold text-primary hover:underline uppercase tracking-widest">Switch to Bulk Import</button>
             </div>
             
             <div id="individual-add-form" class="space-y-3">
-              <textarea id="q-text" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white h-20 resize-none placeholder:text-slate-600" placeholder="Enter question text..."></textarea>
+              <textarea id="q-text" class="w-full bg-secondary/5 border border-primary/10 rounded-xl py-3 px-4 text-on-surface h-20 resize-none placeholder:text-slate-400 focus:ring-2 focus:ring-primary/10" placeholder="Enter question text..."></textarea>
               <div class="grid grid-cols-2 gap-3">
-                <input id="q-opt-0" class="bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white placeholder:text-slate-600 text-sm" placeholder="Option A" />
-                <input id="q-opt-1" class="bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white placeholder:text-slate-600 text-sm" placeholder="Option B" />
-                <input id="q-opt-2" class="bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white placeholder:text-slate-600 text-sm" placeholder="Option C" />
-                <input id="q-opt-3" class="bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white placeholder:text-slate-600 text-sm" placeholder="Option D" />
+                <input id="q-opt-0" class="bg-secondary/5 border border-primary/10 rounded-xl py-3 px-4 text-on-surface placeholder:text-slate-400 text-sm focus:ring-2 focus:ring-primary/10" placeholder="Option A" />
+                <input id="q-opt-1" class="bg-secondary/5 border border-primary/10 rounded-xl py-3 px-4 text-on-surface placeholder:text-slate-400 text-sm focus:ring-2 focus:ring-primary/10" placeholder="Option B" />
+                <input id="q-opt-2" class="bg-secondary/5 border border-primary/10 rounded-xl py-3 px-4 text-on-surface placeholder:text-slate-400 text-sm focus:ring-2 focus:ring-primary/10" placeholder="Option C" />
+                <input id="q-opt-3" class="bg-secondary/5 border border-primary/10 rounded-xl py-3 px-4 text-on-surface placeholder:text-slate-400 text-sm focus:ring-2 focus:ring-primary/10" placeholder="Option D" />
               </div>
               <div class="flex gap-3">
-                <select id="q-correct" class="bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white text-sm flex-1">
+                <select id="q-correct" class="bg-secondary/5 border border-primary/10 rounded-xl py-3 px-4 text-on-surface text-sm flex-1 cursor-pointer">
                   <option value="0">Correct: A</option>
                   <option value="1">Correct: B</option>
                   <option value="2">Correct: C</option>
@@ -2315,7 +2315,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
           <!-- MANAGEMENT & BACKUPS -->
           <div class="pt-6 border-t border-white/5 space-y-6">
             <div class="flex items-center justify-between">
-              <h3 class="font-headline font-bold text-white uppercase text-sm tracking-widest">Shuffled Sets & Backups</h3>
+              <h3 class="font-headline font-bold text-on-surface uppercase text-sm tracking-widest">Shuffled Sets & Backups</h3>
               <div class="flex gap-2">
                 <button id="gen-sets" class="px-4 py-2 rounded-lg bg-secondary/10 text-secondary border border-secondary/20 hover:bg-secondary/20 transition-all font-headline font-bold text-[10px] uppercase tracking-widest">Generate 5 Shuffled Sets</button>
                 <button id="assign-sets" class="px-4 py-2 rounded-lg bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-all font-headline font-bold text-[10px] uppercase tracking-widest">Auto round-robin Assign</button>
@@ -2397,7 +2397,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
         ` : selectedRound?.round_type === 'debate' ? `
           <!-- DEBATE ASSETS UI -->
           <div class="glass-panel p-8 rounded-2xl mb-8 space-y-6 glow-accent">
-            <h3 class="font-headline font-bold text-white text-xl flex items-center gap-3">
+            <h3 class="font-headline font-bold text-on-surface text-xl flex items-center gap-3">
               <span class="material-symbols-outlined text-tertiary">forum</span>
               Configure Debate for: <span class="text-tertiary">${selectedRound.title}</span>
             </h3>
@@ -2466,7 +2466,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
         ` : `
           <!-- LOGO ADD UI -->
           <div class="glass-panel p-6 rounded-2xl mb-8 space-y-4 glow-accent">
-            <h3 class="font-headline font-bold text-white">Add Logo Target to: <span class="text-primary">${selectedRound?.title}</span></h3>
+            <h3 class="font-headline font-bold text-on-surface">Add Logo Target to: <span class="text-primary">${selectedRound?.title}</span></h3>
             <p class="text-xs text-on-surface-variant">Provide the correct brand name. If you want players to see the image on their device, select an Image file to upload. Leave the file blank to run Projector-Only Mode.</p>
             <div class="flex max-md:flex-col gap-3 items-center">
               <input id="l-brand" class="flex-1 bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white placeholder:text-slate-600 font-headline uppercase" placeholder="Correct Brand Name (e.g. Tesla)" />
@@ -2949,7 +2949,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
     el.innerHTML = `
       <div class="flex items-end justify-between mb-8">
         <div>
-          <h1 class="text-3xl font-headline font-bold text-white">Registration Page</h1>
+          <h1 class="text-3xl font-headline font-bold text-on-surface">Registration Page</h1>
           <p class="text-on-surface-variant text-sm mt-1">${event.name} · Customize what participants see when registering</p>
         </div>
         <button type="button" onclick="sessionStorage.setItem('admin_return','true');window.location.hash='/register/${event.slug || ''}'" class="px-4 py-2 rounded-xl bg-secondary/10 text-secondary font-headline font-bold text-xs border border-secondary/20 hover:bg-secondary/20 flex items-center gap-2">
@@ -2959,7 +2959,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
 
       <!-- Banner Section -->
       <div class="glass-panel p-6 rounded-2xl mb-6 space-y-4">
-        <h3 class="font-headline font-bold text-white flex items-center gap-2">
+        <h3 class="font-headline font-bold text-on-surface flex items-center gap-2">
           <span class="material-symbols-outlined text-primary">image</span> Banner & Branding
         </h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -2981,11 +2981,11 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
           <div class="space-y-3">
             <div class="space-y-1">
               <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Page Headline</label>
-              <input id="reg-headline" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white focus:ring-1 focus:ring-primary/40 placeholder:text-slate-600 font-headline" placeholder="e.g. Join the Arena · HostiBuzz 2026" value="${cfg.headline || ''}" />
+              <input id="reg-headline" class="w-full bg-secondary/5 border border-primary/10 rounded-xl py-3 px-4 text-on-surface focus:ring-2 focus:ring-primary/20 placeholder:text-slate-400 font-headline" placeholder="e.g. Join the Arena · HostiBuzz 2026" value="${cfg.headline || ''}" />
             </div>
             <div class="space-y-1">
               <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Subheading / Instructions</label>
-              <textarea id="reg-subheading" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white focus:ring-1 focus:ring-primary/40 placeholder:text-slate-600 h-16 resize-none text-sm" placeholder="e.g. Register your team below. Each team may have up to 4 members.">${cfg.subheading || ''}</textarea>
+              <textarea id="reg-subheading" class="w-full bg-secondary/5 border border-primary/10 rounded-xl py-3 px-4 text-on-surface focus:ring-2 focus:ring-primary/20 placeholder:text-slate-400 h-16 resize-none text-sm" placeholder="e.g. Register your team below. Each team may have up to 4 members.">${cfg.subheading || ''}</textarea>
             </div>
           </div>
         </div>
@@ -2994,7 +2994,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
       <!-- Custom Fields Builder -->
       <div class="glass-panel p-6 rounded-2xl mb-6 space-y-4">
         <div class="flex items-center justify-between">
-          <h3 class="font-headline font-bold text-white flex items-center gap-2">
+          <h3 class="font-headline font-bold text-on-surface flex items-center gap-2">
             <span class="material-symbols-outlined text-secondary">dynamic_form</span> Custom Form Fields
           </h3>
           <button id="add-reg-field" class="px-4 py-2 rounded-xl bg-secondary/10 text-secondary font-headline font-bold text-xs border border-secondary/20 hover:bg-secondary/20 flex items-center gap-2">
@@ -3006,7 +3006,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
           <div class="flex items-start gap-3">
             <span class="material-symbols-outlined text-primary text-lg shrink-0 mt-0.5">info</span>
             <div>
-              <p class="text-xs font-bold text-white mb-2">These fields are <span class="text-primary">already included</span> by default — do NOT add them again:</p>
+              <p class="text-xs font-bold text-on-surface mb-2">These fields are <span class="text-primary">already included</span> by default — do NOT add them again:</p>
               <div class="flex flex-wrap gap-2">
                 ${['Team Name', 'Member 1 / 2 / 3 (+ Add more)', 'Contact Email', 'Contact Phone'].map(f => `
                   <span class="px-3 py-1 bg-primary/10 text-primary rounded-full text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
