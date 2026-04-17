@@ -8,7 +8,7 @@ import { ActivityBroadcast } from '../services/activity-broadcast.js';
 import { Ticker } from '../components/ticker.js';
 import { Notifier } from '../services/notifier.js';
 import { pauseFooterClock, resumeFooterClock } from '../components/footer.js';
-import { timeSync } from './timeSync.js';
+import { timeSync } from '../services/timeSync.js';
 import { socketService } from '../services/socket-service.js';
 
 let timer = null;
