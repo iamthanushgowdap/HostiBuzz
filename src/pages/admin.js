@@ -630,7 +630,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
         renderEventDetail(content, event, rounds, teams);
         break;
       case 'rounds':
-        renderRoundsTab(content, event, rounds);
+        renderRoundsTab(content, event, rounds, teams);
         break;
       case 'teams':
         renderTeamsTab(content, event, teams, tabSwitches);
@@ -1993,7 +1993,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
                     <span class="font-headline font-bold text-on-surface text-sm">${t.team_id}</span>
                   </td>
                   ${rounds.map(r => {
-                    const s = eventScores.find(sc => sc.team_id === t.id && sc.round_id === r.id);
+                    const s = allScores.find(sc => sc.team_id === t.id && sc.round_id === r.id);
                     if (s) total += Number(s.score);
                     return `
                       <td class="px-2 py-3 text-center">

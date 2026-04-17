@@ -422,7 +422,7 @@ export async function renderDashboard(container, params = {}, search = {}, mockU
           </div>
           <div>
             <div class="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-1">Total Score</div>
-            <h3 class="text-xl font-headline font-bold text-white">${score.rounds?.title}</h3>
+            <h3 class="text-xl font-headline font-bold text-on-surface">${score.rounds?.title}</h3>
             <p class="text-xs text-on-surface-variant mt-1">Evaluated on ${new Date(score.evaluated_at).toLocaleDateString()}</p>
           </div>
         </div>
@@ -445,7 +445,7 @@ export async function renderDashboard(container, params = {}, search = {}, mockU
                     
                     <div>
                       <div class="text-[10px] font-bold text-secondary uppercase tracking-widest mb-2">${item.title || (data.type === 'quiz' ? 'Question Detail' : 'Correction')}</div>
-                      ${data.type === 'quiz' ? `<p class="text-sm text-white font-headline font-bold mb-4 leading-relaxed">${item.question}</p>` : ''}
+                      ${data.type === 'quiz' ? `<p class="text-sm text-on-surface font-headline font-bold mb-4 leading-relaxed">${item.question}</p>` : ''}
                       
                       <div class="grid grid-cols-2 gap-3">
                         <div class="bg-red-500/10 border border-red-500/20 p-3 rounded-xl">

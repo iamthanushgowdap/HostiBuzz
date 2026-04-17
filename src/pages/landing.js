@@ -41,7 +41,7 @@ export async function renderLanding(container) {
             <span>Open Source Platform for Hosting Technical Events</span>
           </div>
         </div>
-        <h1 class="text-6xl md:text-8xl lg:text-9xl font-headline font-bold tracking-tighter text-white mb-8 max-w-5xl leading-[0.9]">
+        <h1 class="text-6xl md:text-8xl lg:text-9xl font-headline font-bold tracking-tighter text-on-surface mb-8 max-w-5xl leading-[0.9]">
           The Future of <span class="inline-block px-[0.15em] -mx-[0.15em] text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary italic">Technical</span> Events
         </h1>
         <div class="max-w-3xl mb-12 space-y-6 mx-auto">
@@ -91,24 +91,24 @@ export async function renderLanding(container) {
             icon: 'arrow_forward',
             onClick: "location.hash='#/events'"
           })}
-          <a href="#/login" class="px-8 py-4 rounded-xl bg-surface-container-high/80 border border-outline-variant/20 text-white font-headline font-bold text-lg hover:bg-surface-container-highest transition-colors flex items-center gap-2">
+          <a href="#/login" class="px-8 py-4 rounded-xl bg-surface-container-high border border-primary/10 text-on-surface font-headline font-bold text-lg hover:bg-surface-container-highest transition-colors flex items-center gap-2">
             Team Login
           </a>
         </div>
 
         <!-- Live Stats -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-3xl w-full">
-          <div class="bg-surface-container-low/60 rounded-2xl p-6 text-left border-l-2 border-primary/30 hover:bg-surface-container transition-colors">
+          <div class="glass-panel bg-secondary/5 rounded-2xl p-6 text-left border-l-4 border-primary/30 hover:bg-secondary/10 transition-all">
             <span class="text-xs font-headline font-bold tracking-widest text-on-surface-variant uppercase">Teams Registered</span>
-            <div class="text-3xl font-headline font-black text-white mt-2">${teamCount || 0}</div>
+            <div class="text-3xl font-headline font-black text-on-surface mt-2">${teamCount || 0}</div>
           </div>
-          <div class="bg-surface-container-low/60 rounded-2xl p-6 text-left border-l-2 border-secondary/30 hover:bg-surface-container transition-colors">
+          <div class="glass-panel bg-secondary/5 rounded-2xl p-6 text-left border-l-4 border-secondary/30 hover:bg-secondary/10 transition-all">
             <span class="text-xs font-headline font-bold tracking-widest text-on-surface-variant uppercase">Events Created</span>
-            <div class="text-3xl font-headline font-black text-white mt-2">${eventCount || 0}</div>
+            <div class="text-3xl font-headline font-black text-on-surface mt-2">${eventCount || 0}</div>
           </div>
-          <div class="bg-surface-container-low/60 rounded-2xl p-6 text-left border-l-2 border-tertiary/30 hover:bg-surface-container transition-colors">
+          <div class="glass-panel bg-secondary/5 rounded-2xl p-6 text-left border-l-4 border-tertiary/30 hover:bg-secondary/10 transition-all">
             <span class="text-xs font-headline font-bold tracking-widest text-on-surface-variant uppercase">Platform Status</span>
-            <div class="text-3xl font-headline font-black text-white mt-2 flex items-center gap-2">
+            <div class="text-3xl font-headline font-black text-on-surface mt-2 flex items-center gap-2">
               <span class="w-2.5 h-2.5 bg-secondary rounded-full animate-pulse"></span> Tactical
             </div>
           </div>
@@ -122,7 +122,7 @@ export async function renderLanding(container) {
             <span class="material-symbols-outlined text-base">settings</span>
             Platform Features
           </div>
-          <h2 class="text-4xl md:text-6xl font-headline font-bold tracking-tighter text-white">
+          <h2 class="text-4xl md:text-6xl font-headline font-bold tracking-tighter text-on-surface">
             Built for Complete <span class="italic text-secondary">Event Control</span>
           </h2>
         </div>
@@ -137,10 +137,10 @@ export async function renderLanding(container) {
             { icon: 'notifications_active', title: 'Real-Time Notifications', desc: 'Submission success, Round started, Eliminated / Qualified.' },
             { icon: 'visibility', title: 'Round Preview Mode', desc: 'Admin Only: Preview exactly what users will see before starting a round.' },
           ].map(f => `
-            <div class="bg-surface-container-low/40 rounded-3xl p-8 border border-outline-variant/10 hover:border-primary/20 transition-all">
-              <span class="material-symbols-outlined text-4xl text-primary mb-6">${f.icon}</span>
-              <h3 class="text-2xl font-headline font-bold text-white mb-3">${f.title}</h3>
-              <p class="text-on-surface-variant leading-relaxed">${f.desc}</p>
+            <div class="glass-panel bg-secondary/5 rounded-3xl p-8 border border-primary/10 hover:border-primary/30 transition-all group">
+              <span class="material-symbols-outlined text-4xl text-primary mb-6 group-hover:scale-110 transition-transform">${f.icon}</span>
+              <h3 class="text-2xl font-headline font-bold text-on-surface mb-3">${f.title}</h3>
+              <p class="text-on-surface-variant leading-relaxed text-sm">${f.desc}</p>
             </div>
           `).join('')}
         </div>
