@@ -6,6 +6,7 @@ import { navigate } from '../router.js';
 import { startAntiCheat, stopAntiCheat } from '../services/anti-cheat.js';
 import { Notifier } from '../services/notifier.js';
 import { timeSync } from '../services/timeSync.js';
+import { socketService } from '../services/socket-service.js';
 import { pauseFooterClock, resumeFooterClock } from '../components/footer.js';
 
 export async function renderVideoRound(container, params, search = {}) {
@@ -30,7 +31,7 @@ export async function renderVideoRound(container, params, search = {}) {
       .select('*')
       .eq('event_id', user.event_id)
       .eq('round_type', 'video')
-      .in('status', ['active', 'paused'])
+      .in('status', ['active', 'paused', 'pending'])
       .single();
     round = data;
   }
@@ -40,9 +41,6 @@ export async function renderVideoRound(container, params, search = {}) {
     bindNavbarEvents(); 
     return; 
   }
-
-  // Instant Launch Protocol: Overlay disabled as per user request
-  // if (!isPreview && renderPreRoundCountdown(round, container, renderVideoRound)) return;
 
   const isPaused = round.status === 'paused';
   
@@ -59,7 +57,7 @@ export async function renderVideoRound(container, params, search = {}) {
   if (typeof cfg === 'string') try { cfg = JSON.parse(cfg); } catch(e) { cfg = {}; }
   const guidelines = cfg.guidelines || '';
 
-  if (!isLocked && !isPaused && !isPreview) startAntiCheat(round.id);
+  if (!isLocked && !isPaused && !isPreview && round.status === 'active') startAntiCheat(round.id);
 
   container.innerHTML = `
     ${isPreview ? '<div class="fixed top-0 left-0 w-full bg-primary/80 backdrop-blur-md text-on-primary-fixed text-[10px] font-bold py-1 text-center uppercase tracking-widest z-[200]">PREVIEW MODE - DATA WILL NOT BE SAVED</div>' : ''}
@@ -112,7 +110,7 @@ export async function renderVideoRound(container, params, search = {}) {
                 <span class="material-symbols-outlined text-secondary animate-pulse font-black">timer</span>
                 <span class="text-[9px] uppercase tracking-[0.2em] font-black text-on-surface-variant/60">Sync Remaining</span>
               </div>
-              <span id="video-timer" class="text-2xl lg:text-3xl font-headline font-black text-white tabular-nums tracking-tighter">${Timer.formatTime(round.duration_minutes * 60 * 1000)}</span>
+              <span id="video-timer" class="text-2xl lg:text-3xl font-headline font-black text-white tabular-nums tracking-tighter">${round.started_at ? Timer.formatTime(round.duration_minutes * 60 * 1000) : '--:--'}</span>
             </div>
           </div>
         </div>
@@ -166,7 +164,6 @@ export async function renderVideoRound(container, params, search = {}) {
     }
 
     try {
-      // Calculate synchronized time taken based on Instant Launch
       const competitionStart = new Date(round.started_at).getTime();
       const time_taken_ms = Math.max(0, timeSync.getSyncedTime() - competitionStart);
 
@@ -182,7 +179,6 @@ export async function renderVideoRound(container, params, search = {}) {
       if (error) throw error;
 
       if (isFinal) {
-        // Also save to scores table for ranking
         await supabase.from('scores').upsert({
           team_id: user.id,
           round_id: round.id,
@@ -219,8 +215,9 @@ export async function renderVideoRound(container, params, search = {}) {
     });
   }
 
+  let timer = null;
   if (round.started_at && !isLocked && !isPaused) {
-    new Timer({
+    timer = new Timer({
       onTick: (rem) => { 
         const el = document.getElementById('video-timer'); 
         if (el) el.textContent = Timer.formatTime(rem); 
@@ -229,7 +226,7 @@ export async function renderVideoRound(container, params, search = {}) {
         const link = document.getElementById('video-link').value.trim();
         if (link) await save(true); 
         Notifier.toast('Time is up! Video submission finalized.', 'warning'); 
-        renderVideoRound(container);
+        renderVideoRound(container, params, search);
       }
     }).startFromServer(round.started_at, round.duration_minutes);
   } else if (!isPreview && isPaused) {
@@ -246,12 +243,38 @@ export async function renderVideoRound(container, params, search = {}) {
     if (el) el.textContent = Timer.formatTime(remaining);
   }
 
+  // Socket Synchronization for Instant Launch
+  const onRoundStart = ({ roundId, startedAt }) => {
+    if (roundId === round.id) {
+      round.started_at = startedAt;
+      round.status = 'active';
+      if (timer) timer.stop();
+      timer = new Timer({
+        onTick: (rem) => {
+          const el = document.getElementById('video-timer');
+          if (el) el.textContent = Timer.formatTime(rem);
+        },
+        onComplete: async () => {
+          const link = document.getElementById('video-link').value.trim();
+          if (link) await save(true);
+          Notifier.toast('Time is up! Video submission finalized.', 'warning');
+          renderVideoRound(container, params, search);
+        }
+      });
+      timer.startFromServer(startedAt, round.duration_minutes);
+      startAntiCheat(round.id);
+    }
+  };
+
+  socketService.on('admin:round_start', onRoundStart);
+
   // Terminate Session
   container.querySelector('#terminate-session')?.addEventListener('click', async () => {
     Notifier.confirm(
       'Terminate Session',
       'Are you sure you want to exit the current round? Your progress is auto-saved, but you will leave the tactical terminal.',
       () => {
+        socketService.off('admin:round_start', onRoundStart);
         resumeFooterClock();
         navigate('/dashboard');
       },

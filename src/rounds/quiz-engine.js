@@ -8,7 +8,8 @@ import { ActivityBroadcast } from '../services/activity-broadcast.js';
 import { Ticker } from '../components/ticker.js';
 import { Notifier } from '../services/notifier.js';
 import { pauseFooterClock, resumeFooterClock } from '../components/footer.js';
-import { timeSync } from '../services/timeSync.js';
+import { timeSync } from './timeSync.js';
+import { socketService } from '../services/socket-service.js';
 
 let timer = null;
 
@@ -370,12 +371,41 @@ export async function renderQuizRound(container, params, search = {}, mockUser =
     if (el) el.textContent = Timer.formatTime(remaining);
   }
 
+  // Socket Synchronization for Instant Launch
+  const onRoundStart = ({ roundId, startedAt }) => {
+    if (roundId === round.id) {
+      round.started_at = startedAt;
+      round.status = 'active';
+      // Re-initialize timer and refresh UI components
+      if (timer) timer.stop();
+      timer = new Timer({
+        onTick: (rem) => {
+          const el = document.getElementById('quiz-timer');
+          if (el) el.textContent = Timer.formatTime(rem);
+        },
+        onComplete: async () => {
+          const { data: latest } = await supabase.from('submissions').select('answers').eq('team_id', user.id).eq('round_id', round.id).maybeSingle();
+          await performEvaluation(latest?.answers || answers);
+          Notifier.toast('Time is up! Quiz auto-submitted.', 'warning');
+        }
+      });
+      timer.startFromServer(startedAt, round.duration_minutes);
+      
+      // Force refresh of the ready state
+      renderQuestion();
+      startAntiCheat(round.id);
+    }
+  };
+
+  socketService.on('admin:round_start', onRoundStart);
+
   // Terminate Session
   container.querySelector('#terminate-session')?.addEventListener('click', () => {
     Notifier.confirm(
       'Terminate Session',
       'Are you sure you want to exit the current round? Your progress is auto-saved, but you will leave the tactical terminal.',
       () => {
+        socketService.off('admin:round_start', onRoundStart);
         resumeFooterClock();
         navigate('/dashboard');
       },

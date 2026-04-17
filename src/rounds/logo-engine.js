@@ -6,6 +6,7 @@ import { startAntiCheat, stopAntiCheat } from '../services/anti-cheat.js';
 import { navigate } from '../router.js';
 import { Ticker } from '../components/ticker.js';
 import { timeSync } from '../services/timeSync.js';
+import { socketService } from '../services/socket-service.js';
 import { Notifier } from '../services/notifier.js';
 import { pauseFooterClock, resumeFooterClock } from '../components/footer.js';
 
@@ -395,6 +396,36 @@ export async function renderLogoRound(container, params, search = {}, mockUser =
     if (el) el.textContent = Timer.formatTime(remaining);
   }
 
+  // Socket Synchronization for Instant Launch
+  const onRoundStart = ({ roundId, startedAt }) => {
+    if (roundId === round.id) {
+      round.started_at = startedAt;
+      round.status = 'active';
+      // Re-initialize timer and synchronization logic
+      if (timer) timer.stop();
+      timer = new Timer({
+        onTick: (rem) => {
+          const el = document.getElementById('logo-timer');
+          if (el) el.textContent = Timer.formatTime(rem);
+        },
+        onComplete: async () => {
+          isFinal = true;
+          const competitionStart = new Date(startedAt).getTime();
+          const time_taken_ms = Math.max(0, timeSync.getSyncedTime() - competitionStart);
+          await supabase.from('submissions').upsert({
+            team_id: user.id, round_id: round.id, answers: currentAnswers, is_final: true, submission_time: new Date().toISOString(), time_taken_ms
+          }, { onConflict: 'team_id,round_id' });
+          renderLogoRound(container, params, search);
+        }
+      });
+      timer.startFromServer(startedAt, round.duration_minutes);
+      startAntiCheat(round.id);
+      syncSlideshow(); 
+    }
+  };
+
+  socketService.on('admin:round_start', onRoundStart);
+
   // Terminate Session
   container.querySelector('#terminate-session')?.addEventListener('click', async () => {
     const { Notifier } = await import('../services/notifier.js');
@@ -402,6 +433,7 @@ export async function renderLogoRound(container, params, search = {}, mockUser =
       'Terminate Session',
       'Are you sure you want to exit the current round? Your progress is auto-saved, but you will leave the tactical terminal.',
       () => {
+        socketService.off('admin:round_start', onRoundStart);
         resumeFooterClock();
         navigate('/dashboard');
       },

@@ -4,7 +4,9 @@ import { renderNavbar, bindNavbarEvents } from '../components/navbar.js';
 import { Timer, renderPreRoundCountdown } from '../services/timer.js';
 import { navigate } from '../router.js';
 import { startAntiCheat, stopAntiCheat } from '../services/anti-cheat.js';
+import { Ticker } from '../components/ticker.js';
 import { timeSync } from '../services/timeSync.js';
+import { socketService } from '../services/socket-service.js';
 import { pauseFooterClock, resumeFooterClock } from '../components/footer.js';
 
 export async function renderDebateRound(container, params, search = {}) {
@@ -145,7 +147,8 @@ export async function renderDebateRound(container, params, search = {}) {
 
       <!-- Response Area + tips -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div class="lg:col-span-8 space-y          ${isLocked ? `
+        <div class="lg:col-span-8 space-y-6">
+          ${isLocked ? `
             <div class="glass-panel p-6 lg:p-8 rounded-[2rem] border-secondary/20 bg-secondary/5 slide-in-bottom relative overflow-hidden">
               <div class="absolute -right-12 -top-12 w-32 h-32 bg-secondary/10 blur-3xl rounded-full"></div>
               <div class="flex flex-col lg:flex-row items-center lg:items-start gap-6">
@@ -373,6 +376,19 @@ export async function renderDebateRound(container, params, search = {}) {
     debateTimer.start();
   }
 
+  // Socket Synchronization for Instant Launch
+  const onRoundStart = ({ roundId, startedAt }) => {
+    if (roundId === round.id) {
+      round.started_at = startedAt;
+      round.status = 'active';
+      // Re-initialize all engine baselines and state
+      renderDebateRound(container, params, search);
+      startAntiCheat(round.id);
+    }
+  };
+
+  socketService.on('admin:round_start', onRoundStart);
+
   // Terminate Session
   container.querySelector('#terminate-session')?.addEventListener('click', async () => {
     const { Notifier } = await import('../services/notifier.js');
@@ -380,6 +396,7 @@ export async function renderDebateRound(container, params, search = {}) {
       'Terminate Session',
       'Are you sure you want to exit the current round? Your progress is auto-saved, but you will leave the tactical terminal.',
       () => {
+        socketService.off('admin:round_start', onRoundStart);
         resumeFooterClock();
         navigate('/dashboard');
       },

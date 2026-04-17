@@ -6,8 +6,10 @@ import { navigate } from '../router.js';
 import { startAntiCheat, stopAntiCheat } from '../services/anti-cheat.js';
 import { ActivityBroadcast } from '../services/activity-broadcast.js';
 import { Ticker } from '../components/ticker.js';
-import { timeSync } from '../services/timeSync.js';
+import { Notifier } from '../services/notifier.js';
 import { pauseFooterClock, resumeFooterClock } from '../components/footer.js';
+import { timeSync } from '../services/timeSync.js';
+import { socketService } from '../services/socket-service.js';
 
 export async function renderPromptRound(container, params, search = {}) {
   // Eco-Mode: Pause background processing
@@ -219,6 +221,7 @@ export async function renderPromptRound(container, params, search = {}) {
 
   // Timer and Observer Logic
   const displayDuration = promptImage?.display_duration_seconds || 30;
+  let timer;
 
   if (round.started_at) {
     const syncInterval = setInterval(() => {
@@ -245,7 +248,7 @@ export async function renderPromptRound(container, params, search = {}) {
     }, 100);
 
     if (!isPaused) {
-      new Timer({
+      timer = new Timer({
         onTick: (rem) => { const el = document.getElementById('prompt-timer'); if (el) el.textContent = Timer.formatTime(rem); },
         onComplete: async () => {
           clearInterval(syncInterval);
@@ -288,13 +291,44 @@ export async function renderPromptRound(container, params, search = {}) {
     }
   }
 
-  // Terminate Session
-  container.querySelector('#terminate-session')?.addEventListener('click', async () => {
-    const { Notifier } = await import('../services/notifier.js');
+  // Socket Synchronization for Instant Launch
+  const onRoundStart = ({ roundId, startedAt }) => {
+    if (roundId === round.id) {
+      round.started_at = startedAt;
+      round.status = 'active';
+      // Re-initialize timer and synchronization baseline
+      if (timer) timer.stop();
+      timer = new Timer({
+        onTick: (rem) => {
+          const el = document.getElementById('prompt-timer');
+          if (el) el.textContent = Timer.formatTime(rem);
+        },
+        onComplete: async () => {
+          if (!existing?.is_final) {
+            const competitionStart = new Date(startedAt).getTime();
+            const time_taken_ms = Math.max(0, timeSync.getSyncedTime() - competitionStart);
+            await supabase.from('submissions').upsert({ 
+              team_id: user.id, round_id: round.id, is_final: true, submission_time: new Date().toISOString(), time_taken_ms
+            }, { onConflict: 'team_id,round_id' });
+            Notifier.toast('Time is up! Prompt finalized.', 'warning');
+            renderPromptRound(container, params, search);
+          }
+        }
+      });
+      timer.startFromServer(startedAt, round.duration_minutes);
+      startAntiCheat(round.id);
+    }
+  };
+
+  socketService.on('admin:round_start', onRoundStart);
+
+  // Terminate session
+  container.querySelector('#terminate-session')?.addEventListener('click', () => {
     Notifier.confirm(
       'Terminate Session',
-      'Are you sure you want to exit the current round? Your progress is auto-saved, but you will leave the tactical terminal.',
+      'Are you sure you want to exit? Your progress is auto-saved.',
       () => {
+        socketService.off('admin:round_start', onRoundStart);
         resumeFooterClock();
         navigate('/dashboard');
       },

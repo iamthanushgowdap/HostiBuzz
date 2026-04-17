@@ -7,6 +7,7 @@ import { startAntiCheat, stopAntiCheat } from '../services/anti-cheat.js';
 import { ActivityBroadcast } from '../services/activity-broadcast.js';
 import { Ticker } from '../components/ticker.js';
 import { timeSync } from '../services/timeSync.js';
+import { socketService } from '../services/socket-service.js';
 import { pauseFooterClock, resumeFooterClock } from '../components/footer.js';
 
 export async function renderWebdevRound(container, params, search = {}) {
@@ -376,13 +377,40 @@ export async function renderWebdevRound(container, params, search = {}) {
     if (el) el.querySelector('span:last-child').textContent = Timer.formatTime(remaining);
   }
 
-  // Terminate Session
+  // Socket Synchronization for Instant Launch
+  const onRoundStart = ({ roundId, startedAt }) => {
+    if (roundId === round.id) {
+      round.started_at = startedAt;
+      round.status = 'active';
+      // Re-initialize timer and synchronization baseline
+      if (timer) timer.stop();
+      timer = new Timer({
+        onTick: (rem) => {
+          const el = document.getElementById('webdev-timer');
+          if (el) el.querySelector('span:last-child').textContent = Timer.formatTime(rem);
+        },
+        onComplete: async () => {
+          await save(true);
+          const { Notifier: n } = await import('../services/notifier.js');
+          n.toast('Time up! Project auto-finalized.', 'warning');
+          renderWebdevRound(container, params, search);
+        }
+      });
+      timer.startFromServer(startedAt, round.duration_minutes);
+      startAntiCheat(round.id);
+    }
+  };
+
+  socketService.on('admin:round_start', onRoundStart);
+
+  // Terminate session
   container.querySelector('#terminate-session')?.addEventListener('click', async () => {
     const { Notifier } = await import('../services/notifier.js');
     Notifier.confirm(
       'Terminate Session',
       'Are you sure you want to exit the current round? Your progress is auto-saved, but you will leave the tactical terminal.',
       () => {
+        socketService.off('admin:round_start', onRoundStart);
         resumeFooterClock();
         navigate('/dashboard');
       },
