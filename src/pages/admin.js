@@ -88,16 +88,16 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
     ${renderNavbar({ activeLink: 'dashboard', hideMobileMenu: true })}
     <div class="flex flex-col lg:flex-row min-h-[calc(100vh-76px)]">
       <!-- Mobile Admin Header -->
-      <div class="lg:hidden flex items-center justify-between px-4 py-2 bg-surface-container-high/90 backdrop-blur-md border-b border-white/5 sticky top-[64px] z-30">
+      <div class="lg:hidden flex items-center justify-between px-4 py-2 bg-surface-container-high/90 backdrop-blur-md border-b border-primary/10 sticky top-[64px] z-30">
         <div class="flex items-center gap-3">
-          <button id="admin-sidebar-toggle" class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-primary group active:scale-95 transition-all">
+          <button id="admin-sidebar-toggle" class="w-10 h-10 rounded-xl bg-secondary/10 flex items-center justify-center text-primary group active:scale-95 transition-all outline outline-1 outline-primary/10">
             <span class="material-symbols-outlined">menu_open</span>
           </button>
-          <span class="font-headline font-bold text-sm text-white tracking-widest uppercase">Mission Control</span>
+          <span class="font-headline font-bold text-sm text-on-surface tracking-widest uppercase">Mission Control</span>
         </div>
         
         <!-- Quick Pulse Stats (Mobile) -->
-        <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary/10 border border-primary/20">
           <span class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
           <span class="text-[9px] font-bold text-secondary uppercase tracking-widest">Live</span>
         </div>
@@ -567,9 +567,9 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
     el.innerHTML = `
       <div class="flex flex-col items-center justify-center min-h-[60vh] text-center">
         <span class="material-symbols-outlined text-6xl text-on-surface-variant/20 mb-6">event_note</span>
-        <h1 class="text-4xl font-headline font-bold text-white mb-3">Welcome to Admin Panel</h1>
+        <h1 class="text-4xl font-headline font-bold text-on-surface mb-3">Welcome to Admin Panel</h1>
         <p class="text-on-surface-variant max-w-lg mb-8">Create a new event or select an existing one from the sidebar to manage rounds, teams, and scores.</p>
-        <button id="welcome-create-event" class="kinetic-gradient px-8 py-4 rounded-xl font-headline font-bold text-on-primary-fixed flex items-center gap-3 hover:scale-105 active:scale-95 transition-transform shadow-[0_10px_30px_rgba(167,165,255,0.3)]">
+        <button id="welcome-create-event" class="kinetic-gradient px-8 py-4 rounded-xl font-headline font-bold text-white flex items-center gap-3 hover:scale-105 active:scale-95 transition-transform shadow-lg">
           <span class="material-symbols-outlined">add_circle</span> Create Your First Event
         </button>
 
@@ -578,10 +578,10 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
             <h3 class="text-sm font-headline font-bold text-on-surface-variant/60 tracking-widest uppercase mb-4">or select an event</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
               ${eventList.map(ev => `
-                <button data-pick-event="${ev.id}" class="pick-event bg-surface-container-low p-5 rounded-2xl text-left hover:bg-surface-container transition-all group">
+                <button data-pick-event="${ev.id}" class="pick-event bg-surface-container-low p-5 rounded-2xl text-left hover:bg-surface-container-high transition-all group border border-primary/5">
                   <div class="flex items-center gap-3 mb-2">
                     <span class="w-2.5 h-2.5 rounded-full ${ev.status === 'active' ? 'bg-secondary animate-pulse' : ev.status === 'completed' ? 'bg-primary' : 'bg-outline'}"></span>
-                    <h4 class="font-headline font-bold text-white group-hover:text-primary transition-colors">${ev.name}</h4>
+                    <h4 class="font-headline font-bold text-on-surface group-hover:text-primary transition-colors">${ev.name}</h4>
                   </div>
                   <p class="text-xs text-on-surface-variant">${ev.organizer || 'No organizer'} • ${ev.status} • ${ev.registration_open ? 'Registration Open' : 'Registration Closed'}</p>
                 </button>
@@ -1197,7 +1197,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
                 <div>
                   <div class="flex items-center gap-2">
                     <span class="text-xs font-bold text-on-surface-variant/40 font-headline">R${r.round_number}</span>
-                    <h4 class="font-headline font-bold text-white">${r.title}</h4>
+                    <h4 class="font-headline font-bold text-on-surface">${r.title}</h4>
                   </div>
                   <div class="text-[10px] text-on-surface-variant capitalize">
                     ${typeInfo.label || r.round_type} • ${r.duration_minutes} min • <span class="text-secondary font-bold">Max: ${r.max_score || 100} pts</span>
@@ -1224,7 +1224,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
                     <button data-round-action="restart" data-round-id="${r.id}" class="round-ctrl px-3 py-1.5 rounded-lg bg-primary/10 text-primary font-headline font-bold text-xs border border-primary/20 hover:bg-primary/30 transition-colors">🔄 RESTART FRESH</button>
                   ` : ''}
 
-                  <div class="w-px h-6 bg-white/10 mx-2 hidden sm:block"></div>
+                  <div class="w-px h-6 bg-primary/10 mx-2 hidden sm:block"></div>
                   <span class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${r.status === 'active' ? 'bg-secondary/10 text-secondary' : r.status === 'paused' ? 'bg-warning/10 text-warning' : r.status === 'completed' ? 'bg-primary/10 text-primary' : 'bg-surface-container-highest text-on-surface-variant'}">${r.status}</span>
                   <button type="button" data-round-action="preview" data-round-id="${r.id}" class="round-ctrl round-preview w-8 h-8 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center hover:bg-secondary/20 transition-colors shrink-0" title="Preview Participant View"><span class="material-symbols-outlined text-sm">visibility</span></button>
                   <button type="button" data-edit-round="${r.id}" class="edit-round w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center hover:bg-primary/20 transition-colors shrink-0"><span class="material-symbols-outlined text-sm">edit</span></button>
@@ -1236,11 +1236,11 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
       </div>
 
       <!-- Edit Round Modal -->
-      <div id="edit-round-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-6">
-        <div class="glass-panel p-8 rounded-3xl max-w-lg w-full border border-white/10 space-y-6">
+      <div id="edit-round-modal" class="hidden fixed inset-0 bg-surface/80 backdrop-blur-md z-50 flex items-center justify-center p-6">
+        <div class="glass-panel p-8 rounded-3xl max-w-lg w-full border border-primary/10 space-y-6 bg-surface-container shadow-2xl">
           <div class="flex justify-between items-center">
-            <h2 class="text-2xl font-headline font-bold text-white">Edit Round</h2>
-            <button id="close-edit-round" class="w-8 h-8 rounded-lg bg-surface-container-highest flex items-center justify-center text-on-surface-variant hover:text-white transition-colors">
+            <h2 class="text-2xl font-headline font-bold text-on-surface">Edit Round</h2>
+            <button id="close-edit-round" class="w-8 h-8 rounded-lg bg-surface-container-highest flex items-center justify-center text-on-surface-variant hover:text-on-surface transition-colors">
               <span class="material-symbols-outlined text-sm">close</span>
             </button>
           </div>
@@ -1249,31 +1249,31 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
             <div class="grid grid-cols-4 gap-4">
               <div>
                 <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block mb-1">Order</label>
-                <input id="edit-round-number" type="number" min="1" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-3 text-white text-center font-headline font-bold" />
+                <input id="edit-round-number" type="number" min="1" class="w-full bg-surface-container-lowest border border-primary/5 rounded-xl py-3 px-3 text-on-surface text-center font-headline font-bold" />
               </div>
               <div class="col-span-3">
                 <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block mb-1">Title</label>
-                <input id="edit-round-title" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white focus:ring-1 focus:ring-secondary/40 font-headline" />
+                <input id="edit-round-title" class="w-full bg-surface-container-lowest border border-primary/5 rounded-xl py-3 px-4 text-on-surface focus:ring-1 focus:ring-secondary/40 font-headline" />
               </div>
             </div>
             <div class="grid grid-cols-3 gap-4">
               <div class="col-span-2">
                 <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block mb-1">Type</label>
-                <select id="edit-round-type" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white">
+                <select id="edit-round-type" class="w-full bg-surface-container-lowest border border-primary/5 rounded-xl py-3 px-4 text-on-surface">
                   ${roundTypes.map(t => `<option value="${t.value}">${t.label}</option>`).join('')}
                 </select>
               </div>
               <div>
                 <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block mb-1">Duration (min)</label>
-                <input id="edit-round-duration" type="number" min="1" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-white" />
+                <input id="edit-round-duration" type="number" min="1" class="w-full bg-surface-container-lowest border border-primary/5 rounded-xl py-3 px-4 text-on-surface" />
               </div>
             </div>
             <div>
               <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block mb-1">Max Round Score (Marks)</label>
-              <input id="edit-round-max-score" type="number" min="1" class="w-full bg-surface-container-lowest border-none rounded-xl py-3 px-4 text-secondary font-headline font-black text-xl" />
+              <input id="edit-round-max-score" type="number" min="1" class="w-full bg-surface-container-lowest border border-primary/5 rounded-xl py-3 px-4 text-secondary font-headline font-black text-xl" />
             </div>
           </div>
-          <button id="save-edit-round" class="kinetic-gradient w-full py-4 rounded-xl font-headline font-bold text-on-primary-fixed flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-transform">
+          <button id="save-edit-round" class="kinetic-gradient w-full py-4 rounded-xl font-headline font-bold text-white flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-transform shadow-lg">
             <span class="material-symbols-outlined">save</span> Save Changes
           </button>
         </div>

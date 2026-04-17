@@ -70,13 +70,13 @@ export async function renderDashboard(container, params = {}, search = {}, mockU
               <span class="material-symbols-outlined text-sm">satellite_alt</span>
               <span>Command Center</span>
             </div>
-            <div id="socket-pulse-wrap" class="flex items-center gap-2 pl-4 border-l border-white/10">
-               <div id="socket-pulse-dot" class="w-1.5 h-1.5 rounded-full bg-white/20"></div>
-               <span id="socket-pulse-text" class="text-[8px] font-bold text-on-surface-variant/60 uppercase">Syncing...</span>
+            <div id="socket-pulse-wrap" class="flex items-center gap-2 pl-4 border-l border-primary/10">
+               <div id="socket-pulse-dot" class="w-1.5 h-1.5 rounded-full bg-primary/20"></div>
+               <span id="socket-pulse-text" class="text-[8px] font-bold text-on-surface-variant uppercase">Syncing...</span>
             </div>
           </div>
           <div class="flex flex-col md:flex-row md:items-center gap-4">
-            <h1 class="text-2xl md:text-4xl font-headline font-bold tracking-tighter text-white">${user.team_name}</h1>
+            <h1 class="text-2xl md:text-4xl font-headline font-bold tracking-tighter text-on-surface">${user.team_name}</h1>
             ${(freshTeam?.tab_switch_count > 0) ? `
               <div class="flex bg-error/20 text-error px-4 py-1.5 rounded-full items-center gap-2 border border-error/30 animate-pulse w-max">
                 <span class="material-symbols-outlined text-sm">warning</span>
@@ -89,7 +89,7 @@ export async function renderDashboard(container, params = {}, search = {}, mockU
           </div>
         </div>
         <div class="w-full lg:w-auto flex justify-end">
-          <div class="bg-surface-container-low p-4 rounded-2xl text-center w-full lg:w-32 border border-white/5 shadow-xl glass-panel">
+          <div class="bg-surface-container-lowest p-4 rounded-2xl text-center w-full lg:w-32 border border-primary/5 shadow-sm glass-panel">
             <span class="text-[10px] font-headline font-bold tracking-widest text-on-surface-variant uppercase block mb-1">Total Score</span>
             <span class="text-3xl font-headline font-black text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">${totalScore}</span>
           </div>
@@ -106,15 +106,15 @@ export async function renderDashboard(container, params = {}, search = {}, mockU
                 <span class="w-1.5 h-1.5 bg-secondary rounded-full animate-pulse"></span>
                 <span>Active Round ${currentRound.round_number}</span>
               </div>
-              <h2 class="text-2xl lg:text-3xl font-headline font-bold text-white tracking-tight">${currentRound.title}</h2>
+              <h2 class="text-2xl lg:text-3xl font-headline font-bold text-on-surface tracking-tight">${currentRound.title}</h2>
               <p class="text-xs lg:text-sm text-on-surface-variant mt-1 capitalize">${currentRound.round_type} Round • ${currentRound.duration_minutes} minutes</p>
             </div>
             <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 lg:gap-8 w-full lg:w-auto">
-              <div class="text-left lg:text-right bg-white/5 lg:bg-transparent p-4 lg:p-0 rounded-2xl border border-white/5 lg:border-none">
+              <div class="text-left lg:text-right bg-secondary/5 lg:bg-transparent p-4 lg:p-0 rounded-2xl border border-primary/5 lg:border-none">
                 <span class="text-[9px] font-headline tracking-[0.2em] text-on-surface-variant uppercase block mb-1">Time Remaining</span>
                 <div id="round-timer" class="text-3xl lg:text-4xl font-headline font-black tabular-nums tracking-tighter ${currentRound.status === 'paused' ? 'text-warning' : 'text-secondary'}">${currentRound.status === 'paused' ? 'PAUSED' : Timer.formatTime(currentRound.duration_minutes * 60 * 1000)}</div>
               </div>
-              <button id="enter-round" class="w-full lg:w-auto px-8 py-4 rounded-2xl kinetic-gradient text-on-primary-fixed font-headline font-black text-sm lg:text-lg flex items-center justify-center gap-3 transition-all hover:scale-[1.03] active:scale-[0.97] shadow-xl disabled:opacity-30 disabled:grayscale disabled:scale-100" ${currentRound.status === 'paused' ? 'disabled' : ''}>
+              <button id="enter-round" class="w-full lg:w-auto px-8 py-4 rounded-2xl kinetic-gradient text-white font-headline font-black text-sm lg:text-lg flex items-center justify-center gap-3 transition-all hover:scale-[1.03] active:scale-[0.97] shadow-lg disabled:opacity-30 disabled:grayscale disabled:scale-100" ${currentRound.status === 'paused' ? 'disabled' : ''}>
                 <span>${currentRound.status === 'paused' ? 'LOCKED' : 'ENTER ROUND'}</span>
                 <span class="material-symbols-outlined text-lg lg:text-2xl">${currentRound.status === 'paused' ? 'lock' : 'arrow_forward'}</span>
               </button>
@@ -122,22 +122,22 @@ export async function renderDashboard(container, params = {}, search = {}, mockU
           </div>
         </div>
       ` : `
-        <div class="bg-surface-container-low/50 backdrop-blur-sm p-8 lg:p-12 rounded-3xl mb-8 text-center border border-white/5">
+        <div class="bg-surface-container-low p-8 lg:p-12 rounded-3xl mb-8 text-center border border-primary/5">
           ${!event ? `
             <span class="material-symbols-outlined text-4xl lg:text-5xl text-error/40 mb-4 block">error_outline</span>
-            <h2 class="text-xl lg:text-2xl font-headline font-bold text-white mb-2 tracking-tight">System Link Missing</h2>
+            <h2 class="text-xl lg:text-2xl font-headline font-bold text-on-surface mb-2 tracking-tight">System Link Missing</h2>
             <p class="text-xs lg:text-sm text-on-surface-variant leading-relaxed">No active event synchronization detected. Contact protocol administrator.</p>
           ` : rounds.every(r => r.status === 'completed') && rounds.length > 0 ? `
             <span class="material-symbols-outlined text-4xl lg:text-5xl text-primary/40 mb-4 block">check_circle</span>
-            <h2 class="text-xl lg:text-2xl font-headline font-bold text-white mb-2 tracking-tight">Mission Accomplished</h2>
+            <h2 class="text-xl lg:text-2xl font-headline font-bold text-on-surface mb-2 tracking-tight">Mission Accomplished</h2>
             <p class="text-xs lg:text-sm text-on-surface-variant leading-relaxed">All ${rounds.length} operational phases complete. Monitor the <a href="#/leaderboard" class="text-primary hover:underline font-bold">Project Leaderboard</a> for final metrics.</p>
           ` : rounds.length === 0 ? `
             <span class="material-symbols-outlined text-4xl lg:text-5xl text-on-surface-variant/40 mb-4 block">event_upcoming</span>
-            <h2 class="text-xl lg:text-2xl font-headline font-bold text-white mb-2 tracking-tight">Initialization Pending</h2>
+            <h2 class="text-xl lg:text-2xl font-headline font-bold text-on-surface mb-2 tracking-tight">Initialization Pending</h2>
             <p class="text-xs lg:text-sm text-on-surface-variant leading-relaxed">Event structure loading. Awaiting round deployment from command center.</p>
           ` : `
             <span class="material-symbols-outlined text-4xl lg:text-5xl text-on-surface-variant/40 mb-4 block">hourglass_empty</span>
-            <h2 class="text-xl lg:text-2xl font-headline font-bold text-white mb-2 tracking-tight">Awaiting Sync...</h2>
+            <h2 class="text-xl lg:text-2xl font-headline font-bold text-on-surface mb-2 tracking-tight">Awaiting Sync...</h2>
             <p class="text-xs lg:text-sm text-on-surface-variant leading-relaxed">Protocol activation pending. The mission will resume automatically upon sync.</p>
           `}
         </div>
@@ -155,7 +155,7 @@ export async function renderDashboard(container, params = {}, search = {}, mockU
                 <div class="flex items-center gap-3">
                   <span class="material-symbols-outlined text-2xl ${statusColor}">${roundTypeIcons[r.round_type] || 'extension'}</span>
                   <div>
-                    <h3 class="font-headline font-bold text-white text-sm">${r.title}</h3>
+                    <h3 class="font-headline font-bold text-on-surface text-sm">${r.title}</h3>
                     <span class="text-[10px] text-on-surface-variant uppercase tracking-widest">Round ${r.round_number}</span>
                   </div>
                 </div>
@@ -163,9 +163,9 @@ export async function renderDashboard(container, params = {}, search = {}, mockU
               </div>
               ${scoreData ? `
                 <div class="space-y-3">
-                  <div class="flex justify-between items-center bg-surface-container-lowest p-3 rounded-xl">
+                  <div class="flex justify-between items-center bg-surface-container-lowest p-3 rounded-xl border border-primary/5">
                     <span class="text-xs text-on-surface-variant font-headline">Score</span>
-                    <span class="font-headline font-bold text-white text-lg">${scoreData.score}<span class="text-on-surface-variant font-normal text-[10px] ml-1">/ ${scoreData.max_score}</span></span>
+                    <span class="font-headline font-bold text-on-surface text-lg">${scoreData.score}<span class="text-on-surface-variant font-normal text-[10px] ml-1">/ ${scoreData.max_score}</span></span>
                   </div>
                   ${scoreData.evaluator_notes ? `
                     <button data-feedback-id="${scoreData.id}" class="view-feedback-btn w-full py-2.5 rounded-xl bg-primary/10 text-primary font-headline font-bold text-[10px] uppercase tracking-widest border border-primary/20 hover:bg-primary/20 transition-all flex items-center justify-center gap-2">
@@ -185,15 +185,15 @@ export async function renderDashboard(container, params = {}, search = {}, mockU
 
       <!-- Team Members -->
       <div class="bg-surface-container-low rounded-2xl p-6">
-        <h3 class="font-headline font-bold text-white mb-4">Team Composition</h3>
+        <h3 class="font-headline font-bold text-on-surface mb-4">Team Composition</h3>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           ${(user.members || []).map(m => `
-            <div class="bg-surface-container p-4 rounded-xl flex items-center gap-3">
+            <div class="bg-surface-container p-4 rounded-xl flex items-center gap-3 border border-primary/5">
               <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
                 <span class="material-symbols-outlined text-primary">person</span>
               </div>
               <div>
-                <div class="text-sm font-medium text-white">${m.name}</div>
+                <div class="text-sm font-medium text-on-surface">${m.name}</div>
                 <div class="text-[10px] text-on-surface-variant uppercase tracking-widest">${m.role}</div>
               </div>
             </div>
@@ -272,14 +272,14 @@ export async function renderDashboard(container, params = {}, search = {}, mockU
         type: 'info',
         body: `
           <div class="space-y-6">
-            <div class="flex items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/10">
+            <div class="flex items-center justify-between p-4 rounded-2xl bg-secondary/5 border border-primary/10">
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                   <span class="material-symbols-outlined text-sm">leaderboard</span>
                 </div>
                 <div>
                   <div class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Validated Score</div>
-                  <div class="text-xl font-headline font-bold text-white">${score.score} <span class="text-xs font-normal text-on-surface-variant">/ ${score.max_score}</span></div>
+                  <div class="text-xl font-headline font-bold text-on-surface">${score.score} <span class="text-xs font-normal text-on-surface-variant">/ ${score.max_score}</span></div>
                 </div>
               </div>
               ${notes.ai ? `
@@ -292,7 +292,7 @@ export async function renderDashboard(container, params = {}, search = {}, mockU
 
             <div class="space-y-2">
               <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Technical Review</label>
-              <div class="p-5 rounded-3xl bg-surface-container-highest border border-white/5 text-sm text-white italic leading-relaxed">
+              <div class="p-5 rounded-3xl bg-surface-container-highest border border-primary/5 text-sm text-on-surface-variant italic leading-relaxed">
                 "${notes.feedback || 'No detailed feedback provided yet.'}"
               </div>
             </div>
@@ -326,7 +326,7 @@ export async function renderDashboard(container, params = {}, search = {}, mockU
       Notifier.toast(`🔥 ROUND STARTED: ${title}`, 'success', { duration: 5000 });
       Notifier.modal({
         title: 'Round Started!',
-        body: `<p class="text-xl font-headline text-white mb-2">${title}</p><p class="text-sm text-on-surface-variant">Synchronizing round assets and starting the synchronized clock. Good luck, Team!</p>`,
+        body: `<p class="text-xl font-headline text-on-surface mb-2">${title}</p><p class="text-sm text-on-surface-variant">Synchronizing round assets and starting the synchronized clock. Good luck, Team!</p>`,
         icon: 'rocket_launch',
         type: 'success'
       });
@@ -347,7 +347,7 @@ export async function renderDashboard(container, params = {}, search = {}, mockU
       if (data.status === 'paused' || data.status === 'completed') {
         Notifier.modal({
           title: `Round ${verb}`,
-          body: `<p class="text-xl font-headline text-white mb-2">${title}</p><p class="text-sm text-on-surface-variant">The administration has ${verb.toLowerCase()} this round. Please standby for further instructions.</p>`,
+          body: `<p class="text-xl font-headline text-on-surface mb-2">${title}</p><p class="text-sm text-on-surface-variant">The administration has ${verb.toLowerCase()} this round. Please standby for further instructions.</p>`,
           icon: data.status === 'paused' ? 'pause_circle' : 'task_alt',
           type: type
         });
@@ -407,10 +407,10 @@ export async function renderDashboard(container, params = {}, search = {}, mockU
         
         <div class="flex justify-between items-center mb-6">
           <div>
-            <h2 class="text-2xl font-headline font-bold text-white uppercase tracking-tighter">Performance Analysis</h2>
+            <h2 class="text-2xl font-headline font-bold text-on-surface uppercase tracking-tighter">Performance Analysis</h2>
             <div class="text-[10px] font-bold text-secondary uppercase tracking-[0.2em] mt-1">${score.rounds?.title} Evaluation</div>
           </div>
-          <button id="close-feedback" class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-on-surface-variant hover:text-white hover:bg-white/10 transition-all">
+          <button id="close-feedback" class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-secondary/20 transition-all">
             <span class="material-symbols-outlined">close</span>
           </button>
         </div>
@@ -436,9 +436,9 @@ export async function renderDashboard(container, params = {}, search = {}, mockU
             if (data.summary && data.items.length === 0) return `<p class="text-sm text-on-surface-variant p-4 bg-primary/5 rounded-xl border border-primary/10 text-center">${data.summary}</p>`;
 
             return data.items.map(item => `
-                  <div class="glass-panel p-5 rounded-3xl border-white/5 bg-white/5 space-y-4">
+                  <div class="glass-panel p-5 rounded-3xl border-primary/5 bg-secondary/5 space-y-4">
                     ${data.type === 'logo' && item.label ? `
-                      <div class="w-full h-32 bg-white rounded-xl overflow-hidden p-2">
+                      <div class="w-full h-32 bg-white rounded-xl overflow-hidden p-2 border border-primary/10">
                         <img src="${item.label}" class="w-full h-full object-contain" />
                       </div>
                     ` : ''}
@@ -449,12 +449,12 @@ export async function renderDashboard(container, params = {}, search = {}, mockU
                       
                       <div class="grid grid-cols-2 gap-3">
                         <div class="bg-red-500/10 border border-red-500/20 p-3 rounded-xl">
-                          <div class="text-[8px] uppercase font-bold text-red-400 mb-1">Your Answer</div>
-                          <div class="text-xs text-white font-medium">${item.given || item.chosen || 'No Answer'}</div>
+                          <div class="text-[8px] uppercase font-bold text-red-500 mb-1">Your Answer</div>
+                          <div class="text-xs text-on-surface font-medium">${item.given || item.chosen || 'No Answer'}</div>
                         </div>
                         <div class="bg-primary/10 border border-primary/20 p-3 rounded-xl">
                           <div class="text-[8px] uppercase font-bold text-primary mb-1">Correct Answer</div>
-                          <div class="text-xs text-white font-medium">${item.correct || 'Unknown'}</div>
+                          <div class="text-xs text-on-surface font-medium">${item.correct || 'Unknown'}</div>
                         </div>
                       </div>
                     </div>
@@ -465,7 +465,7 @@ export async function renderDashboard(container, params = {}, search = {}, mockU
 
         return `
               <div class="space-y-4">
-                <div class="p-6 rounded-3xl bg-surface-container-highest border border-white/5 text-on-surface-variant italic leading-relaxed relative overflow-hidden group">
+                <div class="p-6 rounded-3xl bg-surface-container-highest border border-primary/5 text-on-surface-variant italic leading-relaxed relative overflow-hidden group">
                   <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
                     <span class="material-symbols-outlined text-4xl">format_quote</span>
                   </div>
@@ -473,17 +473,17 @@ export async function renderDashboard(container, params = {}, search = {}, mockU
                     <span class="material-symbols-outlined text-sm">psychology</span>
                     Judge's Strategic Review
                   </div>
-                  <div class="relative z-10 text-white selection:bg-primary/30">
+                  <div class="relative z-10 text-on-surface selection:bg-primary/30">
                     ${rawNotes.replace(/\n/g, '<br>')}
                   </div>
                 </div>
                 
                 <div class="grid grid-cols-2 gap-4">
-                   <div class="p-4 rounded-2xl bg-white/5 border border-white/5">
+                   <div class="p-4 rounded-2xl bg-secondary/5 border border-primary/5">
                       <div class="text-[8px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Scoring Metric</div>
-                      <div class="text-xs text-white font-headline">Audit-Based Manual Evaluation</div>
+                      <div class="text-xs text-on-surface font-headline">Audit-Based Manual Evaluation</div>
                    </div>
-                   <div class="p-4 rounded-2xl bg-white/5 border border-white/5 text-right">
+                   <div class="p-4 rounded-2xl bg-secondary/5 border border-primary/5 text-right">
                       <div class="text-[8px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Status</div>
                       <div class="text-xs text-secondary font-headline flex items-center justify-end gap-1">
                         <span class="material-symbols-outlined text-sm">verified</span> Verified

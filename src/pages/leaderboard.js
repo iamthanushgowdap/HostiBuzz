@@ -78,17 +78,17 @@ export async function renderLeaderboard(container) {
       <header class="mb-10 lg:mb-16">
         <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 lg:gap-8">
           <div>
-            <h1 class="text-4xl lg:text-6xl font-bold font-headline tracking-tighter text-white">${eventTitle}</h1>
+            <h1 class="text-4xl lg:text-6xl font-bold font-headline tracking-tighter text-on-surface">${eventTitle}</h1>
             <p class="text-on-surface-variant max-w-xl text-sm lg:text-lg mt-2 lg:mt-4">Real-time performance metrics updated live in the arena.</p>
           </div>
           
           ${(!user || user.role === 'admin') ? `
-            <div class="glass-panel p-2 rounded-2xl flex items-center min-w-[250px]">
+            <div class="glass-panel p-2 rounded-2xl flex items-center min-w-[250px] bg-secondary/5 border border-primary/10">
               <span class="material-symbols-outlined text-on-surface-variant ml-3 mr-2 text-sm">filter_list</span>
-              <select id="lb-event-filter" class="w-full bg-transparent border-none text-white font-headline text-sm py-2 px-2 focus:ring-0 cursor-pointer outline-none shadow-none">
-                <option value="all" class="bg-surface-container-high" ${selectedLeaderboardEvent === 'all' ? 'selected' : ''}>All Events (Overall)</option>
+              <select id="lb-event-filter" class="w-full bg-transparent border-none text-on-surface font-headline text-sm py-2 px-2 focus:ring-0 cursor-pointer outline-none shadow-none">
+                <option value="all" class="bg-surface-container" ${selectedLeaderboardEvent === 'all' ? 'selected' : ''}>All Events (Overall)</option>
                 ${(events || []).map(e => `
-                  <option value="${e.id}" class="bg-surface-container-high" ${selectedLeaderboardEvent === e.id ? 'selected' : ''}>${e.name}</option>
+                  <option value="${e.id}" class="bg-surface-container" ${selectedLeaderboardEvent === e.id ? 'selected' : ''}>${e.name}</option>
                 `).join('')}
               </select>
             </div>
@@ -106,16 +106,16 @@ export async function renderLeaderboard(container) {
             const color = medals[idx];
             return `
               <div class="relative group ${isFirst ? 'scale-100 lg:scale-105 z-10 order-2' : idx === 1 ? 'order-1 translate-y-4' : 'order-3 translate-y-6'}">
-                <div class="glass-panel ${isFirst ? 'p-2 py-6 lg:p-10 rounded-xl lg:rounded-[3rem]' : 'p-2 py-4 lg:p-8 rounded-xl lg:rounded-[2.5rem]'} flex flex-col items-center text-center relative border border-white/10 shadow-lg">
+                <div class="glass-panel ${isFirst ? 'p-2 py-6 lg:p-10 rounded-xl lg:rounded-[3rem]' : 'p-2 py-4 lg:p-8 rounded-xl lg:rounded-[2.5rem]'} flex flex-col items-center text-center relative border border-primary/10 shadow-sm bg-surface-container-lowest">
                   <div class="absolute -top-${isFirst ? '6 lg:10' : '4 lg:8'} left-1/2 -translate-x-1/2">
-                    <div class="w-8 h-8 lg:w-20 lg:h-20 bg-surface-container-highest rounded-full flex items-center justify-center border-${isFirst ? '2 lg:4' : '1 lg:2'} glow-accent" style="border-color: ${color}">
+                    <div class="w-8 h-8 lg:w-20 lg:h-20 bg-surface-container rounded-full flex items-center justify-center border-${isFirst ? '2 lg:4' : '1 lg:2'} glow-accent" style="border-color: ${color}">
                       <span class="text-[10px] lg:text-3xl font-bold font-headline" style="color: ${color}">${idx + 1}</span>
                     </div>
                   </div>
-                  <div class="w-8 h-8 lg:w-16 lg:h-16 rounded-full bg-gradient-to-br from-primary/10 to-secondary/20 flex items-center justify-center mt-4 lg:mt-6 mb-2 lg:mb-4">
-                    <span class="material-symbols-outlined text-lg lg:text-3xl text-white">groups</span>
+                  <div class="w-8 h-8 lg:w-16 lg:h-16 rounded-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center mt-4 lg:mt-6 mb-2 lg:mb-4 border border-primary/5">
+                    <span class="material-symbols-outlined text-lg lg:text-3xl text-on-surface">groups</span>
                   </div>
-                  <h3 class="text-[10px] lg:text-3xl font-bold font-headline text-white mb-0.5 lg:mb-1 truncate w-full px-1">${t.team_name}</h3>
+                  <h3 class="text-[10px] lg:text-3xl font-bold font-headline text-on-surface mb-0.5 lg:mb-1 truncate w-full px-1">${t.team_name}</h3>
                   <p class="hidden lg:block text-on-surface-variant text-sm mb-6">${t.team_id} ${selectedLeaderboardEvent === 'all' ? `• <span class="text-secondary">${t.eventName}</span>` : ''}</p>
                   <div class="text-xs lg:text-5xl font-black font-headline ${isFirst ? 'text-transparent bg-clip-text bg-gradient-to-br from-primary to-secondary' : ''}" style="${!isFirst ? `color: ${color}` : ''}">${t.total.toLocaleString()}</div>
                   <p class="text-[8px] lg:text-[10px] tracking-widest font-bold mt-1 uppercase" style="color: ${color}">${medalLabels[idx]}</p>
@@ -139,7 +139,7 @@ export async function renderLeaderboard(container) {
         </div>
       ` : `
         <!-- DESKTOP TABLE VIEW -->
-        <section class="hidden lg:block glass-panel rounded-[2rem] overflow-hidden border border-outline-variant/10 mb-12 shadow-2xl">
+        <section class="hidden lg:block glass-panel rounded-[2rem] overflow-hidden border border-primary/10 mb-12 shadow-sm bg-surface-container-lowest">
           <table class="w-full text-left border-collapse">
             <thead>
               <tr class="bg-surface-container-high/50 text-on-surface-variant font-headline text-[10px] uppercase tracking-[0.2em]">
@@ -149,25 +149,25 @@ export async function renderLeaderboard(container) {
                 <th class="px-8 py-6 text-right">Total Score</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-outline-variant/10">
+            <tbody class="divide-y divide-primary/5">
               ${teamScores.map((t, i) => `
-                <tr class="${t.status === 'eliminated' ? 'opacity-50 grayscale' : ''} hover:bg-white/5 transition-all group">
+                <tr class="${t.status === 'eliminated' ? 'opacity-50 grayscale' : ''} hover:bg-secondary/5 transition-all group">
                   <td class="px-8 py-6">
-                    <span class="text-xl font-black font-headline text-on-surface-variant group-hover:text-white">#${String(i + 1).padStart(2, '0')}</span>
+                    <span class="text-xl font-black font-headline text-on-surface-variant group-hover:text-on-surface">#${String(i + 1).padStart(2, '0')}</span>
                   </td>
                   <td class="px-8 py-6">
                     <div>
-                      <div class="text-white font-bold font-headline flex items-center gap-2">
+                      <div class="text-on-surface font-bold font-headline flex items-center gap-2">
                         ${t.team_name}
-                        ${t.status === 'eliminated' ? '<span class="px-2 py-0.5 rounded-sm bg-error/20 text-error text-[8px] uppercase font-black tracking-widest">Eliminated</span>' : ''}
+                        ${t.status === 'eliminated' ? '<span class="px-2 py-0.5 rounded-sm bg-error/10 text-error text-[8px] uppercase font-black tracking-widest border border-error/10">Eliminated</span>' : ''}
                       </div>
-                      <div class="text-[10px] text-on-surface-variant mt-1">${t.team_id} ${selectedLeaderboardEvent === 'all' ? `• <span class="text-secondary">${t.eventName}</span>` : ''}</div>
+                      <div class="text-[10px] text-on-surface-variant mt-1">${t.team_id} ${selectedLeaderboardEvent === 'all' ? `• <span class="text-secondary font-semibold">${t.eventName}</span>` : ''}</div>
                     </div>
                   </td>
                   <td class="px-8 py-6">
                     <div class="flex gap-2 flex-wrap">
                       ${t.roundScores.map(rs => `
-                        <span class="px-2.5 py-1.5 bg-primary/10 text-primary text-[10px] font-black rounded-lg flex flex-col items-center border border-primary/10">
+                        <span class="px-2.5 py-1.5 bg-primary/5 text-primary text-[10px] font-black rounded-lg flex flex-col items-center border border-primary/10">
                           <span>R${rs.round}: ${rs.score}</span>
                           ${rs.timeTaken !== '--' ? `<span class="text-[8px] opacity-60 font-mono tracking-tighter mt-0.5">${rs.timeTaken}</span>` : ''}
                         </span>
@@ -175,7 +175,7 @@ export async function renderLeaderboard(container) {
                     </div>
                   </td>
                   <td class="px-8 py-6 text-right">
-                    <span class="text-2xl font-black font-headline text-white">${t.total.toLocaleString()}</span>
+                    <span class="text-2xl font-black font-headline text-on-surface">${t.total.toLocaleString()}</span>
                   </td>
                 </tr>
               `).join('')}
@@ -186,14 +186,14 @@ export async function renderLeaderboard(container) {
         <!-- MOBILE CARD STACK VIEW -->
         <section class="lg:hidden space-y-4 mb-12 px-2">
           ${teamScores.map((t, i) => `
-            <div class="${t.status === 'eliminated' ? 'opacity-60 grayscale' : ''} glass-panel p-5 rounded-3xl border border-white/5 shadow-xl relative overflow-hidden">
-               <div class="flex items-center justify-between mb-4 pb-4 border-b border-white/5">
+            <div class="${t.status === 'eliminated' ? 'opacity-60 grayscale' : ''} glass-panel p-5 rounded-3xl border border-primary/5 shadow-sm relative overflow-hidden bg-surface-container-lowest">
+                <div class="flex items-center justify-between mb-4 pb-4 border-b border-primary/5">
                  <div class="flex items-center gap-3">
-                   <div class="w-10 h-10 rounded-xl bg-surface-container-highest flex items-center justify-center font-headline font-black text-primary text-lg">
+                   <div class="w-10 h-10 rounded-xl bg-surface-container flex items-center justify-center font-headline font-black text-primary text-lg border border-primary/5">
                       ${i + 1}
                    </div>
                    <div>
-                     <h3 class="font-headline font-bold text-white text-base">${t.team_name}</h3>
+                     <h3 class="font-headline font-bold text-on-surface text-base">${t.team_name}</h3>
                      <p class="text-[9px] text-on-surface-variant uppercase tracking-[0.2em]">${t.team_id}</p>
                    </div>
                  </div>
@@ -205,9 +205,9 @@ export async function renderLeaderboard(container) {
                
                <div class="flex gap-2 overflow-x-auto pb-2 scrollbar-none">
                   ${t.roundScores.map(rs => `
-                    <div class="flex-shrink-0 bg-white/5 p-3 rounded-2xl border border-white/5 text-center min-w-[70px]">
+                    <div class="flex-shrink-0 bg-secondary/5 p-3 rounded-2xl border border-primary/5 text-center min-w-[70px]">
                        <div class="text-[8px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Round ${rs.round}</div>
-                       <div class="text-sm font-black text-white">${rs.score}</div>
+                       <div class="text-sm font-black text-on-surface">${rs.score}</div>
                        ${rs.timeTaken !== '--' ? `<div class="text-[7px] text-primary font-mono mt-1">${rs.timeTaken}</div>` : ''}
                     </div>
                   `).join('') || '<div class="text-[9px] text-on-surface-variant font-bold italic py-2">No sequences recorded...</div>'}
