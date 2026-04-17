@@ -1,4 +1,4 @@
-import { loginTeam } from '../services/auth.js';
+import { teamLogin } from '../services/auth.js';
 import { renderNavbar, bindNavbarEvents } from '../components/navbar.js';
 import { navigate } from '../router.js';
 
@@ -21,20 +21,28 @@ export async function renderLogin(container) {
                <span class="material-symbols-outlined text-4xl text-primary">key</span>
             </div>
             <h1 class="text-4xl lg:text-5xl font-headline font-black text-on-surface tracking-tighter">Ops Terminal</h1>
-            <p class="text-on-surface-variant text-sm lg:text-base px-4">Initialize synchronization by entering your protocol designation.</p>
+            <p class="text-on-surface-variant text-sm lg:text-base px-4">Initialize synchronization by entering your protocol credentials.</p>
           </div>
 
-          <form id="login-form" class="space-y-8">
+          <form id="login-form" class="space-y-6">
             <div id="login-error" class="hidden p-4 rounded-2xl bg-error/10 border border-error/20 text-error text-[11px] font-black uppercase tracking-widest flex items-center gap-3">
               <span class="material-symbols-outlined text-sm">report</span>
               <span id="error-text"></span>
             </div>
 
-            <div class="space-y-4 group">
-              <label class="text-[10px] font-black uppercase tracking-[0.3em] text-on-surface-variant pl-1 group-focus-within:text-primary transition-colors">Protocol Node ID</label>
+            <div class="space-y-2 group/field">
+              <label class="text-[10px] font-black uppercase tracking-[0.3em] text-on-surface-variant pl-1 group-focus-within/field:text-primary transition-colors">Protocol Node ID</label>
               <div class="relative">
-                <span class="material-symbols-outlined absolute left-6 top-1/2 -translate-y-1/2 text-2xl text-on-surface-variant/30 group-focus-within:text-primary transition-colors pointer-events-none">terminal</span>
-                <input id="login-team-id" class="w-full bg-secondary/5 border border-primary/5 rounded-[2rem] py-6 pl-16 pr-8 text-2xl text-primary font-headline font-black placeholder:text-slate-300 focus:ring-4 focus:ring-primary/5 transition-all text-center tracking-[0.2em] uppercase" placeholder="XXXX-XXXX" required autofocus />
+                <span class="material-symbols-outlined absolute left-6 top-1/2 -translate-y-1/2 text-2xl text-on-surface-variant/30 group-focus-within/field:text-primary transition-colors pointer-events-none">terminal</span>
+                <input id="login-team-id" class="w-full bg-secondary/5 border border-primary/5 rounded-[2rem] py-6 pl-16 pr-8 text-xl text-primary font-headline font-black placeholder:text-slate-300 focus:ring-4 focus:ring-primary/5 transition-all text-center tracking-[0.1em] uppercase" placeholder="HB-000" required autofocus />
+              </div>
+            </div>
+
+            <div class="space-y-2 group/field">
+              <label class="text-[10px] font-black uppercase tracking-[0.3em] text-on-surface-variant pl-1 group-focus-within/field:text-secondary transition-colors">Secure Access Key</label>
+              <div class="relative">
+                <span class="material-symbols-outlined absolute left-6 top-1/2 -translate-y-1/2 text-2xl text-on-surface-variant/30 group-focus-within/field:text-secondary transition-colors pointer-events-none">lock</span>
+                <input id="login-password" type="password" class="w-full bg-secondary/5 border border-primary/5 rounded-[2rem] py-6 pl-16 pr-8 text-xl text-secondary font-headline font-bold placeholder:text-slate-300 focus:ring-4 focus:ring-secondary/5 transition-all text-center tracking-[0.2em]" placeholder="********" required />
               </div>
             </div>
 
@@ -64,15 +72,21 @@ export async function renderLogin(container) {
     const btn = document.getElementById('login-submit');
 
     const teamId = document.getElementById('login-team-id').value.trim();
-    if (!teamId) return;
+    const password = document.getElementById('login-password').value.trim();
+    
+    if (!teamId || !password) return;
 
     errorEl.classList.add('hidden');
     btn.innerHTML = '<span class="material-symbols-outlined animate-spin mr-3">progress_activity</span> Authenticating...';
     btn.disabled = true;
 
     try {
-      await loginTeam(teamId);
-      navigate('/dashboard');
+      const result = await teamLogin(teamId, password);
+      if (result.eliminated) {
+        navigate('/eliminated'); // Redirect to eliminated page if applicable
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err) {
       errorText.textContent = err.message || 'Node Synchronization Failure';
       errorEl.classList.remove('hidden');
