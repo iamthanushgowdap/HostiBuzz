@@ -16,8 +16,8 @@ export async function renderLeaderboard(container) {
   // Fetch data
   const { data: events } = await supabase.from('events').select('id, name').order('created_at', { ascending: false });
   const { data: teams } = await supabase.from('teams').select('id, team_id, team_name, status, members, event_id');
-  const { data: allScores } = await supabase.from('scores').select('team_id, score, round_id, rounds(round_number, title)');
-  const { data: submissions } = await supabase.from('submissions').select('team_id, round_id, submission_time');
+  const { data: allScores } = await supabase.from('scores').select('team_id, score, round_id, time_taken_ms, rounds(round_number, title)');
+  const { data: submissions } = await supabase.from('submissions').select('team_id, round_id, submission_time, time_taken_ms');
 
   // Filter teams based on selected event
   const targetTeams = selectedLeaderboardEvent === 'all' 
@@ -30,25 +30,28 @@ export async function renderLeaderboard(container) {
     const total = tScores.reduce((sum, s) => sum + Number(s.score), 0);
     
     const roundScores = tScores.map(s => {
+      // Prioritize time_taken_ms from score table, fallback to submission table
       const sub = (submissions || []).find(sub => sub.team_id === t.id && sub.round_id === s.round_id);
+      const timeMs = s.time_taken_ms || sub?.time_taken_ms || 0;
+      
       return { 
         round: s.rounds?.round_number, 
         score: s.score, 
         title: s.rounds?.title,
-        time: sub?.submission_time ? new Date(sub.submission_time).toLocaleTimeString([], { hour12: false }) : null,
-        rawTime: sub?.submission_time ? new Date(sub.submission_time).getTime() : 0
+        timeTaken: timeMs > 0 ? (timeMs / 1000).toFixed(2) + 's' : '--',
+        rawTimeTaken: timeMs
       };
     }).sort((a, b) => a.round - b.round);
 
-    // Completion Time = The maximum (latest) submission time of all scores recorded
-    const completionTime = roundScores.length > 0 ? Math.max(...roundScores.map(rs => rs.rawTime)) : Infinity;
+    // Total Time taken = Sum of relative performance duration
+    const totalTimeTaken = roundScores.reduce((sum, rs) => sum + rs.rawTimeTaken, 0);
     const eventName = (events || []).find(e => e.id === t.event_id)?.name || 'Unknown Event';
     
-    return { ...t, total, roundScores, completionTime, eventName };
+    return { ...t, total, roundScores, totalTimeTaken, eventName };
   });
 
-  // Sort by score DESC, then by completion time ASC (faster is better)
-  teamScores.sort((a, b) => b.total - a.total || (a.completionTime - b.completionTime));
+  // Sort by score DESC, then by Total Time Taken ASC (faster is better)
+  teamScores.sort((a, b) => b.total - a.total || (a.totalTimeTaken - b.totalTimeTaken));
 
   const top3 = teamScores.slice(0, 3);
   const rest = teamScores.slice(3);
@@ -166,7 +169,7 @@ export async function renderLeaderboard(container) {
                       ${t.roundScores.map(rs => `
                         <span class="px-2.5 py-1.5 bg-primary/10 text-primary text-[10px] font-black rounded-lg flex flex-col items-center border border-primary/10">
                           <span>R${rs.round}: ${rs.score}</span>
-                          ${rs.time ? `<span class="text-[8px] opacity-60 font-mono tracking-tighter mt-0.5">${rs.time}</span>` : ''}
+                          ${rs.timeTaken !== '--' ? `<span class="text-[8px] opacity-60 font-mono tracking-tighter mt-0.5">${rs.timeTaken}</span>` : ''}
                         </span>
                       `).join('') || '<span class="text-[10px] text-on-surface-variant font-bold uppercase tracking-widest">Awaiting Pulse</span>'}
                     </div>
@@ -205,7 +208,7 @@ export async function renderLeaderboard(container) {
                     <div class="flex-shrink-0 bg-white/5 p-3 rounded-2xl border border-white/5 text-center min-w-[70px]">
                        <div class="text-[8px] font-bold text-on-surface-variant uppercase tracking-widest mb-1">Round ${rs.round}</div>
                        <div class="text-sm font-black text-white">${rs.score}</div>
-                       ${rs.time ? `<div class="text-[7px] text-primary font-mono mt-1">${rs.time}</div>` : ''}
+                       ${rs.timeTaken !== '--' ? `<div class="text-[7px] text-primary font-mono mt-1">${rs.timeTaken}</div>` : ''}
                     </div>
                   `).join('') || '<div class="text-[9px] text-on-surface-variant font-bold italic py-2">No sequences recorded...</div>'}
                </div>

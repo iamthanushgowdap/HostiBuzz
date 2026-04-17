@@ -4,10 +4,14 @@ import { renderNavbar, bindNavbarEvents } from '../components/navbar.js';
 import { Timer, renderPreRoundCountdown } from '../services/timer.js';
 import { startAntiCheat, stopAntiCheat } from '../services/anti-cheat.js';
 import { navigate } from '../router.js';
-import { ActivityBroadcast } from '../services/activity-broadcast.js';
 import { Ticker } from '../components/ticker.js';
+import { timeSync } from '../services/timeSync.js';
+import { Notifier } from '../services/notifier.js';
+import { pauseFooterClock, resumeFooterClock } from '../components/footer.js';
 
 export async function renderLogoRound(container, params, search = {}, mockUser = null) {
+  // Eco-Mode: Pause background processing
+  pauseFooterClock();
   const isPreview = search.mode === 'preview' || !!mockUser;
   const previewRoundId = search.roundId;
   const user = mockUser || getState('user');
@@ -138,13 +142,27 @@ export async function renderLogoRound(container, params, search = {}, mockUser =
       confirmText: "Finalize & Submit",
       onConfirm: async () => {
         isFinal = true;
+        
+        // Calculate synchronized time taken
+        const competitionStart = new Date(round.started_at).getTime() + 5000;
+        const time_taken_ms = Math.max(0, timeSync.getSyncedTime() - competitionStart);
+
         await supabase.from('submissions').upsert({
-          team_id: user.id, round_id: round.id, answers, is_final: true, submission_time: new Date().toISOString()
+          team_id: user.id, 
+          round_id: round.id, 
+          answers, 
+          is_final: true, 
+          submission_time: new Date().toISOString(),
+          time_taken_ms
         }, { onConflict: 'team_id,round_id' });
+        
+        // Also update scores with time_taken_ms (if auto-evaluated or later)
+        // Note: Logo rounds are usually human-evaluated later, but we store the speed truth now.
         
         stopAntiCheat();
         ActivityBroadcast.push('activity', `Team "${user.team_name}" just identified all brands in Round ${round.round_number}!`);
         Notifier.toast('Submission successful!', 'success');
+        resumeFooterClock();
         renderPhase();
       }
     });
@@ -199,9 +217,10 @@ export async function renderLogoRound(container, params, search = {}, mockUser =
       return;
     }
 
-    if (!localStartTime) localStartTime = Date.now();
-
-    const elapsedSec = (Date.now() - localStartTime) / 1000;
+    // SLIDESHOW CALIBRATION: Sync based on absolute server start + grace
+    const syncStart = new Date(round.started_at).getTime() + 5000;
+    const now = timeSync.getSyncedTime();
+    const elapsedSec = (now - syncStart) / 1000;
     const slideIndex = Math.floor(elapsedSec / SECONDS_PER_LOGO);
 
     if (slideIndex >= logos.length) {
@@ -381,7 +400,10 @@ export async function renderLogoRound(container, params, search = {}, mockUser =
     Notifier.confirm(
       'Terminate Session',
       'Are you sure you want to exit the current round? Your progress is auto-saved, but you will leave the tactical terminal.',
-      () => navigate('/dashboard'),
+      () => {
+        resumeFooterClock();
+        navigate('/dashboard');
+      },
       { confirmText: 'Exit to Dashboard', type: 'warning' }
     );
   });

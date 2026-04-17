@@ -8,6 +8,7 @@ import { ActivityBroadcast } from '../services/activity-broadcast.js';
 import { Ticker } from '../components/ticker.js';
 import { Notifier } from '../services/notifier.js';
 import { pauseFooterClock, resumeFooterClock } from '../components/footer.js';
+import { timeSync } from '../services/timeSync.js';
 
 let timer = null;
 
@@ -197,14 +198,30 @@ export async function renderQuizRound(container, params, search = {}, mockUser =
       summary: wrongItems.length === 0 ? "Perfect Score: All questions answered correctly!" : null
     });
 
+    // Calculate synchronized time taken
+    const competitionStart = new Date(round.started_at).getTime() + 5000;
+    const time_taken_ms = Math.max(0, timeSync.getSyncedTime() - competitionStart);
+
     // Save final state
     await supabase.from('submissions').upsert({
-      team_id: user.id, round_id: round.id, answers: finalAnswers, is_final: true, submission_time: new Date().toISOString()
+      team_id: user.id, 
+      round_id: round.id, 
+      answers: finalAnswers, 
+      is_final: true, 
+      submission_time: new Date().toISOString(),
+      time_taken_ms
     }, { onConflict: 'team_id,round_id' });
 
     // Save score
     await supabase.from('scores').upsert({
-      team_id: user.id, round_id: round.id, score, max_score: maxScore, auto_evaluated: true, evaluator_notes: richNotes, evaluated_at: new Date().toISOString()
+      team_id: user.id, 
+      round_id: round.id, 
+      score, 
+      max_score: maxScore, 
+      auto_evaluated: true, 
+      evaluator_notes: richNotes, 
+      evaluated_at: new Date().toISOString(),
+      time_taken_ms
     }, { onConflict: 'team_id,round_id' });
 
     stopAntiCheat();

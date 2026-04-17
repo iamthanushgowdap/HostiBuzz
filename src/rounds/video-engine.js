@@ -5,8 +5,12 @@ import { Timer, renderPreRoundCountdown } from '../services/timer.js';
 import { navigate } from '../router.js';
 import { startAntiCheat, stopAntiCheat } from '../services/anti-cheat.js';
 import { Notifier } from '../services/notifier.js';
+import { timeSync } from '../services/timeSync.js';
+import { pauseFooterClock, resumeFooterClock } from '../components/footer.js';
 
 export async function renderVideoRound(container, params, search = {}) {
+  // Eco-Mode: Pause background processing
+  pauseFooterClock();
   const isPreview = search.mode === 'preview';
   const previewRoundId = search.roundId;
   const user = getState('user');
@@ -161,19 +165,35 @@ export async function renderVideoRound(container, params, search = {}) {
     }
 
     try {
+      // Calculate synchronized time taken
+      const competitionStart = new Date(round.started_at).getTime() + 5000;
+      const time_taken_ms = Math.max(0, timeSync.getSyncedTime() - competitionStart);
+
       const { error } = await supabase.from('submissions').upsert({
         team_id: user.id, 
         round_id: round.id, 
         drive_link: link, 
         is_final: isFinal, 
-        submission_time: new Date().toISOString()
+        submission_time: new Date().toISOString(),
+        time_taken_ms
       }, { onConflict: 'team_id,round_id' });
 
       if (error) throw error;
 
       if (isFinal) {
+        // Also save to scores table for ranking
+        await supabase.from('scores').upsert({
+          team_id: user.id,
+          round_id: round.id,
+          score: 0,
+          max_score: 100,
+          time_taken_ms,
+          evaluated_at: new Date().toISOString()
+        }, { onConflict: 'team_id,round_id' });
+
         stopAntiCheat();
         Notifier.toast('Video Submitted Successfully!', 'success');
+        resumeFooterClock();
         renderVideoRound(container, params, search);
       }
     } catch (err) {
@@ -212,7 +232,7 @@ export async function renderVideoRound(container, params, search = {}) {
       }
     }).startFromServer(round.started_at, round.duration_minutes);
   } else if (!isPreview && isPaused) {
-    const startedAt = new Date(round.started_at).getTime() + 10000;
+    const startedAt = new Date(round.started_at).getTime() + 5000;
     let pausedAt = Date.now();
     try {
       const cfg = typeof round.config === 'string' ? JSON.parse(round.config) : (round.config || {});
@@ -230,7 +250,10 @@ export async function renderVideoRound(container, params, search = {}) {
     Notifier.confirm(
       'Terminate Session',
       'Are you sure you want to exit the current round? Your progress is auto-saved, but you will leave the tactical terminal.',
-      () => navigate('/dashboard'),
+      () => {
+        resumeFooterClock();
+        navigate('/dashboard');
+      },
       { confirmText: 'Exit to Dashboard', type: 'warning' }
     );
   });

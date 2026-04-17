@@ -4,8 +4,12 @@ import { renderNavbar, bindNavbarEvents } from '../components/navbar.js';
 import { Timer, renderPreRoundCountdown } from '../services/timer.js';
 import { navigate } from '../router.js';
 import { startAntiCheat, stopAntiCheat } from '../services/anti-cheat.js';
+import { timeSync } from '../services/timeSync.js';
+import { pauseFooterClock, resumeFooterClock } from '../components/footer.js';
 
 export async function renderDebateRound(container, params, search = {}) {
+  // Eco-Mode: Pause background processing
+  pauseFooterClock();
   const isPreview = search.mode === 'preview';
   const previewRoundId = search.roundId;
   const user = getState('user');
@@ -53,8 +57,8 @@ export async function renderDebateRound(container, params, search = {}) {
   // Compute remaining time for paused state
   let pausedRemaining = DEBATE_DURATION_MS;
   if (isPaused && round.started_at) {
-    const startedAt = new Date(round.started_at).getTime() + 10000;
-    let pausedAt = Date.now();
+    const startedAt = new Date(round.started_at).getTime() + 5000;
+    let pausedAt = timeSync.getSyncedTime();
     try {
       const cfg = typeof round.config === 'string' ? JSON.parse(round.config) : (round.config || {});
       if (cfg.paused_at) pausedAt = new Date(cfg.paused_at).getTime();
@@ -258,18 +262,34 @@ export async function renderDebateRound(container, params, search = {}) {
     const text = document.getElementById('debate-text')?.value?.trim() || '';
     
     try {
+      // Calculate synchronized time taken
+      const competitionStart = new Date(round.started_at).getTime() + 5000;
+      const time_taken_ms = Math.max(0, timeSync.getSyncedTime() - competitionStart);
+
       const { error } = await supabase.from('submissions').upsert({
         team_id: user.id, 
         round_id: round.id, 
         text_content: text, 
         is_final: isFinal, 
-        submission_time: new Date().toISOString()
+        submission_time: new Date().toISOString(),
+        time_taken_ms
       }, { onConflict: 'team_id,round_id' });
 
       if (error) throw error;
 
       if (isFinal) {
+        // Also save to scores table for ranking
+        await supabase.from('scores').upsert({
+          team_id: user.id,
+          round_id: round.id,
+          score: 0,
+          max_score: 100,
+          time_taken_ms,
+          evaluated_at: new Date().toISOString()
+        }, { onConflict: 'team_id,round_id' });
+
         stopAntiCheat();
+        resumeFooterClock();
         renderDebateRound(container, params, search);
       }
     } catch (err) {
@@ -312,10 +332,10 @@ export async function renderDebateRound(container, params, search = {}) {
   }
 
   // Debate timer is based on topic.duration_seconds (NOT round.duration_minutes)
-  // It starts counting from round.started_at + 10s grace
+  // It starts counting from round.started_at + 5s grace
   if (round.started_at && !isLocked && !isPaused && !isPreview) {
-    const startedAt = new Date(round.started_at).getTime() + 10000;
-    const elapsed = Date.now() - startedAt;
+    const startedAt = new Date(round.started_at).getTime() + 5000;
+    const elapsed = timeSync.getSyncedTime() - startedAt;
     const remaining = Math.max(0, DEBATE_DURATION_MS - elapsed);
 
     if (remaining <= 0) {
@@ -359,7 +379,10 @@ export async function renderDebateRound(container, params, search = {}) {
     Notifier.confirm(
       'Terminate Session',
       'Are you sure you want to exit the current round? Your progress is auto-saved, but you will leave the tactical terminal.',
-      () => navigate('/dashboard'),
+      () => {
+        resumeFooterClock();
+        navigate('/dashboard');
+      },
       { confirmText: 'Exit to Dashboard', type: 'warning' }
     );
   });

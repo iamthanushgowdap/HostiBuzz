@@ -70,7 +70,7 @@ export function renderPreRoundCountdown(round, container, renderFn) {
   const serverStart = new Date(round.started_at).getTime();
   const now = timeSync.getSyncedTime();
   const elapsed = now - serverStart;
-  const GRACE_MS = 10000; 
+  const GRACE_MS = 5000; // Synchronized with Admin Future-Start Buffer
   
   if (elapsed < GRACE_MS) {
     const remainingSeconds = Math.ceil((GRACE_MS - elapsed) / 1000);

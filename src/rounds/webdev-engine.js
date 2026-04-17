@@ -6,8 +6,12 @@ import { navigate } from '../router.js';
 import { startAntiCheat, stopAntiCheat } from '../services/anti-cheat.js';
 import { ActivityBroadcast } from '../services/activity-broadcast.js';
 import { Ticker } from '../components/ticker.js';
+import { timeSync } from '../services/timeSync.js';
+import { pauseFooterClock, resumeFooterClock } from '../components/footer.js';
 
 export async function renderWebdevRound(container, params, search = {}) {
+  // Eco-Mode: Pause background processing
+  pauseFooterClock();
   const isPreview = search.mode === 'preview';
   const previewRoundId = search.roundId;
   const user = getState('user');
@@ -270,6 +274,10 @@ export async function renderWebdevRound(container, params, search = {}) {
     }
 
     try {
+      // Calculate synchronized time taken
+      const competitionStart = new Date(round.started_at).getTime() + 5000;
+      const time_taken_ms = Math.max(0, timeSync.getSyncedTime() - competitionStart);
+
       const { error } = await supabase.from('submissions').upsert({
         team_id: user.id, 
         round_id: round.id, 
@@ -277,12 +285,23 @@ export async function renderWebdevRound(container, params, search = {}) {
         live_link: isDeployed ? live : null, 
         is_deployed: isDeployed,
         is_final: isFinal, 
-        submission_time: new Date().toISOString()
+        submission_time: new Date().toISOString(),
+        time_taken_ms
       }, { onConflict: 'team_id,round_id' });
 
       if (error) throw error;
       
       if (isFinal) {
+        // Also save to scores table for immediate ranking
+        await supabase.from('scores').upsert({
+          team_id: user.id,
+          round_id: round.id,
+          score: 0, // Awaiting judging
+          max_score: 100,
+          time_taken_ms,
+          evaluated_at: new Date().toISOString()
+        }, { onConflict: 'team_id,round_id' });
+
         stopAntiCheat();
         
         // Broadcast submission
@@ -290,6 +309,7 @@ export async function renderWebdevRound(container, params, search = {}) {
 
         const { Notifier } = await import('../services/notifier.js');
         Notifier.toast('Project Finalized Successfully!', 'success');
+        resumeFooterClock();
         renderWebdevRound(container, params, search); // Re-render to show locked state
       }
     } catch (err) {
@@ -340,7 +360,7 @@ export async function renderWebdevRound(container, params, search = {}) {
       }
     }).startFromServer(round.started_at, round.duration_minutes);
   } else if (!isPreview && isPaused) {
-    const startedAt = new Date(round.started_at).getTime() + 10000;
+    const startedAt = new Date(round.started_at).getTime() + 5000;
     let pausedAt = Date.now();
     try {
       const cfg = typeof round.config === 'string' ? JSON.parse(round.config) : (round.config || {});
@@ -361,7 +381,10 @@ export async function renderWebdevRound(container, params, search = {}) {
     Notifier.confirm(
       'Terminate Session',
       'Are you sure you want to exit the current round? Your progress is auto-saved, but you will leave the tactical terminal.',
-      () => navigate('/dashboard'),
+      () => {
+        resumeFooterClock();
+        navigate('/dashboard');
+      },
       { confirmText: 'Exit to Dashboard', type: 'warning' }
     );
   });
