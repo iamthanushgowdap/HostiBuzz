@@ -390,7 +390,7 @@ export async function renderRegister(container, params = {}) {
     }
 
     errorEl.classList.add('hidden');
-    btn.innerHTML = '<span class="material-symbols-outlined animate-spin mr-4 text-3xl">sync</span> REGISTERING...';
+    btn.innerHTML = '<div class="loader mr-4 text-3xl"></div> REGISTERING...';
     btn.disabled = true;
 
     try {

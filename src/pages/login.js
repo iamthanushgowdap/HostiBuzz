@@ -78,7 +78,7 @@ export async function renderLogin(container) {
     if (!teamId || !password) return;
 
     errorEl.classList.add('hidden');
-    btn.innerHTML = '<span class="material-symbols-outlined animate-spin mr-3">progress_activity</span> Authenticating...';
+    btn.innerHTML = '<div class="loader mr-3"></div> Authenticating...';
     btn.disabled = true;
 
     try {

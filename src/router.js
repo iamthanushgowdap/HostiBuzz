@@ -91,13 +91,7 @@ export async function handleRoute() {
     app.innerHTML = `
       <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1.5rem;background:#fff;">
         <div style="display:flex;flex-direction:column;align-items:center;gap:0.75rem;">
-          <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="20" cy="20" r="18" stroke="#14532d" stroke-width="3" stroke-dasharray="90 30" style="animation:spin 1s linear infinite;transform-origin:center">
-              <animateTransform attributeName="transform" type="rotate" from="0 20 20" to="360 20 20" dur="0.9s" repeatCount="indefinite"/>
-            </circle>
-            <circle cx="20" cy="20" r="8" fill="#14532d" opacity="0.15"/>
-            <circle cx="20" cy="20" r="4" fill="#22c55e"/>
-          </svg>
+          <div class="loader"></div>
           <div style="font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:1.1rem;color:#14532d;letter-spacing:-0.02em;">HostiBuzz</div>
           <div style="font-family:'Inter',sans-serif;font-size:0.7rem;color:#6b7280;letter-spacing:0.1em;text-transform:uppercase;">Loading...</div>
         </div>
