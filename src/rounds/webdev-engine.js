@@ -39,7 +39,7 @@ export async function renderWebdevRound(container, params, search = {}) {
   }
   
   if (!round) { 
-    container.innerHTML = `${renderNavbar()}<div class="min-h-screen flex items-center justify-center p-12 text-center"><div><span class="material-symbols-outlined text-6xl text-on-surface-variant/20 mb-4">analytics</span><p class="text-on-surface-variant text-lg">${isPreview ? 'Preview Round Not Found' : 'No active web development round.'}</p></div></div>`; 
+    container.innerHTML = `${renderNavbar()}<div class="min-h-screen flex items-center justify-center p-12 text-center bg-surface"><div><span class="material-symbols-outlined text-6xl text-primary/20 mb-4">analytics</span><p class="text-on-surface-variant text-lg">${isPreview ? 'Preview Round Not Found' : 'No active web development round.'}</p></div></div>`; 
     bindNavbarEvents(); 
     return; 
   }
@@ -68,15 +68,15 @@ export async function renderWebdevRound(container, params, search = {}) {
     ${renderNavbar({ hideNavigation: !isLocked })}
     <main class="min-h-[calc(100vh-76px)] relative pb-24">
       ${isPaused ? `
-        <div class="fixed inset-0 z-[100] bg-[#0a0e19]/60 backdrop-blur-xl flex items-center justify-center p-6 slide-in-bottom">
-          <div class="glass-panel p-12 rounded-[40px] max-w-xl w-full text-center border-warning/20 bg-warning/5 shadow-[0_20px_50px_rgba(245,158,11,0.1)]">
-            <div class="w-20 h-20 bg-warning/10 rounded-3xl flex items-center justify-center mx-auto mb-8 animate-pulse">
-              <span class="material-symbols-outlined text-4xl text-warning">lock_open</span>
+        <div class="fixed inset-0 z-[100] bg-white/60 backdrop-blur-xl flex items-center justify-center p-6 slide-in-bottom">
+          <div class="glass-panel p-12 rounded-[40px] max-w-xl w-full text-center border-accent/20 bg-white shadow-2xl">
+            <div class="w-20 h-20 bg-accent/10 rounded-3xl flex items-center justify-center mx-auto mb-8 animate-pulse">
+              <span class="material-symbols-outlined text-4xl text-accent">lock_open</span>
             </div>
-            <h2 class="text-4xl font-headline font-bold text-white mb-4 tracking-tighter uppercase">Round Paused</h2>
+            <h2 class="text-4xl font-headline font-bold text-on-surface mb-4 tracking-tighter uppercase">Round Paused</h2>
             <p class="text-on-surface-variant text-lg leading-relaxed mb-8">The administrator has temporarily paused the round. All inputs are locked. Please wait for the round to resume — your progress is safe.</p>
-            <div class="flex items-center justify-center gap-3 text-warning font-headline font-bold text-xs uppercase tracking-[0.3em]">
-              <span class="w-2 h-2 bg-warning rounded-full animate-ping"></span>
+            <div class="flex items-center justify-center gap-3 text-accent font-headline font-bold text-xs uppercase tracking-[0.3em]">
+              <span class="w-2 h-2 bg-accent rounded-full animate-ping"></span>
               Awaiting Admin Signal
             </div>
           </div>
@@ -88,22 +88,22 @@ export async function renderWebdevRound(container, params, search = {}) {
         <div class="mb-8 lg:mb-12 flex flex-col lg:flex-row justify-between lg:items-end gap-6 px-6 lg:px-0">
           <div class="space-y-2">
             <div class="flex items-center gap-3 mb-2">
-              <span class="px-3 py-1 bg-primary/20 text-primary rounded-full text-[9px] lg:text-[10px] font-black uppercase tracking-widest border border-primary/20">Phase ${round.round_number} Tactics</span>
-              ${isLocked ? `<span class="px-3 py-1 bg-secondary/20 text-secondary rounded-full text-[9px] lg:text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 border border-secondary/20"><span class="material-symbols-outlined text-[14px]">beenhere</span> Finalized</span>` : ''}
+              <span class="px-3 py-1 bg-primary/10 text-primary rounded-full text-[9px] lg:text-[10px] font-black uppercase tracking-widest border border-primary/20">Phase ${round.round_number} Tactics</span>
+              ${isLocked ? `<span class="px-3 py-1 bg-accent/20 text-accent rounded-full text-[9px] lg:text-[10px] font-black uppercase tracking-widest flex items-center gap-1.5 border border-accent/20"><span class="material-symbols-outlined text-[14px]">beenhere</span> Finalized</span>` : ''}
             </div>
-            <h1 class="text-3xl lg:text-5xl font-black font-headline tracking-tighter text-white">Project Protocol</h1>
+            <h1 class="text-3xl lg:text-5xl font-black font-headline tracking-tighter text-on-surface">Project Protocol</h1>
             <p class="text-[11px] lg:text-base text-on-surface-variant max-w-md uppercase tracking-widest font-bold opacity-60">${round.title}</p>
           </div>
           
           <div class="flex flex-col lg:items-end gap-2">
             <span class="text-[9px] uppercase tracking-[0.2em] text-on-surface-variant/60 font-black">Sync Pulse Remaining</span>
-            <div id="webdev-timer" class="flex items-center gap-4 bg-surface-container-low border border-white/5 px-4 lg:px-6 py-3 rounded-2xl shadow-xl justify-between lg:justify-end">
-              <button id="terminate-session" class="w-8 h-8 lg:w-10 lg:h-10 rounded-lg bg-white/5 flex items-center justify-center text-on-surface-variant/60 hover:text-error transition-colors" title="Terminate Session">
+            <div id="webdev-timer" class="flex items-center gap-4 bg-white border border-primary/10 px-4 lg:px-6 py-3 rounded-2xl shadow-xl justify-between lg:justify-end">
+              <button id="terminate-session" class="w-8 h-8 lg:w-10 lg:h-10 rounded-lg bg-primary/5 flex items-center justify-center text-on-surface-variant/60 hover:text-error transition-colors" title="Terminate Session">
                 <span class="material-symbols-outlined text-sm lg:text-base">logout</span>
               </button>
-              <div class="flex items-center gap-4 border-l border-white/5 pl-4 lg:pl-6">
-                <span class="material-symbols-outlined text-secondary text-xl font-black">timer</span>
-                <span class="text-2xl lg:text-3xl font-headline font-black text-white tabular-nums tracking-tighter">${Timer.formatTime(round.duration_minutes * 60 * 1000)}</span>
+              <div class="flex items-center gap-4 border-l border-primary/10 pl-4 lg:pl-6">
+                <span class="material-symbols-outlined text-accent text-xl font-black">timer</span>
+                <span class="text-2xl lg:text-3xl font-headline font-black text-on-surface tabular-nums tracking-tighter">${Timer.formatTime(round.duration_minutes * 60 * 1000)}</span>
               </div>
             </div>
           </div>
@@ -114,57 +114,55 @@ export async function renderWebdevRound(container, params, search = {}) {
             
             ${isLocked ? `
               <!-- SUCCESS STATE -->
-              <div class="glass-panel p-8 rounded-2xl border-secondary/20 bg-secondary/5 mb-6">
+              <div class="glass-panel p-8 rounded-2xl border-accent/20 bg-accent/5 mb-6">
                 <div class="flex items-start gap-4">
-                  <span class="material-symbols-outlined text-secondary text-4xl">verified</span>
+                  <span class="material-symbols-outlined text-accent text-4xl">verified</span>
                   <div>
-                    <h3 class="text-xl font-headline font-bold text-white mb-2">Submission Confirmed</h3>
+                    <h3 class="text-xl font-headline font-bold text-on-surface mb-2">Submission Confirmed</h3>
                     <div class="flex items-center gap-4 mb-4">
-                      <span class="px-3 py-1 bg-secondary/10 text-secondary rounded-lg text-[10px] font-bold uppercase tracking-widest border border-secondary/20">
+                      <span class="px-3 py-1 bg-accent/10 text-accent rounded-lg text-[10px] font-bold uppercase tracking-widest border border-accent/20">
                         ${existing?.is_deployed ? 'Live Project' : 'Code Only / Manual Verification'}
                       </span>
                     </div>
                     <p class="text-on-surface-variant text-sm leading-relaxed mb-6">Your project has been successfully finalized. You can no longer edit your submission. Our judges will evaluate your work soon.</p>
-                    <button onclick="window.location.hash='#/dashboard'" class="px-6 py-3 bg-secondary text-on-secondary rounded-xl font-headline font-bold text-xs uppercase tracking-widest hover:scale-105 transition-all shadow-lg">Return to Dashboard</button>
+                    <button onclick="window.location.hash='#/dashboard'" class="px-6 py-3 bg-accent text-white rounded-xl font-headline font-bold text-xs uppercase tracking-widest hover:scale-105 transition-all shadow-lg">Return to Dashboard</button>
                   </div>
                 </div>
               </div>
             ` : ''}
 
             <!-- INPUT FORM -->
-            <div class="glass-panel p-6 lg:p-8 rounded-[2rem] space-y-8 ${isLocked ? 'opacity-50 pointer-events-none' : ''} border border-white/5">
+            <div class="glass-panel p-6 lg:p-8 rounded-[2rem] space-y-8 ${isLocked ? 'opacity-50 pointer-events-none' : ''} border border-primary/10 bg-white shadow-xl">
               <div class="space-y-6">
-                <h2 class="text-sm lg:text-lg font-headline font-black text-secondary flex items-center gap-3 uppercase tracking-widest">
+                <h2 class="text-sm lg:text-lg font-headline font-black text-accent flex items-center gap-3 uppercase tracking-widest">
                   <span class="material-symbols-outlined">rocket_launch</span> Deployment Node
                 </h2>
                 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 lg:gap-4">
-                  <label class="relative flex items-center p-5 rounded-2xl bg-surface-container-lowest border border-white/5 cursor-pointer group hover:bg-white/5 transition-all">
+                  <label class="relative flex items-center p-5 rounded-2xl bg-primary/5 border border-primary/10 cursor-pointer group hover:bg-primary/10 transition-all">
                     <input type="radio" name="deployed" value="true" class="hidden peer" ${existing?.is_deployed ? 'checked' : ''}>
-                    <div class="w-6 h-6 rounded-full border-2 border-outline-variant/30 mr-4 flex items-center justify-center peer-checked:border-secondary peer-checked:bg-secondary transition-all">
-                      <div class="w-2 h-2 rounded-full bg-surface-container-lowest scale-0 peer-checked:scale-100 transition-transform"></div>
+                    <div class="w-6 h-6 rounded-full border-2 border-primary/30 mr-4 flex items-center justify-center peer-checked:border-accent peer-checked:bg-accent transition-all">
+                      <div class="w-2 h-2 rounded-full bg-white scale-0 peer-checked:scale-100 transition-transform"></div>
                     </div>
                     <div>
-                      <span class="text-white font-black block text-sm lg:text-base">LIVE ENDPOINT</span>
+                      <span class="text-on-surface font-black block text-sm lg:text-base">LIVE ENDPOINT</span>
                       <span class="text-[9px] text-on-surface-variant/60 uppercase font-bold tracking-widest leading-none">Deployed URL Ready</span>
                     </div>
                   </label>
                   
-                  <label class="relative flex items-center p-5 rounded-2xl bg-surface-container-lowest border border-white/5 cursor-pointer group hover:bg-white/5 transition-all">
+                  <label class="relative flex items-center p-5 rounded-2xl bg-primary/5 border border-primary/10 cursor-pointer group hover:bg-primary/10 transition-all">
                     <input type="radio" name="deployed" value="false" class="hidden peer" ${existing?.is_deployed === false ? 'checked' : !existing ? 'checked' : ''}>
-                    <div class="w-6 h-6 rounded-full border-2 border-outline-variant/30 mr-4 flex items-center justify-center peer-checked:border-secondary peer-checked:bg-secondary transition-all">
-                      <div class="w-2 h-2 rounded-full bg-surface-container-lowest scale-0 peer-checked:scale-100 transition-transform"></div>
+                    <div class="w-6 h-6 rounded-full border-2 border-primary/30 mr-4 flex items-center justify-center peer-checked:border-accent peer-checked:bg-accent transition-all">
+                      <div class="w-2 h-2 rounded-full bg-white scale-0 peer-checked:scale-100 transition-transform"></div>
                     </div>
                     <div>
-                      <span class="text-white font-black block text-sm lg:text-base">CODE ARCHIVE</span>
+                      <span class="text-on-surface font-black block text-sm lg:text-base">CODE ARCHIVE</span>
                       <span class="text-[9px] text-on-surface-variant/60 uppercase font-bold tracking-widest leading-none">Local Sources Only</span>
                     </div>
                   </label>
                 </div>
-              </div>
-
-              <div id="submission-links-section" class="space-y-6 pt-8 border-t border-white/5 ${existing?.is_deployed ? '' : 'hidden'}">
-                <h2 class="text-sm lg:text-lg font-headline font-black text-secondary flex items-center gap-3 uppercase tracking-widest">
+              </div>              <div id="submission-links-section" class="space-y-6 pt-8 border-t border-primary/10 ${existing?.is_deployed ? '' : 'hidden'}">
+                <h2 class="text-sm lg:text-lg font-headline font-black text-accent flex items-center gap-3 uppercase tracking-widest">
                   <span class="material-symbols-outlined">link</span> Transmission Links
                 </h2>
                 
@@ -173,28 +171,29 @@ export async function renderWebdevRound(container, params, search = {}) {
                     <label class="text-[9px] lg:text-[10px] font-black uppercase tracking-[0.3em] text-on-surface-variant/60 block pl-1">Source Logic (GitHub/GitLab)</label>
                     <div class="relative">
                       <span class="material-symbols-outlined absolute left-5 top-1/2 -translate-y-1/2 text-on-surface-variant/40">code</span>
-                      <input id="github-link" class="w-full bg-surface-container-lowest border-none rounded-2xl py-4 lg:py-5 pl-14 pr-5 text-white placeholder:text-outline/20 font-body text-sm lg:text-base focus:ring-1 focus:ring-secondary/40 shadow-inner" placeholder="https://github.com/team/project" value="${existing?.github_link || ''}" />
+                      <input id="github-link" class="w-full bg-primary/5 border-none rounded-2xl py-4 lg:py-5 pl-14 pr-5 text-on-surface placeholder:text-on-surface-variant/20 font-body text-sm lg:text-base focus:ring-1 focus:ring-accent/40 shadow-inner" placeholder="https://github.com/team/project" value="${existing?.github_link || ''}" />
                     </div>
                   </div>
-
+ 
                   <div id="live-url-container" class="space-y-2">
                     <label class="text-[9px] lg:text-[10px] font-black uppercase tracking-[0.3em] text-on-surface-variant/60 block pl-1">Live Deployment Node</label>
                     <div class="relative">
                       <span class="material-symbols-outlined absolute left-5 top-1/2 -translate-y-1/2 text-on-surface-variant/40">public</span>
-                      <input id="live-link" class="w-full bg-surface-container-lowest border-none rounded-2xl py-4 lg:py-5 pl-14 pr-5 text-white placeholder:text-outline/20 font-body text-sm lg:text-base focus:ring-1 focus:ring-secondary/40 shadow-inner" placeholder="https://project.vercel.app" value="${existing?.live_link || ''}" />
+                      <input id="live-link" class="w-full bg-primary/5 border-none rounded-2xl py-4 lg:py-5 pl-14 pr-5 text-on-surface placeholder:text-on-surface-variant/20 font-body text-sm lg:text-base focus:ring-1 focus:ring-accent/40 shadow-inner" placeholder="https://project.vercel.app" value="${existing?.live_link || ''}" />
                     </div>
                   </div>
                 </div>
               </div>
+>
             </div>
 
             ${!isLocked ? `
               <div class="flex flex-col sm:flex-row items-center gap-4">
-                <button id="submit-webdev" class="w-full sm:flex-1 h-16 rounded-2xl kinetic-gradient font-bold font-headline text-on-primary-fixed flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_10px_30px_rgba(100,255,100,0.1)]">
+                <button id="submit-webdev" class="w-full sm:flex-1 h-16 rounded-2xl kinetic-gradient font-bold font-headline text-white flex items-center justify-center gap-3 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl">
                   Finalize Submission
                   <span class="material-symbols-outlined">send</span>
                 </button>
-                <button id="save-draft-webdev" class="w-full sm:w-auto px-8 h-16 rounded-2xl border border-outline-variant/30 text-on-surface hover:bg-white/5 transition-all font-headline font-bold uppercase text-xs tracking-widest">
+                <button id="save-draft-webdev" class="w-full sm:w-auto px-8 h-16 rounded-2xl border border-primary/20 text-on-surface hover:bg-primary/5 transition-all font-headline font-bold uppercase text-xs tracking-widest bg-white">
                   Save Draft
                 </button>
               </div>
@@ -203,9 +202,9 @@ export async function renderWebdevRound(container, params, search = {}) {
 
           <div class="md:col-span-12 lg:col-span-4 space-y-6">
             <!-- INSTRUCTIONS CARD -->
-            <div class="bg-surface-container-lowest rounded-[2rem] p-6 lg:p-8 border border-white/5 shadow-xl relative overflow-hidden group">
+            <div class="bg-white rounded-[2rem] p-6 lg:p-8 border border-primary/10 shadow-xl relative overflow-hidden group">
               <div class="absolute -right-4 -top-4 w-24 h-24 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-colors"></div>
-              <h3 class="text-white font-headline font-black text-base lg:text-lg mb-6 flex items-center gap-3 uppercase tracking-widest">
+              <h3 class="text-on-surface font-headline font-black text-base lg:text-lg mb-6 flex items-center gap-3 uppercase tracking-widest">
                 <span class="material-symbols-outlined text-primary">description</span> 
                 Protocol Specs
               </h3>
@@ -213,9 +212,9 @@ export async function renderWebdevRound(container, params, search = {}) {
               <div class="prose prose-invert prose-sm max-w-none text-on-surface-variant/80 leading-relaxed font-medium">
                 ${guidelines ? guidelines.replace(/\n/g, '<br>') : `
                   <ul class="space-y-4 list-none p-0">
-                    <li class="flex items-start gap-3"><span class="material-symbols-outlined text-secondary text-sm shrink-0 mt-0.5">check_circle</span><p class="text-[11px] lg:text-sm uppercase tracking-wider font-bold">WORKING WEB APPLICATION INFRASTRUCTURE</p></li>
-                    <li class="flex items-start gap-3"><span class="material-symbols-outlined text-secondary text-sm shrink-0 mt-0.5">check_circle</span><p class="text-[11px] lg:text-sm uppercase tracking-wider font-bold">PUBLICLY ACCESSIBLE SOURCE REPOSITORY</p></li>
-                    <li class="flex items-start gap-3"><span class="material-symbols-outlined text-secondary text-sm shrink-0 mt-0.5">check_circle</span><p class="text-[11px] lg:text-sm uppercase tracking-wider font-bold">FINALIZE BEFORE PULSE EXPIRATION</p></li>
+                    <li class="flex items-start gap-3"><span class="material-symbols-outlined text-accent text-sm shrink-0 mt-0.5">check_circle</span><p class="text-[11px] lg:text-sm uppercase tracking-wider font-bold">WORKING WEB APPLICATION INFRASTRUCTURE</p></li>
+                    <li class="flex items-start gap-3"><span class="material-symbols-outlined text-accent text-sm shrink-0 mt-0.5">check_circle</span><p class="text-[11px] lg:text-sm uppercase tracking-wider font-bold">PUBLICLY ACCESSIBLE SOURCE REPOSITORY</p></li>
+                    <li class="flex items-start gap-3"><span class="material-symbols-outlined text-accent text-sm shrink-0 mt-0.5">check_circle</span><p class="text-[11px] lg:text-sm uppercase tracking-wider font-bold">FINALIZE BEFORE PULSE EXPIRATION</p></li>
                   </ul>
                 `}
               </div>
@@ -231,7 +230,7 @@ export async function renderWebdevRound(container, params, search = {}) {
             </div>
             
             ${isLocked ? `
-              <button onclick="window.location.hash='#/dashboard'" class="w-full py-4 rounded-xl bg-surface-container-low text-on-surface-variant font-headline font-bold text-xs uppercase tracking-widest hover:bg-surface-container hover:text-white transition-all flex items-center justify-center gap-2 border border-white/5">
+              <button onclick="window.location.hash='#/dashboard'" class="w-full py-4 rounded-xl bg-primary/5 text-on-surface-variant font-headline font-bold text-xs uppercase tracking-widest hover:bg-primary/10 hover:text-on-surface transition-all flex items-center justify-center gap-2 border border-primary/10">
                 <span class="material-symbols-outlined text-sm">arrow_back</span>
                 Back to Dashboard
               </button>

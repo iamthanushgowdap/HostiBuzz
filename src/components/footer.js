@@ -15,17 +15,17 @@ export function renderFooter() {
               <g transform="rotate(-3.76,160.79,349.23)">
                 <use class="footer-cog footer-cw footer-t20" fill-opacity="0.4" href="#spider-cog5" />
               </g>
-              <use id="footer-clockFace" fill="#14532d" fill-opacity="0.15" stroke="none" href="#spider-arabic" filter="url(#spider-shadow)" />
+              <use id="footer-clockFace" fill="#10b981" fill-opacity="0.1" stroke="none" href="#spider-arabic" filter="url(#spider-shadow)" />
               <g id="footer-spiderGroup" transform="matrix(3.7795276,0,0,3.7795276,0,0)">
-                <path fill="#14532d" stroke="none" filter="url(#spider-shadow)"
+                <path fill="#10b981" stroke="none" filter="url(#spider-shadow)"
                   d="m 33.5,21.4 -3.7,8.4 c -0.1,0.3 -0.1,0.5 0,0.7 l 1.4,6.4 6,1.8 -6,1.9 -1.4,4.7 c -0.1,0.3 -0.1,0.5 0.1,0.8 l 3.6,5.7 0.5,-0.2 c -2.1,-3.6 -2.9,-5.2 -2.8,-5.9 0.8,-4.4 1.5,-3.3 8.5,-5.3 7,2 7.3,0.8 8.5,5.3 0.2,0.7 -0.3,1.8 -2.8,5.9 l 0.5,0.2 3.5,-5.7 c 0.1,-0.2 0.2,-0.4 0.1,-0.7 l -1.3,-4.8 -6,-1.9 6,-1.8 1.4,-6.4 c 0.1,-0.3 0.1,-0.4 0,-0.7 l -3.7,-8.4 -0.5,0.2 c 1.8,4.3 3,7.6 2.9,8.4 -0.4,6.2 -1.5,5.1 -8.6,7.1 -7.1,-2 -8.2,-0.9 -8.6,-7.1 -0.1,-0.7 1.1,-4.1 2.9,-8.4 z" />
                 <g id="footer-hr">
                   <circle fill="#14532d" fill-opacity="0" cx="39.75" cy="39.14" r="56.37" />
-                  <path id="footer-hand-hr" fill="#14532d" stroke="none" filter="url(#spider-shadow)" d="" />
+                  <path id="footer-hand-hr" fill="#10b981" stroke="none" filter="url(#spider-shadow)" d="" />
                 </g>
                 <g id="footer-min">
                   <circle fill="#14532d" fill-opacity="0" cx="39.75" cy="39.14" r="56.37" />
-                  <path id="footer-hand-min" fill="#14532d" stroke="none" filter="url(#spider-shadow)" d="" />
+                  <path id="footer-hand-min" fill="#10b981" stroke="none" filter="url(#spider-shadow)" d="" />
                 </g>
                 <g id="footer-sec">
                   <circle fill="#22c55e" fill-opacity="0" cx="39.75" cy="39.14" r="56.37" />
@@ -33,7 +33,7 @@ export function renderFooter() {
                 </g>
                 <path fill="#14532d" stroke="none" filter="url(#spider-shadow2)"
                   d="m 38.3,32.5 c -0.8,0.4 -4.1,4.1 -1.3,8 -0.3,1.1 0,4.1 2.6,4.2 2.6,0.1 3.1,-3 2.6,-4.2 2.5,-3.5 0.1,-7.3 -0.9,-8 -1.2,-1 -1.7,-1.1 -3,0 z" />
-                <path id="footer-face" fill="#14532d" stroke="none" filter="url(#spider-shadow2)" d="" />
+                <path id="footer-face" fill="#10b981" stroke="none" filter="url(#spider-shadow2)" d="" />
                 <path fill="#0a0e19" stroke="none"
                   d="m 42,43.2 c -0.2,0.5 -1.2,1.6 -2.4,1.6 -1.1,0 -2,-1.1 -2.3,-1.7 -0.3,-0.5 1.1,-1.2 2.3,-1.2 1.1,0 2.6,0.7 2.4,1.2 z" />
               </g>
@@ -46,14 +46,14 @@ export function renderFooter() {
       <!-- Details side (65%) -->
       <div class="hb-footer__details">
         <div class="hb-footer__brand">
-          <span class="hb-footer__brand-name">HostiBuzz</span>
-          <span class="hb-footer__brand-version">v2.1.0</span>
+          <span class="hb-footer__brand-name text-on-surface">HostiBuzz</span>
+          <span class="hb-footer__brand-version text-on-surface-variant opacity-40">v2.1.0</span>
         </div>
         <div class="hb-footer__author">
-          <span class="hb-footer__author-name">Tanush Gowda P</span>
-          <span class="hb-footer__author-title">Lead Technical Architect &amp; Developer</span>
+          <span class="hb-footer__author-name text-primary">Thanush Gowda P</span>
+          <span class="hb-footer__author-title text-on-surface-variant opacity-60">Lead Technical Architect &amp; Developer</span>
         </div>
-        <p class="hb-footer__copy">© 2026 · HostiBuzz Platform · Open Source Project Obsidian</p>
+        <p class="hb-footer__copy text-on-surface-variant opacity-30">© 2026 · HostiBuzz Platform · Open Source Project Emerald</p>
       </div>
     </footer>
   `;

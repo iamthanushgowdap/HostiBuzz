@@ -134,7 +134,7 @@ export async function renderLeaderboard(container) {
       ${teamScores.length === 0 ? `
         <div class="text-center py-20 px-6 glass-panel rounded-[2rem] border border-dashed border-outline-variant/30">
           <span class="material-symbols-outlined text-6xl text-on-surface-variant/30 mb-4 block">emoji_events</span>
-          <h2 class="text-xl font-headline font-bold text-white mb-2">No Teams Found</h2>
+          <h2 class="text-xl font-headline font-bold text-on-surface mb-2">No Teams Found</h2>
           <p class="text-sm text-on-surface-variant">There are no teams or scores recorded for this view yet. Please check back later!</p>
         </div>
       ` : `
@@ -217,8 +217,17 @@ export async function renderLeaderboard(container) {
         </section>
       `}
 
-      <footer class="text-center text-on-surface-variant/40 text-xs tracking-widest uppercase py-8">
-        Showing ${teamScores.length} teams • Auto-refreshing
+      <footer class="flex flex-col items-center justify-center gap-4 py-12">
+        <div class="flex items-center gap-3 px-4 py-2 bg-primary/5 rounded-full border border-primary/10">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+          </span>
+          <span class="text-[10px] font-headline font-bold text-primary tracking-[0.2em] uppercase">Live Sync Active</span>
+        </div>
+        <div class="text-on-surface-variant/40 text-[9px] tracking-[0.3em] uppercase font-headline">
+          Showing ${teamScores.length} Competitors • Metrics updated via arena pulse
+        </div>
       </footer>
     </main>
   `;
@@ -230,13 +239,23 @@ export async function renderLeaderboard(container) {
     renderLeaderboard(container);
   });
 
-  // Auto refresh every 10 seconds
-  const interval = setInterval(async () => {
+  // REAL-TIME SYNC: Listen for changes in scores or teams
+  const channel = supabase
+    .channel('leaderboard-changes')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'scores' }, () => {
+      console.log('Leaderboard update triggered by real-time pulse');
+      renderLeaderboard(container);
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'teams' }, () => {
+      renderLeaderboard(container);
+    })
+    .subscribe();
+
+  // Cleanup subscription when leaving the page
+  const checkNavigation = setInterval(() => {
     if (window.location.hash !== '#/leaderboard') {
-      clearInterval(interval);
-      return;
+      supabase.removeChannel(channel);
+      clearInterval(checkNavigation);
     }
-    // Only re-render if still on leaderboard
-    await renderLeaderboard(container);
-  }, 10000);
+  }, 1000);
 }

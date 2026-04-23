@@ -51,7 +51,7 @@ function matchRoute(hash) {
 }
 
 // Auth guards
-const publicRoutes = ['/', '/login', '/admin/login', '/register', '/leaderboard'];
+const publicRoutes = ['/', '/login', '/admin/login', '/register', '/leaderboard', '/events'];
 
 function checkAuth(path) {
   if (publicRoutes.includes(path)) return true;

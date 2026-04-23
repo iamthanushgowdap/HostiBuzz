@@ -67,8 +67,8 @@ export async function renderDashboard(container, params = {}, search = {}, mockU
         <div class="w-full lg:w-auto">
           <div class="flex items-center justify-between lg:justify-start gap-4 text-primary text-[10px] lg:text-xs font-headline tracking-[0.2em] uppercase mb-4">
             <div class="flex items-center gap-2">
-              <span class="material-symbols-outlined text-sm">satellite_alt</span>
-              <span>Command Center</span>
+              <span class="material-symbols-outlined text-sm">dashboard</span>
+              <span>Team Dashboard</span>
             </div>
             <div id="socket-pulse-wrap" class="flex items-center gap-2 pl-4 border-l border-primary/10">
                <div id="socket-pulse-dot" class="w-1.5 h-1.5 rounded-full bg-primary/20"></div>
@@ -125,20 +125,20 @@ export async function renderDashboard(container, params = {}, search = {}, mockU
         <div class="bg-surface-container-low p-8 lg:p-12 rounded-3xl mb-8 text-center border border-primary/5">
           ${!event ? `
             <span class="material-symbols-outlined text-4xl lg:text-5xl text-error/40 mb-4 block">error_outline</span>
-            <h2 class="text-xl lg:text-2xl font-headline font-bold text-on-surface mb-2 tracking-tight">System Link Missing</h2>
-            <p class="text-xs lg:text-sm text-on-surface-variant leading-relaxed">No active event synchronization detected. Contact protocol administrator.</p>
+            <h2 class="text-xl lg:text-2xl font-headline font-bold text-on-surface mb-2 tracking-tight">Event Not Found</h2>
+            <p class="text-xs lg:text-sm text-on-surface-variant leading-relaxed">We couldn't find an active event linked to your account. Please contact the event organizer.</p>
           ` : rounds.every(r => r.status === 'completed') && rounds.length > 0 ? `
             <span class="material-symbols-outlined text-4xl lg:text-5xl text-primary/40 mb-4 block">check_circle</span>
-            <h2 class="text-xl lg:text-2xl font-headline font-bold text-on-surface mb-2 tracking-tight">Mission Accomplished</h2>
-            <p class="text-xs lg:text-sm text-on-surface-variant leading-relaxed">All ${rounds.length} operational phases complete. Monitor the <a href="#/leaderboard" class="text-primary hover:underline font-bold">Project Leaderboard</a> for final metrics.</p>
+            <h2 class="text-xl lg:text-2xl font-headline font-bold text-on-surface mb-2 tracking-tight">Event Completed</h2>
+            <p class="text-xs lg:text-sm text-on-surface-variant leading-relaxed">All ${rounds.length} rounds have been finished. View the <a href="#/leaderboard" class="text-primary hover:underline font-bold">Leaderboard</a> for the final results.</p>
           ` : rounds.length === 0 ? `
             <span class="material-symbols-outlined text-4xl lg:text-5xl text-on-surface-variant/40 mb-4 block">event_upcoming</span>
-            <h2 class="text-xl lg:text-2xl font-headline font-bold text-on-surface mb-2 tracking-tight">Initialization Pending</h2>
-            <p class="text-xs lg:text-sm text-on-surface-variant leading-relaxed">Event structure loading. Awaiting round deployment from command center.</p>
+            <h2 class="text-xl lg:text-2xl font-headline font-bold text-on-surface mb-2 tracking-tight">Coming Soon</h2>
+            <p class="text-xs lg:text-sm text-on-surface-variant leading-relaxed">The event setup is in progress. Please wait for the first round to start.</p>
           ` : `
             <span class="material-symbols-outlined text-4xl lg:text-5xl text-on-surface-variant/40 mb-4 block">hourglass_empty</span>
-            <h2 class="text-xl lg:text-2xl font-headline font-bold text-on-surface mb-2 tracking-tight">Awaiting Sync...</h2>
-            <p class="text-xs lg:text-sm text-on-surface-variant leading-relaxed">Protocol activation pending. The mission will resume automatically upon sync.</p>
+            <h2 class="text-xl lg:text-2xl font-headline font-bold text-on-surface mb-2 tracking-tight">Waiting for Updates...</h2>
+            <p class="text-xs lg:text-sm text-on-surface-variant leading-relaxed">The next round will appear here automatically when it starts.</p>
           `}
         </div>
       `}
@@ -185,7 +185,7 @@ export async function renderDashboard(container, params = {}, search = {}, mockU
 
       <!-- Team Members -->
       <div class="bg-surface-container-low rounded-2xl p-6">
-        <h3 class="font-headline font-bold text-on-surface mb-4">Team Composition</h3>
+        <h3 class="font-headline font-bold text-on-surface mb-4">Team Members</h3>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           ${(user.members || []).map(m => `
             <div class="bg-surface-container p-4 rounded-xl flex items-center gap-3 border border-primary/5">
@@ -267,7 +267,7 @@ export async function renderDashboard(container, params = {}, search = {}, mockU
       }
 
       Notifier.modal({
-        title: 'Performance Intelligence',
+        title: 'Performance Evaluation',
         icon: 'analytics',
         type: 'info',
         body: `
@@ -285,13 +285,13 @@ export async function renderDashboard(container, params = {}, search = {}, mockU
               ${notes.ai ? `
                 <div class="px-3 py-1 rounded-full bg-secondary/10 border border-secondary/20 flex items-center gap-2">
                   <span class="material-symbols-outlined text-[10px] text-secondary">psychology</span>
-                  <span class="text-[8px] font-bold uppercase tracking-widest text-secondary">Aura Intel</span>
+                  <span class="text-[8px] font-bold uppercase tracking-widest text-secondary">AI Evaluation</span>
                 </div>
               ` : ''}
             </div>
 
             <div class="space-y-2">
-              <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Technical Review</label>
+              <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Judge's Feedback</label>
               <div class="p-5 rounded-3xl bg-surface-container-highest border border-primary/5 text-sm text-on-surface-variant italic leading-relaxed">
                 "${notes.feedback || 'No detailed feedback provided yet.'}"
               </div>
@@ -400,14 +400,14 @@ export async function renderDashboard(container, params = {}, search = {}, mockU
     if (!score) return;
 
     const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 bg-black/80 backdrop-blur-md z-[100] flex items-center justify-center p-6';
+    modal.className = 'fixed inset-0 bg-surface/80 backdrop-blur-md z-[100] flex items-center justify-center p-6';
     modal.innerHTML = `
       <div class="glass-panel p-8 rounded-[40px] max-w-xl w-full border-primary/30 scale-in relative overflow-hidden">
         <div class="absolute -top-20 -right-20 w-40 h-40 bg-primary/10 blur-[60px] rounded-full"></div>
         
         <div class="flex justify-between items-center mb-6">
           <div>
-            <h2 class="text-2xl font-headline font-bold text-on-surface uppercase tracking-tighter">Performance Analysis</h2>
+            <h2 class="text-2xl font-headline font-bold text-on-surface uppercase tracking-tighter">Results Details</h2>
             <div class="text-[10px] font-bold text-secondary uppercase tracking-[0.2em] mt-1">${score.rounds?.title} Evaluation</div>
           </div>
           <button id="close-feedback" class="w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center text-on-surface-variant hover:text-on-surface hover:bg-secondary/20 transition-all">
@@ -470,8 +470,8 @@ export async function renderDashboard(container, params = {}, search = {}, mockU
                     <span class="material-symbols-outlined text-4xl">format_quote</span>
                   </div>
                   <div class="text-[10px] font-bold text-secondary uppercase tracking-widest mb-3 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-sm">psychology</span>
-                    Judge's Strategic Review
+                    <span class="material-symbols-outlined text-sm">reviews</span>
+                    Judge's Feedback Review
                   </div>
                   <div class="relative z-10 text-on-surface selection:bg-primary/30">
                     ${rawNotes.replace(/\n/g, '<br>')}

@@ -10,29 +10,29 @@ export function renderNavbar(options = {}) {
     { id: 'leaderboard', label: 'Leaderboard', href: '#/leaderboard', icon: 'leaderboard' },
     ...(user ? [{ 
       id: 'dashboard', 
-      label: user.role === 'admin' ? 'Admin Panel' : 'Command Center', 
+      label: user.role === 'admin' ? 'Admin Panel' : 'Team Dashboard', 
       href: user.role === 'admin' ? '#/admin' : '#/dashboard', 
-      icon: user.role === 'admin' ? 'admin_panel_settings' : 'terminal' 
+      icon: user.role === 'admin' ? 'admin_panel_settings' : 'dashboard' 
     }] : []),
   ] : [];
 
   return `
-    <nav class="glow-nav sticky top-0 z-50 shadow-[0_4px_20px_rgba(20,83,45,0.04)] backdrop-blur-md border-b border-primary/5">
+    <nav class="glow-nav sticky top-0 z-50 shadow-[0_4px_30px_rgba(20,83,45,0.08)] backdrop-blur-md border-b border-primary/10">
       <div class="flex flex-col lg:flex-row justify-between items-center w-full px-4 lg:px-6 py-2 lg:py-3 mx-auto gap-2 lg:gap-0">
         
         <div class="flex items-center justify-between w-full lg:w-auto lg:pr-12">
           <!-- Logo -->
           <div class="flex-shrink-0">
             ${hideNavigation
-              ? `<span class="text-xl lg:text-xl font-bold tracking-tighter text-on-surface font-headline cursor-default">HostiBuzz</span>`
-              : `<a href="#/" class="text-xl lg:text-xl font-bold tracking-tighter text-on-surface font-headline hover:text-primary transition-colors">HostiBuzz</a>`
+              ? `<span class="text-xl lg:text-xl font-bold tracking-tighter text-primary font-headline cursor-default">HostiBuzz</span>`
+              : `<a href="#/" class="text-xl lg:text-xl font-bold tracking-tighter text-primary font-headline hover:text-secondary transition-colors">HostiBuzz</a>`
             }
           </div>
 
           <!-- Mobile Actions (Guest Mode) -->
           ${!user && !hideNavigation ? `
             <div class="lg:hidden flex items-center gap-3">
-              <a href="#/login" class="text-[11px] font-black uppercase tracking-widest text-on-surface-variant hover:text-on-surface transition-colors">Login</a>
+              <a href="#/login" class="text-[11px] font-black uppercase tracking-widest text-on-surface-variant hover:text-primary transition-colors">Login</a>
               <div class="w-1 h-1 bg-primary/20 rounded-full"></div>
               <a href="#/events" class="text-[11px] font-black uppercase tracking-widest text-primary">Register</a>
             </div>
@@ -40,7 +40,7 @@ export function renderNavbar(options = {}) {
           
           <!-- Mobile Logout (Admin/Team) -->
           ${user && !hideNavigation ? `
-            <button id="nav-logout-mobile" class="lg:hidden w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-on-surface-variant hover:text-error transition-colors">
+            <button id="nav-logout-mobile" class="lg:hidden w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center text-on-surface-variant hover:text-error transition-colors">
               <span class="material-symbols-outlined text-sm">logout</span>
             </button>
           ` : ''}
@@ -62,12 +62,12 @@ export function renderNavbar(options = {}) {
           </div>
         ` : ''}
 
-        <!-- TACTICAL MOBILE NAV (The "Stylish" Replacer) -->
+        <!-- MOBILE NAVIGATION -->
         ${!hideNavigation && navLinks.length > 0 ? `
           <div class="lg:hidden w-full overflow-x-auto no-scrollbar pb-1">
-            <div class="flex items-center justify-between gap-1 p-1 bg-surface-container rounded-xl border border-primary/5">
+            <div class="flex items-center justify-between gap-1 p-1 bg-primary/5 rounded-xl border border-primary/5">
               ${navLinks.map(link => `
-                <a href="${link.href}" class="flex-1 flex flex-col items-center gap-1 py-2 px-1 rounded-lg transition-all ${activeLink === link.id ? 'bg-primary/10 text-primary border border-primary/20 shadow-[0_4px_12px_rgba(20,83,45,0.06)]' : 'text-on-surface-variant/60 hover:text-on-surface'}">
+                <a href="${link.href}" class="flex-1 flex flex-col items-center gap-1 py-2 px-1 rounded-lg transition-all ${activeLink === link.id ? 'bg-primary/20 text-primary border border-primary/30 shadow-[0_4px_12px_rgba(20,83,45,0.1)]' : 'text-on-surface-variant hover:text-primary'}">
                   <span class="material-symbols-outlined text-[18px]">${link.icon}</span>
                   <span class="text-[7px] font-headline font-black uppercase tracking-[0.2em]">${link.label}</span>
                 </a>
@@ -79,14 +79,14 @@ export function renderNavbar(options = {}) {
         <!-- Right Side Actions (DESKTOP ONLY) -->
         <div class="hidden lg:flex items-center gap-3 ml-auto">
           ${user ? `
-            <div class="flex items-center gap-2 bg-surface-container-high px-3 py-1.5 rounded-full border border-primary/5">
+            <div class="flex items-center gap-2 bg-primary/5 px-3 py-1.5 rounded-full border border-primary/5">
               <span class="w-1.5 h-1.5 bg-secondary rounded-full animate-pulse"></span>
-              <span class="text-[10px] font-headline font-bold text-on-surface uppercase tracking-widest truncate max-w-[80px]">${user.role === 'admin' ? user.username : user.team_id}</span>
+              <span class="text-[10px] font-headline font-bold text-on-surface-variant uppercase tracking-widest truncate max-w-[80px]">${user.role === 'admin' ? user.username : user.team_id}</span>
             </div>
-            ${user.role === 'admin' ? `<a href="#/admin" class="inline-flex px-4 py-2 rounded-lg bg-gradient-to-r from-primary to-secondary text-white font-headline font-black text-[10px] uppercase tracking-widest hover:scale-105 active:scale-95 transition-transform shadow-lg">Admin</a>` : ''}
-            <button id="nav-logout" class="px-4 py-2 rounded-lg bg-surface-container-high text-on-surface-variant font-headline font-bold text-[10px] uppercase tracking-widest hover:bg-surface-container-highest hover:text-on-surface transition-all border border-primary/5 active:scale-95">Sign Out</button>
+            ${user.role === 'admin' ? `<a href="#/admin" class="inline-flex px-4 py-2 rounded-lg bg-gradient-to-r from-primary to-secondary text-white font-headline font-black text-[10px] uppercase tracking-widest hover:scale-105 active:scale-95 transition-transform shadow-xl">Admin</a>` : ''}
+            <button id="nav-logout" class="px-4 py-2 rounded-lg bg-primary/5 text-on-surface-variant font-headline font-bold text-[10px] uppercase tracking-widest hover:bg-primary/10 hover:text-on-surface transition-all border border-primary/5 active:scale-95">Sign Out</button>
           ` : `
-            <a href="#/login" class="px-4 py-2 rounded-lg bg-surface-container text-on-surface-variant font-headline text-sm hover:text-on-surface transition-colors hidden sm:inline-flex">Team Login</a>
+            <a href="#/login" class="px-4 py-2 rounded-lg bg-primary/5 text-on-surface-variant font-headline text-sm hover:text-on-surface transition-colors hidden sm:inline-flex">Team Login</a>
             <button class="creepy-btn" id="nav-register-btn" onclick="location.hash='#/events'">
               <span class="creepy-btn__eyes" id="nav-creepy-eyes">
                 <span class="creepy-btn__eye"><span class="creepy-btn__pupil" id="nav-pupil-1"></span></span>
@@ -123,9 +123,9 @@ export function bindNavbarEvents() {
         const backBtn = document.createElement('button');
         backBtn.id = backBtnId;
         backBtn.innerHTML = '<span style="font-size:18px;">←</span> Back to Admin Panel';
-        backBtn.style.cssText = 'position:fixed;top:16px;right:16px;z-index:9999;padding:10px 20px;border-radius:12px;background:rgba(167,165,255,0.15);color:#a7a5ff;border:1px solid rgba(167,165,255,0.3);font-size:12px;font-weight:700;cursor:pointer;backdrop-filter:blur(12px);text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;gap:8px;transition:all 0.2s;';
-        backBtn.onmouseenter = () => backBtn.style.background = 'rgba(167,165,255,0.25)';
-        backBtn.onmouseleave = () => backBtn.style.background = 'rgba(167,165,255,0.15)';
+        backBtn.style.cssText = 'position:fixed;top:16px;right:16px;z-index:9999;padding:10px 20px;border-radius:12px;background:rgba(16,185,129,0.1);color:#10b981;border:1px solid rgba(16,185,129,0.3);font-size:12px;font-weight:700;cursor:pointer;backdrop-filter:blur(12px);text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;gap:8px;transition:all 0.2s;';
+        backBtn.onmouseenter = () => backBtn.style.background = 'rgba(16,185,129,0.2)';
+        backBtn.onmouseleave = () => backBtn.style.background = 'rgba(16,185,129,0.1)';
         backBtn.addEventListener('click', () => {
           sessionStorage.removeItem('admin_return');
           window.location.hash = '/admin';
@@ -164,6 +164,7 @@ function initGlowNav(wrapper) {
     wrapper.style.setProperty('--after-bg-position', offsetLeft);
     wrapper.style.setProperty('--after-radial-bg-position', (left + width / 2) - wrapper.getBoundingClientRect().left);
     wrapper.style.setProperty('--after-bg-width', width);
+    wrapper.style.setProperty('--after-bg-opacity', '100');
   }
 
   links.forEach(link => {
@@ -181,15 +182,18 @@ function initGlowNav(wrapper) {
 
   // Set active state from DOM on load
   const activeItem = wrapper.querySelector('.glow-nav-item.active');
-  const targetItem = activeItem || wrapper.querySelector('.glow-nav-item');
-  if (targetItem) {
+  if (activeItem) {
     setTimeout(() => {
-      const { width, left } = targetItem.getBoundingClientRect();
+      const { width, left } = activeItem.getBoundingClientRect();
       const offsetLeft = left - wrapper.getBoundingClientRect().left;
       wrapper.style.setProperty('--after-bg-position', offsetLeft);
       wrapper.style.setProperty('--after-radial-bg-position', offsetLeft + width / 2);
       wrapper.style.setProperty('--after-bg-width', width);
+      wrapper.style.setProperty('--after-bg-opacity', '100');
     }, 50);
+  } else {
+    // Force opacity to 0 if no item is active
+    wrapper.style.setProperty('--after-bg-opacity', '0');
   }
 }
 

@@ -1,5 +1,6 @@
 import { supabase } from '../config/supabase.js';
 import { renderNavbar, bindNavbarEvents, bindCreepyEyes } from '../components/navbar.js';
+import { initTextRotate } from '../components/text-rotate.js';
 
 /* ── Creepy-Eye button HTML ─────────────────────────────
    Used for hero button and the navbar button.
@@ -41,8 +42,10 @@ export async function renderLanding(container) {
             <span>Open Source Platform for Hosting Technical Events</span>
           </div>
         </div>
-        <h1 class="text-6xl md:text-8xl lg:text-9xl font-headline font-bold tracking-tighter text-on-surface mb-8 max-w-5xl leading-[0.9]">
-          The Future of <span class="inline-block px-[0.15em] -mx-[0.15em] text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary italic">Technical</span> Events
+        <h1 class="text-6xl md:text-8xl lg:text-9xl font-headline font-bold tracking-tighter text-on-surface mb-8 max-w-7xl leading-[1.2] flex flex-wrap items-center justify-center gap-x-6">
+          <span>The Future of</span> 
+          <span id="hero-rotate-target" class="inline-flex items-center justify-center transition-all duration-500 min-w-[350px] md:min-w-[450px]"></span> 
+          <span>Events</span>
         </h1>
         <div class="max-w-3xl mb-12 space-y-6 mx-auto">
           <p class="text-xl md:text-2xl text-on-surface font-headline font-bold tracking-tight">
@@ -109,7 +112,7 @@ export async function renderLanding(container) {
           <div class="glass-panel bg-secondary/5 rounded-2xl p-6 text-left border-l-4 border-tertiary/30 hover:bg-secondary/10 transition-all">
             <span class="text-xs font-headline font-bold tracking-widest text-on-surface-variant uppercase">Platform Status</span>
             <div class="text-3xl font-headline font-black text-on-surface mt-2 flex items-center gap-2">
-              <span class="w-2.5 h-2.5 bg-secondary rounded-full animate-pulse"></span> Tactical
+              <span class="w-2.5 h-2.5 bg-secondary rounded-full animate-pulse"></span> Active
             </div>
           </div>
         </div>
@@ -150,6 +153,16 @@ export async function renderLanding(container) {
   `;
 
   bindNavbarEvents();
+  
+  // Initialize Technical word rotation
+  initTextRotate('hero-rotate-target', [
+    'Technical',
+    'Strategic',
+    'Creative',
+    'Innovation',
+    'Competitive',
+    'Professional'
+  ]);
 
   // Bind Creepy-Eye tracking on hero button
   const heroBtn = document.getElementById('hero-register-btn');

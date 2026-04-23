@@ -44,7 +44,7 @@ export async function renderQuizRound(container, params, search = {}, mockUser =
   }
 
   if (!round) {
-    container.innerHTML = `${renderNavbar()}<div class="min-h-screen flex items-center justify-center p-6 text-center"><div><span class="material-symbols-outlined text-6xl text-on-surface-variant/20 mb-4">quiz</span><p class="text-on-surface-variant text-lg">${isPreview ? 'Preview Round Not Found' : 'No active quiz round.'}</p></div></div>`;
+    container.innerHTML = `${renderNavbar()}<div class="min-h-screen flex items-center justify-center p-6 text-center bg-surface"><div><span class="material-symbols-outlined text-6xl text-primary/20 mb-4">quiz</span><p class="text-on-surface-variant text-lg">${isPreview ? 'Preview Round Not Found' : 'No active quiz round.'}</p></div></div>`;
     bindNavbarEvents();
     return;
   }
@@ -83,9 +83,9 @@ export async function renderQuizRound(container, params, search = {}, mockUser =
   function renderQuestion() {
     if (!questions || questions.length === 0) {
       document.getElementById('quiz-content').innerHTML = `
-        <div class="bg-surface-container-low p-12 rounded-3xl mt-8 text-center border border-dashed border-outline-variant/30">
-          <span class="material-symbols-outlined text-5xl text-on-surface-variant/40 mb-4 block">quiz</span>
-          <h2 class="text-2xl font-headline font-bold text-white mb-2">No Questions Yet</h2>
+        <div class="bg-surface-container-low p-12 rounded-3xl mt-8 text-center border border-dashed border-primary/10">
+          <span class="material-symbols-outlined text-5xl text-primary/40 mb-4 block">quiz</span>
+          <h2 class="text-2xl font-headline font-bold text-on-surface mb-2">No Questions Yet</h2>
           <p class="text-on-surface-variant max-w-md mx-auto">The event administrator hasn't added any questions to this round. Please check back later.</p>
         </div>
       `;
@@ -102,18 +102,18 @@ export async function renderQuizRound(container, params, search = {}, mockUser =
             <span class="text-[10px] font-headline tracking-[0.3em] text-primary uppercase font-bold">Progress</span>
             <span class="text-[10px] font-headline text-on-surface-variant/60">${currentQ + 1} of ${questions.length}</span>
           </div>
-          <div class="text-[10px] font-headline text-on-surface-variant font-bold uppercase tracking-widest bg-white/5 px-2 py-1 rounded">
+          <div class="text-[10px] font-headline text-on-surface-variant font-bold uppercase tracking-widest bg-primary/5 px-2 py-1 rounded">
             Complexity Analysis
           </div>
         </div>
-        <div class="h-1 w-full bg-white/5 rounded-full overflow-hidden">
-          <div class="h-full kinetic-gradient transition-all duration-500" style="width: ${((currentQ + 1) / questions.length) * 100}%"></div>
+        <div class="h-1 w-full bg-primary/5 rounded-full overflow-hidden">
+          <div class="h-full kinetic-gradient transition-all duration-500 shadow-[0_0_10px_rgba(34,197,94,0.3)]" style="width: ${((currentQ + 1) / questions.length) * 100}%"></div>
         </div>
       </div>
 
       <!-- Question Text (Impactful) -->
       <div class="mb-8 lg:mb-12 text-center px-2">
-        <h2 class="text-xl md:text-4xl font-headline font-bold text-white leading-tight lg:tracking-tighter">${q.question_text}</h2>
+        <h2 class="text-xl md:text-4xl font-headline font-bold text-on-surface leading-tight lg:tracking-tighter">${q.question_text}</h2>
       </div>
 
       <!-- Options (Adaptive Grid) -->
@@ -124,13 +124,13 @@ export async function renderQuizRound(container, params, search = {}, mockUser =
           return opts.map((opt, i) => {
             const parts = opt.includes(':') ? opt.split(':') : [opt, ''];
             return `
-              <button data-answer="${i}" class="quiz-option group relative overflow-hidden text-left p-5 lg:p-6 rounded-2xl transition-all duration-300 ${selectedAnswer === i ? 'bg-primary/20 border-2 border-primary' : 'bg-surface-container-low hover:bg-surface-container border-2 border-white/5 hover:border-white/20'}">
+              <button data-answer="${i}" class="quiz-option group relative overflow-hidden text-left p-5 lg:p-6 rounded-2xl transition-all duration-300 ${selectedAnswer === i ? 'bg-primary/10 border-2 border-primary shadow-[0_0_20px_rgba(34,197,94,0.1)]' : 'bg-primary/5 hover:bg-primary/10 border-2 border-primary/5 hover:border-primary/10'}">
                 <div class="flex items-center gap-4 lg:gap-5">
-                  <div class="w-8 h-8 lg:w-10 lg:h-10 rounded-full flex-shrink-0 flex items-center justify-center transition-all ${selectedAnswer === i ? 'bg-primary text-on-primary-fixed' : 'bg-white/5 text-on-surface-variant group-hover:bg-white/10'} shadow-inner">
+                  <div class="w-8 h-8 lg:w-10 lg:h-10 rounded-full flex-shrink-0 flex items-center justify-center transition-all ${selectedAnswer === i ? 'bg-primary text-white' : 'bg-primary/5 text-on-surface-variant group-hover:bg-primary/10'} shadow-inner border border-primary/5">
                     <div class="w-2.5 h-2.5 lg:w-3 lg:h-3 rounded-full border-2 ${selectedAnswer === i ? 'bg-white border-white' : 'border-on-surface-variant/30'}"></div>
                   </div>
                   <div class="flex flex-col">
-                    <span class="text-lg lg:text-xl font-headline font-bold ${selectedAnswer === i ? 'text-white' : 'text-on-surface-variant group-hover:text-white'}">${parts[0].trim()}</span>
+                    <span class="text-lg lg:text-xl font-headline font-bold ${selectedAnswer === i ? 'text-primary' : 'text-on-surface/70 group-hover:text-on-surface'}">${parts[0].trim()}</span>
                     ${parts[1] ? `<span class="text-[8px] lg:text-[9px] uppercase tracking-widest font-black ${selectedAnswer === i ? 'text-primary' : 'text-on-surface-variant/40'}">${parts[1].trim()}</span>` : ''}
                   </div>
                 </div>
@@ -141,24 +141,24 @@ export async function renderQuizRound(container, params, search = {}, mockUser =
       </div>
 
       <!-- Navigation & Action -->
-      <div class="flex flex-col sm:flex-row items-center justify-between gap-6 pt-8 border-t border-white/5">
-        <button id="prev-q" class="order-3 sm:order-1 flex items-center gap-2 text-[10px] font-headline font-black text-on-surface-variant uppercase tracking-widest hover:text-white transition-colors ${currentQ === 0 ? 'opacity-20 pointer-events-none' : ''}">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-6 pt-8 border-t border-primary/10">
+        <button id="prev-q" class="order-3 sm:order-1 flex items-center gap-2 text-[10px] font-headline font-black text-on-surface-variant uppercase tracking-widest hover:text-on-surface transition-colors ${currentQ === 0 ? 'opacity-20 pointer-events-none' : ''}">
           <span class="material-symbols-outlined text-sm">arrow_back</span> Previous
         </button>
         
-        <div class="order-2 flex gap-1.5 lg:gap-2 px-4 py-2 bg-white/5 rounded-full">
+        <div class="order-2 flex gap-1.5 lg:gap-2 px-4 py-2 bg-primary/5 rounded-full">
           ${questions.map((_, i) => `
-            <button data-goto="${i}" class="quiz-nav w-1.5 lg:w-2 h-1.5 lg:h-2 rounded-full transition-all ${i === currentQ ? 'w-4 lg:w-6 kinetic-gradient' : (answers[questions[i].id] !== undefined && answers[questions[i].id] !== null) ? 'bg-secondary' : 'bg-white/10 hover:bg-white/20'}"></button>
+            <button data-goto="${i}" class="quiz-nav w-1.5 lg:w-2 h-1.5 lg:h-2 rounded-full transition-all ${i === currentQ ? 'w-4 lg:w-6 kinetic-gradient' : (answers[questions[i].id] !== undefined && answers[questions[i].id] !== null) ? 'bg-accent/40' : 'bg-primary/20 hover:bg-primary/30'}"></button>
           `).join('')}
         </div>
 
         <div class="order-1 sm:order-3 w-full sm:w-auto">
           ${currentQ === questions.length - 1 ? `
-            <button id="submit-quiz-btn" class="w-full sm:w-auto px-8 py-4 rounded-xl kinetic-gradient text-on-primary-fixed font-headline font-black text-xs uppercase tracking-[0.2em] shadow-xl hover:scale-105 active:scale-95 transition-all">
+            <button id="submit-quiz-btn" class="w-full sm:w-auto px-8 py-4 rounded-xl kinetic-gradient text-white font-headline font-black text-xs uppercase tracking-[0.2em] shadow-xl hover:scale-105 active:scale-95 transition-all">
               Initialize Submission
             </button>
           ` : `
-            <button id="next-q" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-primary/20 text-primary font-headline font-black text-xs uppercase tracking-[0.2em] border border-primary/30 hover:bg-primary/30 transition-all group flex items-center justify-center gap-3">
+            <button id="next-q" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-primary text-white font-headline font-black text-xs uppercase tracking-[0.2em] border border-primary/20 hover:bg-primary/90 transition-all group flex items-center justify-center gap-3">
               Next Sequence <span class="material-symbols-outlined text-lg lg:text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
             </button>
           `}
@@ -301,33 +301,33 @@ export async function renderQuizRound(container, params, search = {}, mockUser =
     <main class="min-h-[calc(100vh-76px)] p-6 md:p-12 max-w-4xl mx-auto relative">
       <div class="absolute top-1/4 -left-20 w-96 h-96 bg-primary/10 blur-[120px] rounded-full pointer-events-none"></div>
       
-      <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-8 border-b border-white/5 pb-6">
+      <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-8 border-b border-primary/10 pb-6">
         <div>
           <div class="flex items-center gap-3 text-primary text-[10px] lg:text-sm font-headline tracking-[0.3em] uppercase font-black">
             <span class="material-symbols-outlined text-sm">quiz</span>
             <span>Tactical Phase ${round.round_number}</span>
           </div>
-          <h1 class="text-3xl lg:text-5xl font-headline font-black tracking-tighter text-white mt-1">${round.title}</h1>
+          <h1 class="text-3xl lg:text-5xl font-headline font-black tracking-tighter text-on-surface mt-1">${round.title}</h1>
         </div>
-        <div class="glass-panel p-3 lg:p-4 rounded-2xl flex items-center justify-between lg:justify-end gap-6 border border-white/10">
-          <button id="terminate-session" class="w-8 h-8 lg:w-10 lg:h-10 rounded-lg bg-white/5 flex items-center justify-center text-on-surface-variant/60 hover:text-error transition-colors order-2 lg:order-1" title="Terminate Session">
+        <div class="glass-panel p-3 lg:p-4 rounded-2xl flex items-center justify-between lg:justify-end gap-6 border border-primary/10 bg-white shadow-sm">
+          <button id="terminate-session" class="w-8 h-8 lg:w-10 lg:h-10 rounded-lg bg-primary/5 flex items-center justify-center text-on-surface-variant/40 hover:text-error transition-colors order-2 lg:order-1" title="Terminate Session">
             <span class="material-symbols-outlined text-sm lg:text-base">logout</span>
           </button>
           <div class="flex flex-col items-start lg:items-end order-1 lg:order-2">
-            <span class="text-[9px] uppercase tracking-[0.2em] text-on-surface-variant font-black">Pulse Remaining</span>
-            <div id="quiz-timer" class="text-2xl lg:text-3xl font-headline font-black tabular-nums text-secondary tracking-tighter">${Timer.formatTime(round.duration_minutes * 60 * 1000)}</div>
+            <span class="text-[9px] uppercase tracking-[0.2em] text-on-surface-variant/60 font-black">Pulse Remaining</span>
+            <div id="quiz-timer" class="text-2xl lg:text-3xl font-headline font-black tabular-nums text-primary tracking-tighter">${Timer.formatTime(round.duration_minutes * 60 * 1000)}</div>
           </div>
         </div>
       </div>
 
       <div id="quiz-content">
         ${isLocked ? `
-          <div class="glass-panel p-12 rounded-3xl mt-8 text-center border-secondary/20 bg-secondary/5 space-y-6">
-            <span class="material-symbols-outlined text-6xl text-secondary animate-bounce">verified</span>
-            <h2 class="text-3xl font-headline font-bold text-white uppercase tracking-tighter">Quiz Finalized</h2>
+          <div class="glass-panel p-12 rounded-3xl mt-8 text-center border-accent/20 bg-accent/5 space-y-6">
+            <span class="material-symbols-outlined text-6xl text-accent animate-bounce">verified</span>
+            <h2 class="text-3xl font-headline font-bold text-on-surface uppercase tracking-tighter">Quiz Finalized</h2>
             <p class="text-on-surface-variant max-w-md mx-auto leading-relaxed">Your answers have been securely submitted and auto-evaluated. You can now return to the dashboard to wait for the next round.</p>
             <div class="pt-6">
-              <button onclick="window.location.hash='#/dashboard'" class="px-10 py-4 bg-secondary text-on-secondary rounded-xl font-headline font-bold text-xs uppercase tracking-[0.2em] hover:scale-105 transition-all shadow-[0_10px_30px_rgba(255,255,255,0.05)]">
+              <button onclick="window.location.hash='#/dashboard'" class="px-10 py-4 bg-accent text-white rounded-xl font-headline font-bold text-xs uppercase tracking-[0.2em] hover:scale-105 transition-all shadow-lg">
                 Back to Dashboard
               </button>
             </div>

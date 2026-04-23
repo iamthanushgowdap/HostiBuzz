@@ -41,7 +41,7 @@ export async function renderPromptRound(container, params, search = {}) {
   }
 
   if (!round) { 
-    container.innerHTML = `${renderNavbar()}<div class="min-h-screen flex items-center justify-center p-6 text-center"><div><span class="material-symbols-outlined text-6xl text-on-surface-variant/20 mb-4">edit_note</span><p class="text-on-surface-variant text-lg">No active prompt round.</p></div></div>`; 
+    container.innerHTML = `${renderNavbar()}<div class="min-h-screen flex items-center justify-center p-6 text-center bg-surface"><div><span class="material-symbols-outlined text-6xl text-primary/20 mb-4">edit_note</span><p class="text-on-surface-variant text-lg">No active prompt round.</p></div></div>`; 
     bindNavbarEvents(); 
     return; 
   }
@@ -62,15 +62,15 @@ export async function renderPromptRound(container, params, search = {}) {
     ${renderNavbar({ hideNavigation: isLocked })}
     <main class="min-h-[calc(100vh-76px)] pt-8 pb-24 px-4 md:px-8 max-w-6xl mx-auto relative">
       ${isPaused ? `
-        <div class="fixed inset-0 z-[100] bg-[#0a0e19]/60 backdrop-blur-xl flex items-center justify-center p-6 slide-in-bottom">
-          <div class="glass-panel p-12 rounded-[40px] max-w-xl w-full text-center border-warning/20 bg-warning/5 shadow-[0_20px_50px_rgba(245,158,11,0.1)]">
-            <div class="w-20 h-20 bg-warning/10 rounded-3xl flex items-center justify-center mx-auto mb-8 animate-pulse">
-              <span class="material-symbols-outlined text-4xl text-warning">lock_open</span>
+        <div class="fixed inset-0 z-[100] bg-white/60 backdrop-blur-xl flex items-center justify-center p-6 slide-in-bottom">
+          <div class="glass-panel p-12 rounded-[40px] max-w-xl w-full text-center border-accent/20 bg-white shadow-2xl">
+            <div class="w-20 h-20 bg-accent/10 rounded-3xl flex items-center justify-center mx-auto mb-8 animate-pulse">
+              <span class="material-symbols-outlined text-4xl text-accent">lock_open</span>
             </div>
-            <h2 class="text-4xl font-headline font-bold text-white mb-4 tracking-tighter uppercase">Round Paused</h2>
+            <h2 class="text-4xl font-headline font-bold text-on-surface mb-4 tracking-tighter uppercase">Round Paused</h2>
             <p class="text-on-surface-variant text-lg leading-relaxed mb-8">The administrator has temporarily paused the round. All inputs are locked. Please wait for the round to resume — your progress is safe.</p>
-            <div class="flex items-center justify-center gap-3 text-warning font-headline font-bold text-xs uppercase tracking-[0.3em]">
-              <span class="w-2 h-2 bg-warning rounded-full animate-ping"></span>
+            <div class="flex items-center justify-center gap-3 text-accent font-headline font-bold text-xs uppercase tracking-[0.3em]">
+              <span class="w-2 h-2 bg-accent rounded-full animate-ping"></span>
               Awaiting Admin Signal
             </div>
           </div>
@@ -80,15 +80,15 @@ export async function renderPromptRound(container, params, search = {}) {
       <div class="fixed bottom-1/4 -right-20 w-80 h-80 bg-secondary/10 blur-[100px] rounded-full pointer-events-none -z-10"></div>
 
       ${existing?.is_final ? `
-        <div class="glass-panel p-8 lg:p-12 rounded-[3rem] mb-12 text-center border-secondary/20 bg-secondary/5 space-y-6 slide-in-top relative overflow-hidden">
-          <div class="absolute -right-12 -top-12 w-32 h-32 bg-secondary/10 blur-3xl rounded-full"></div>
-          <div class="w-16 h-16 lg:w-20 lg:h-20 bg-secondary/20 text-secondary rounded-[1.5rem] flex items-center justify-center mx-auto mb-2 border border-secondary/20 rotate-12">
+        <div class="glass-panel p-8 lg:p-12 rounded-[3rem] mb-12 text-center border-accent/20 bg-accent/5 space-y-6 slide-in-top relative overflow-hidden">
+          <div class="absolute -right-12 -top-12 w-32 h-32 bg-accent/10 blur-3xl rounded-full"></div>
+          <div class="w-16 h-16 lg:w-20 lg:h-20 bg-accent/20 text-accent rounded-[1.5rem] flex items-center justify-center mx-auto mb-2 border border-accent/20 rotate-12">
             <span class="material-symbols-outlined text-4xl">beenhere</span>
           </div>
-          <h2 class="text-2xl lg:text-3xl font-headline font-black text-white uppercase tracking-tighter">Transmission Sealed</h2>
+          <h2 class="text-2xl lg:text-3xl font-headline font-black text-on-surface uppercase tracking-tighter">Transmission Sealed</h2>
           <p class="text-on-surface-variant/60 max-w-md mx-auto leading-relaxed font-bold uppercase tracking-widest text-[11px] lg:text-sm">Your cognitive prompt has been recorded in the central hub. Standing by for neural evaluation.</p>
           <div class="pt-6">
-            <button onclick="window.location.hash='#/dashboard'" class="w-full lg:w-fit px-10 py-5 bg-secondary text-on-secondary rounded-[1.25rem] font-headline font-black text-[10px] uppercase tracking-[0.3em] hover:scale-105 transition-all shadow-xl">
+            <button onclick="window.location.hash='#/dashboard'" class="w-full lg:w-fit px-10 py-5 bg-accent text-white rounded-[1.25rem] font-headline font-black text-[10px] uppercase tracking-[0.3em] hover:scale-105 transition-all shadow-xl">
               Return to Mission Control
             </button>
           </div>
@@ -96,20 +96,20 @@ export async function renderPromptRound(container, params, search = {}) {
       ` : ''}
 
       <div class="flex flex-col items-center mb-8 lg:mb-12 ${existing?.is_final ? 'opacity-50 pointer-events-none' : ''}">
-        <div class="glass-panel px-4 lg:px-8 py-3 rounded-2xl flex items-center gap-4 lg:gap-6 shadow-xl border border-primary/20 bg-surface-container-low/50">
-          <button id="terminate-session" class="w-8 h-8 lg:w-10 lg:h-10 rounded-lg bg-white/5 flex items-center justify-center text-on-surface-variant/60 hover:text-error transition-colors" title="Terminate Session">
+        <div class="glass-panel px-4 lg:px-8 py-3 rounded-2xl flex items-center gap-4 lg:gap-6 shadow-xl border border-primary/20 bg-white">
+          <button id="terminate-session" class="w-8 h-8 lg:w-10 lg:h-10 rounded-lg bg-primary/5 flex items-center justify-center text-on-surface-variant/60 hover:text-error transition-colors" title="Terminate Session">
             <span class="material-symbols-outlined text-sm lg:text-base">logout</span>
           </button>
-          <div class="flex items-center gap-2 border-l border-white/5 pl-4 lg:pl-6">
+          <div class="flex items-center gap-2 border-l border-primary/10 pl-4 lg:pl-6">
             <span class="material-symbols-outlined text-primary font-black animate-pulse">hourglass_top</span>
-            <span id="prompt-timer" class="font-headline text-2xl lg:text-3xl font-black tracking-tighter text-white tabular-nums">${Timer.formatTime(round.duration_minutes * 60 * 1000)}</span>
+            <span id="prompt-timer" class="font-headline text-2xl lg:text-3xl font-black tracking-tighter text-on-surface tabular-nums">${Timer.formatTime(round.duration_minutes * 60 * 1000)}</span>
           </div>
         </div>
         <div class="mt-4 text-[9px] lg:text-xs text-on-surface-variant font-black tracking-[0.4em] uppercase opacity-60">Phase ${round.round_number}: ${round.title}</div>
         
-        <div class="mt-4 glass-panel px-4 lg:px-6 py-2 rounded-xl flex items-center gap-3 border border-secondary/20 bg-secondary/5">
-          <span class="material-symbols-outlined text-secondary text-base font-black">visibility</span>
-          <span class="text-[8px] lg:text-[10px] text-secondary font-black tracking-[0.2em] uppercase">Target Observer: <span id="obs-timer" class="font-bold">--</span></span>
+        <div class="mt-4 glass-panel px-4 lg:px-6 py-2 rounded-xl flex items-center gap-3 border border-accent/20 bg-accent/10 shadow-sm">
+          <span class="material-symbols-outlined text-accent text-base font-black">visibility</span>
+          <span class="text-[8px] lg:text-[10px] text-accent font-black tracking-[0.2em] uppercase">Target Observer: <span id="obs-timer" class="font-bold">--</span></span>
         </div>
       </div>
 
@@ -117,7 +117,7 @@ export async function renderPromptRound(container, params, search = {}) {
         <div class="lg:col-span-7 space-y-6">
           <div class="relative group select-none">
             <div class="absolute -inset-1 bg-gradient-to-r from-primary to-secondary rounded-xl blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
-            <div class="relative bg-surface-container-lowest rounded-xl overflow-hidden aspect-video border border-white/5 flex items-center justify-center">
+            <div class="relative bg-surface rounded-xl overflow-hidden aspect-video border border-primary/10 flex items-center justify-center shadow-lg">
               <!-- Observation Overlay / Blur -->
               <div id="prompt-blur-overlay" class="absolute inset-0 bg-black/40 backdrop-blur-3xl z-20 flex flex-col items-center justify-center opacity-0 transition-opacity duration-1000 pointer-events-none">
                 <span class="material-symbols-outlined text-white/50 text-6xl mb-4">lock</span>
@@ -129,15 +129,15 @@ export async function renderPromptRound(container, params, search = {}) {
         </div>
 
         <div class="lg:col-span-5 flex flex-col gap-6 ${existing?.is_final ? 'opacity-50 pointer-events-none' : ''}">
-          <div class="bg-surface-container-low p-6 lg:p-8 rounded-[2rem] border border-white/5 space-y-6 shadow-xl">
+          <div class="bg-white p-6 lg:p-8 rounded-[2rem] border border-primary/10 space-y-6 shadow-xl">
             <header>
-              <h2 class="font-headline text-lg lg:text-2xl font-black text-white mb-2 uppercase tracking-tighter leading-none">Capture Protocol</h2>
+              <h2 class="font-headline text-lg lg:text-2xl font-black text-on-surface mb-2 uppercase tracking-tighter leading-none">Capture Protocol</h2>
               <p class="text-on-surface-variant/60 text-[10px] lg:text-sm leading-relaxed font-bold uppercase tracking-widest">Architect a descriptive prompt from the source node to maximize neural accuracy.</p>
             </header>
             <div class="relative group">
-              <div class="absolute -inset-1 bg-secondary/10 rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition duration-500"></div>
-              <textarea id="prompt-text" class="relative w-full h-48 lg:h-64 bg-surface-container-lowest text-on-surface border-none rounded-2xl p-6 lg:p-8 focus:ring-1 focus:ring-secondary/40 placeholder:text-outline/20 font-body text-sm lg:text-base leading-relaxed transition-all shadow-inner resize-none" placeholder="Initiate description sequence..." ${existing?.is_final ? 'disabled' : ''}>${existing?.text_content || ''}</textarea>
-              <div class="absolute bottom-4 right-4 glass-panel px-3 py-1.5 rounded-lg text-[9px] font-black text-secondary tracking-[0.2em] border border-secondary/20 shadow-lg">
+              <div class="absolute -inset-1 bg-accent/10 rounded-2xl blur opacity-0 group-focus-within:opacity-100 transition duration-500"></div>
+              <textarea id="prompt-text" class="relative w-full h-48 lg:h-64 bg-primary/5 text-on-surface border-none rounded-2xl p-6 lg:p-8 focus:ring-1 focus:ring-accent/40 placeholder:text-on-surface-variant/20 font-body text-sm lg:text-base leading-relaxed transition-all shadow-inner resize-none" placeholder="Initiate description sequence..." ${existing?.is_final ? 'disabled' : ''}>${existing?.text_content || ''}</textarea>
+              <div class="absolute bottom-4 right-4 glass-panel px-3 py-1.5 rounded-lg text-[9px] font-black text-accent tracking-[0.2em] border border-accent/20 shadow-lg bg-white">
                 NODES: <span id="word-count" class="font-bold">0</span> / 150
               </div>
             </div>
@@ -147,7 +147,7 @@ export async function renderPromptRound(container, params, search = {}) {
             </div>
           </div>
           ${!existing?.is_final ? `
-            <button id="submit-prompt" class="kinetic-gradient w-full py-5 lg:py-6 rounded-[1.5rem] font-headline font-black text-on-primary-fixed uppercase tracking-[0.3em] shadow-[0_20px_40px_rgba(167,165,255,0.2)] hover:shadow-[0_20px_60px_rgba(167,165,255,0.4)] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-4 group text-xs lg:text-sm">
+            <button id="submit-prompt" class="kinetic-gradient w-full py-5 lg:py-6 rounded-[1.5rem] font-headline font-black text-white uppercase tracking-[0.3em] shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-4 group text-xs lg:text-sm">
               <span>Transmit Prompt</span>
               <span class="material-symbols-outlined text-xl group-hover:translate-x-1 transition-transform">send</span>
             </button>

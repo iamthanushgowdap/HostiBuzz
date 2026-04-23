@@ -4,59 +4,60 @@ import { navigate } from '../router.js';
 
 export async function renderLogin(container) {
   container.innerHTML = `
-    ${renderNavbar()}
-    <main class="min-h-[calc(100vh-76px)] flex items-center justify-center p-6 relative overflow-hidden bg-white">
+    ${renderNavbar({ activeLink: '' })}
+    <main class="min-h-[calc(100vh-76px)] flex items-center justify-center p-6 relative overflow-hidden bg-background">
       <!-- Kinetic Background -->
       <div class="fixed top-0 left-0 w-full h-full pointer-events-none -z-10">
-        <div class="absolute top-1/4 -left-20 w-[500px] h-[500px] bg-primary/10 blur-[150px] rounded-full animate-pulse-slow"></div>
-        <div class="absolute bottom-1/4 -right-20 w-[600px] h-[600px] bg-secondary/10 blur-[150px] rounded-full animate-pulse"></div>
+        <div class="absolute top-1/4 -left-20 w-[500px] h-[500px] bg-primary/5 blur-[150px] rounded-full animate-pulse-slow"></div>
+        <div class="absolute bottom-1/4 -right-20 w-[600px] h-[600px] bg-secondary/5 blur-[150px] rounded-full animate-pulse"></div>
       </div>
 
       <div class="w-full max-w-lg relative z-10 slide-in-bottom">
-        <div class="glass-panel p-8 lg:p-12 rounded-[50px] border border-primary/10 bg-white shadow-2xl relative overflow-hidden group">
-          <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-primary via-secondary to-primary"></div>
+        <div class="bg-surface p-6 lg:p-8 rounded-[40px] border border-primary/10 shadow-2xl relative overflow-hidden group">
+          <div class="absolute top-0 left-0 w-full h-1.5 bg-primary"></div>
           
-          <div class="text-center space-y-4 mb-10">
-            <div class="w-20 h-20 bg-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-500">
-               <span class="material-symbols-outlined text-4xl text-primary">key</span>
+          <div class="text-center space-y-2 mb-6">
+            <div class="w-16 h-16 bg-primary/5 rounded-2xl flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-500">
+               <span class="material-symbols-outlined text-3xl text-primary">login</span>
             </div>
-            <h1 class="text-4xl lg:text-5xl font-headline font-black text-on-surface tracking-tighter">Ops Terminal</h1>
-            <p class="text-on-surface-variant text-sm lg:text-base px-4">Initialize synchronization by entering your protocol credentials.</p>
+            <h1 class="text-3xl lg:text-4xl font-headline font-black text-on-surface tracking-tighter">Team Login</h1>
+            <p class="text-on-surface-variant text-xs font-bold opacity-70 uppercase tracking-widest px-4">Login to your dashboard</p>
           </div>
-
-          <form id="login-form" class="space-y-6">
-            <div id="login-error" class="hidden p-4 rounded-2xl bg-error/10 border border-error/20 text-error text-[11px] font-black uppercase tracking-widest flex items-center gap-3">
+ 
+          <form id="login-form" class="space-y-4">
+            <div id="login-error" class="hidden p-3 rounded-xl bg-error/10 border border-error/20 text-error text-[10px] font-black uppercase tracking-widest flex items-center gap-3">
               <span class="material-symbols-outlined text-sm">report</span>
               <span id="error-text"></span>
             </div>
-
-            <div class="space-y-2 group/field">
-              <label class="text-[10px] font-black uppercase tracking-[0.3em] text-on-surface-variant pl-1 group-focus-within/field:text-primary transition-colors">Protocol Node ID</label>
+ 
+            <div class="space-y-1.5 group/field">
+              <label class="text-[9px] font-black uppercase tracking-[0.3em] text-on-surface-variant/40 pl-4 group-focus-within/field:text-primary transition-colors">Team ID</label>
               <div class="relative">
-                <span class="material-symbols-outlined absolute left-6 top-1/2 -translate-y-1/2 text-2xl text-on-surface-variant/30 group-focus-within/field:text-primary transition-colors pointer-events-none">terminal</span>
-                <input id="login-team-id" class="w-full bg-secondary/5 border border-primary/5 rounded-[2rem] py-6 pl-16 pr-8 text-xl text-primary font-headline font-black placeholder:text-slate-300 focus:ring-4 focus:ring-primary/5 transition-all text-center tracking-[0.1em] uppercase" placeholder="HB-000" required autofocus />
+                <span class="material-symbols-outlined absolute left-6 top-1/2 -translate-y-1/2 text-xl text-on-surface/10 group-focus-within/field:text-primary transition-colors pointer-events-none">person</span>
+                <input id="login-team-id" class="w-full bg-surface-container-low border border-outline rounded-[1.5rem] py-4 pl-16 pr-8 text-lg text-primary font-headline font-black placeholder:text-on-surface-variant/20 focus:ring-4 focus:ring-primary/10 transition-all text-center tracking-[0.1em] uppercase shadow-sm" placeholder="HB-000" required autofocus />
               </div>
             </div>
-
-            <div class="space-y-2 group/field">
-              <label class="text-[10px] font-black uppercase tracking-[0.3em] text-on-surface-variant pl-1 group-focus-within/field:text-secondary transition-colors">Secure Access Key</label>
+ 
+            <div class="space-y-1.5 group/field">
+              <label class="text-[9px] font-black uppercase tracking-[0.3em] text-on-surface-variant/40 pl-4 group-focus-within/field:text-secondary transition-colors">Password</label>
               <div class="relative">
-                <span class="material-symbols-outlined absolute left-6 top-1/2 -translate-y-1/2 text-2xl text-on-surface-variant/30 group-focus-within/field:text-secondary transition-colors pointer-events-none">lock</span>
-                <input id="login-password" type="password" class="w-full bg-secondary/5 border border-primary/5 rounded-[2rem] py-6 pl-16 pr-8 text-xl text-secondary font-headline font-bold placeholder:text-slate-300 focus:ring-4 focus:ring-secondary/5 transition-all text-center tracking-[0.2em]" placeholder="********" required />
+                <span class="material-symbols-outlined absolute left-6 top-1/2 -translate-y-1/2 text-xl text-on-surface/10 group-focus-within/field:text-secondary transition-colors pointer-events-none">lock</span>
+                <input id="login-password" type="password" class="w-full bg-surface-container-low border border-outline rounded-[1.5rem] py-4 pl-16 pr-8 text-lg text-secondary font-headline font-bold placeholder:text-on-surface-variant/20 focus:ring-4 focus:ring-secondary/10 transition-all text-center tracking-[0.2em] shadow-sm" placeholder="********" required />
               </div>
             </div>
-
-            <button type="submit" id="login-submit" class="kinetic-gradient w-full py-6 rounded-[2.5rem] font-headline font-black text-white text-lg lg:text-xl flex items-center justify-center gap-4 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl group">
-              <span class="uppercase tracking-[0.3em]">Access Operations</span>
-              <span class="material-symbols-outlined text-2xl group-hover:translate-x-2 transition-transform duration-500">arrow_forward</span>
+ 
+            <button type="submit" id="login-submit" class="kinetic-gradient w-full py-5 rounded-[2rem] font-headline font-black text-white text-base lg:text-lg flex items-center justify-center gap-4 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_15px_30px_rgba(16,185,129,0.2)] group">
+              <span class="uppercase tracking-[0.2em]">Sign In</span>
+              <span class="material-symbols-outlined text-xl group-hover:translate-x-2 transition-transform duration-500">arrow_forward</span>
             </button>
             
-            <div class="pt-4 text-center">
-              <p class="text-[10px] text-on-surface-variant/40 uppercase tracking-[0.4em] font-medium italic mb-6">Encrypted Pipeline Active</p>
-              <div class="h-px w-full bg-primary/10 mb-6"></div>
-              <p class="text-on-surface-variant text-xs">Awaiting designation? <a href="#/events" class="text-secondary font-bold hover:underline">Locate Mission Node</a></p>
+            <div class="pt-2 text-center">
+              <div class="h-px w-full bg-outline/10 mb-4"></div>
+              <p class="text-on-surface-variant text-[10px] font-bold">Don't have an ID? <a href="#/events" class="text-secondary font-black hover:underline px-2 py-1 bg-secondary/5 rounded-md">View Events</a></p>
             </div>
           </form>
+        </div>
+      </div>
         </div>
       </div>
     </main>
@@ -83,7 +84,7 @@ export async function renderLogin(container) {
     try {
       const result = await teamLogin(teamId, password);
       if (result.eliminated) {
-        navigate('/eliminated'); // Redirect to eliminated page if applicable
+        navigate('/eliminated');
       } else {
         navigate('/dashboard');
       }

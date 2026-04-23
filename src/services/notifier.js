@@ -18,7 +18,7 @@ class NotifierService {
     root.className = 'fixed inset-0 pointer-events-none z-[9999] overflow-hidden';
     root.innerHTML = `
       <div id="toast-container" class="fixed top-6 right-6 flex flex-col gap-3 items-end w-80 pointer-events-none"></div>
-      <div id="modal-container" class="fixed inset-0 flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300 z-50"></div>
+      <div id="modal-container" class="fixed inset-0 flex items-center justify-center p-6 bg-surface/60 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300 z-50"></div>
     `;
     document.body.appendChild(root);
   }
@@ -76,13 +76,13 @@ class NotifierService {
     const iconColor = type === 'success' ? 'text-primary' : type === 'error' ? 'text-error' : type === 'kinetic' ? 'text-secondary' : 'text-on-surface-variant';
 
     toast.innerHTML = `
-      <div class="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center flex-shrink-0">
+      <div class="w-10 h-10 rounded-xl bg-primary/5 flex items-center justify-center flex-shrink-0">
         <span class="material-symbols-outlined ${iconColor} text-xl">${icon}</span>
       </div>
       <div class="flex-1 pt-1">
-        <p class="text-sm font-headline font-bold text-white leading-tight">${msg}</p>
+        <p class="text-sm font-headline font-bold text-on-surface leading-tight">${msg}</p>
       </div>
-      <button class="toast-close opacity-0 group-hover:opacity-100 transition-opacity p-1 text-on-surface-variant hover:text-white">
+      <button class="toast-close opacity-0 group-hover:opacity-100 transition-opacity p-1 text-on-surface-variant hover:text-primary">
         <span class="material-symbols-outlined text-sm">close</span>
       </button>
       <div class="absolute bottom-0 left-0 h-1 bg-white/10 w-full overflow-hidden rounded-full">
@@ -126,18 +126,18 @@ class NotifierService {
     const sizeClass = size === 'wide' ? 'max-w-5xl' : 'max-w-lg';
 
     container.innerHTML = `
-      <div class="glass-panel p-8 rounded-[32px] ${sizeClass} w-full border border-white/10 shadow-[0_30px_70px_rgba(0,0,0,0.5)] scale-95 opacity-0 transition-all duration-300">
+      <div class="glass-panel p-8 rounded-[32px] ${sizeClass} w-full border border-primary/10 shadow-[0_30px_70px_rgba(20,83,45,0.15)] scale-95 opacity-0 transition-all duration-300">
         <div class="flex flex-col items-center text-center gap-6">
-          <div class="w-20 h-20 rounded-3xl bg-white/5 flex items-center justify-center relative glow-accent">
+          <div class="w-20 h-20 rounded-3xl bg-primary/5 flex items-center justify-center relative glow-accent">
             <span class="material-symbols-outlined text-4xl ${type === 'error' ? 'text-error' : type === 'success' ? 'text-primary' : 'text-secondary'}">${icon || 'info'}</span>
           </div>
           <div>
-            <h2 class="text-3xl font-headline font-bold text-white tracking-tighter mb-2">${title}</h2>
+            <h2 class="text-3xl font-headline font-bold text-on-surface tracking-tighter mb-2">${title}</h2>
             <div class="text-on-surface-variant text-base leading-relaxed">${body}</div>
           </div>
           <div class="flex gap-4 w-full pt-4">
             ${showConfirm ? `
-              <button id="modal-cancel-btn" class="flex-1 py-4 bg-white/5 text-white font-headline font-bold rounded-2xl hover:bg-white/10 transition-all">Cancel</button>
+              <button id="modal-cancel-btn" class="flex-1 py-4 bg-primary/5 text-on-surface font-headline font-bold rounded-2xl hover:bg-primary/10 transition-all">Cancel</button>
               <button id="modal-confirm-btn" class="flex-1 py-4 kinetic-gradient text-on-primary-fixed font-headline font-bold rounded-2xl shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all">
                 ${confirmText}
               </button>

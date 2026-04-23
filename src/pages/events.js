@@ -13,11 +13,20 @@ export async function renderEvents(container) {
     return;
   }
 
-  // Categorization
+  // Categorization (Mutually Exclusive)
   const now = new Date();
   const liveEvents = events.filter(e => e.status === 'active');
-  const upcomingEvents = events.filter(e => e.status === 'draft' || (e.event_date && new Date(e.event_date) > now && e.status !== 'completed'));
-  const pastEvents = events.filter(e => e.status === 'completed' || (e.event_date && new Date(e.event_date) < now));
+  
+  const upcomingEvents = events.filter(e => 
+    e.status !== 'active' && 
+    e.status !== 'completed' && 
+    (e.status === 'draft' || (e.event_date && new Date(e.event_date) > now))
+  );
+
+  const pastEvents = events.filter(e => 
+    e.status === 'completed' || 
+    (e.status !== 'active' && e.event_date && new Date(e.event_date) < now)
+  );
 
   container.innerHTML = `
     ${renderNavbar({ activeLink: 'events', hideMobileMenu: true })}
@@ -26,21 +35,21 @@ export async function renderEvents(container) {
       <!-- Back Button -->
       <a href="#/" class="inline-flex items-center gap-2 text-on-surface-variant/60 hover:text-primary transition-all mb-8 group">
         <span class="material-symbols-outlined text-sm group-hover:-translate-x-1 transition-transform">arrow_back</span>
-        <span class="text-[10px] font-headline font-bold uppercase tracking-[0.2em]">Back to Core</span>
+        <span class="text-[10px] font-headline font-bold uppercase tracking-[0.2em]">Back to Home</span>
       </a>
 
       <!-- Header -->
       <header class="mb-8 lg:mb-12 text-center">
         <div class="flex items-center justify-center gap-2 text-primary text-[10px] lg:text-xs font-headline font-bold tracking-[0.3em] uppercase mb-4">
           <span class="w-4 lg:w-8 h-[1px] bg-primary/30"></span>
-          <span>Event Protocol</span>
+          <span>Event Listings</span>
           <span class="w-4 lg:w-8 h-[1px] bg-primary/30"></span>
         </div>
         <h1 class="text-4xl lg:text-7xl font-headline font-bold text-on-surface tracking-tighter mb-4">
           Central <span class="inline-block px-[0.15em] -mx-[0.15em] text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary italic">Hub</span>
         </h1>
         <p class="text-on-surface-variant max-w-2xl mx-auto text-sm lg:text-lg leading-relaxed px-4">
-          Browse active competitions, upcoming hackathons, and archived event sequences.
+          Browse active competitions, upcoming events, and previous results.
         </p>
       </header>
 
@@ -54,7 +63,7 @@ export async function renderEvents(container) {
         ${renderSection('Coming Soon', 'Upcoming technical challenges currently in preparation.', upcomingEvents, 'primary')}
 
         <!-- Past Section -->
-        ${renderSection('Archived Circuits', 'Historical event logs and final leaderboards.', pastEvents, 'outline')}
+        ${renderSection('Past Events', 'Browse results and leaderboards from previous events.', pastEvents, 'outline')}
 
       </div>
     </main>
@@ -132,11 +141,11 @@ function renderEventCard(event) {
               <span class="creepy-btn__eye"><span class="creepy-btn__pupil" id="pupil-1-${event.id}"></span></span>
               <span class="creepy-btn__eye"><span class="creepy-btn__pupil" id="pupil-2-${event.id}"></span></span>
             </span>
-            <span class="creepy-btn__cover">Access Protocol</span>
+            <span class="creepy-btn__cover">Register Now</span>
           </button>
         ` : `
           <div class="w-full py-4 text-center rounded-xl bg-surface-container-high/40 text-on-surface-variant/40 font-headline font-bold text-sm uppercase tracking-widest border border-outline-variant/5">
-            ${event.status === 'completed' ? 'Circuit Closed' : 'Access Restricted'}
+            ${event.status === 'completed' ? 'Closed' : 'Registration Closed'}
           </div>
         `}
       </div>

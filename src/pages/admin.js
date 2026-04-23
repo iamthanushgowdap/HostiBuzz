@@ -97,53 +97,45 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
         </div>
         
         <!-- Quick Pulse Stats (Mobile) -->
-        <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-secondary/10 border border-primary/20">
-          <span class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
-          <span class="text-[9px] font-bold text-secondary uppercase tracking-widest">Live</span>
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/5 border border-primary/10">
+          <span class="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
+          <span class="text-[9px] font-bold text-primary uppercase tracking-widest">Live</span>
         </div>
       </div>
 
       <!-- Sidebar (Adaptive Drawer) -->
-      <aside id="admin-sidebar" class="fixed lg:relative inset-y-0 left-0 z-50 w-72 bg-surface-container-low/95 backdrop-blur-xl border-r border-white/5 translate-x-[-100%] lg:translate-x-0 transition-transform duration-300 ease-in-out lg:flex flex-col h-screen overflow-y-auto">
+      <aside id="admin-sidebar" class="fixed lg:relative inset-y-0 left-0 z-50 w-72 bg-surface backdrop-blur-xl border-r border-primary/10 translate-x-[-100%] lg:translate-x-0 transition-transform duration-300 ease-in-out lg:flex flex-col h-screen overflow-y-auto">
         <!-- Close Button (Mobile Only) -->
-        <button id="close-admin-sidebar" class="lg:hidden absolute top-4 right-4 w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-on-surface-variant z-10">
+        <button id="close-admin-sidebar" class="lg:hidden absolute top-4 right-4 w-8 h-8 rounded-lg bg-primary/5 flex items-center justify-center text-on-surface-variant z-10">
           <span class="material-symbols-outlined text-sm">close</span>
         </button>
 
         <!-- Platform Sync (Quick Links for Mobile) -->
-        <div class="lg:hidden px-4 py-4 bg-secondary/5 border-b border-white/5">
-          <p class="text-[8px] font-black text-secondary/60 uppercase tracking-[0.3em] mb-3 px-2">Platform Sync</p>
+        <div class="lg:hidden px-4 py-4 bg-primary/5 border-b border-primary/10">
+          <p class="text-[8px] font-black text-primary/60 uppercase tracking-[0.3em] mb-3 px-2">Platform Sync</p>
           <div class="grid grid-cols-2 gap-2">
-            <a href="#/" class="flex items-center gap-2 py-2 px-3 bg-white/5 rounded-lg text-[10px] text-white font-headline border border-white/5">
-              <span class="material-symbols-outlined text-xs">home</span> Home
+            <a href="#/" class="flex items-center gap-2 py-2 px-3 bg-surface rounded-lg text-[10px] text-on-surface font-headline border border-primary/10 shadow-sm">
+              <span class="material-symbols-outlined text-xs text-primary">home</span> Home
             </a>
-            <a href="#/events" class="flex items-center gap-2 py-2 px-3 bg-white/5 rounded-lg text-[10px] text-white font-headline border border-white/5">
-              <span class="material-symbols-outlined text-xs">event</span> Events
+            <a href="#/events" class="flex items-center gap-2 py-2 px-3 bg-surface rounded-lg text-[10px] text-on-surface font-headline border border-primary/10 shadow-sm">
+              <span class="material-symbols-outlined text-xs text-primary">event</span> Events
             </a>
-            <a href="#/leaderboard" class="flex items-center gap-2 py-2 px-3 bg-white/5 rounded-lg text-[10px] text-white font-headline border border-white/5">
-              <span class="material-symbols-outlined text-xs">leaderboard</span> Ranks
+            <a href="#/leaderboard" class="flex items-center gap-2 py-2 px-3 bg-surface rounded-lg text-[10px] text-on-surface font-headline border border-primary/10 shadow-sm">
+              <span class="material-symbols-outlined text-xs text-primary">leaderboard</span> Ranks
             </a>
-            <button id="sidebar-logout" class="flex items-center gap-2 py-2 px-3 bg-error/10 rounded-lg text-[10px] text-error font-headline border border-error/20">
+            <button id="sidebar-logout" class="flex items-center gap-2 py-2 px-3 bg-error/5 rounded-lg text-[10px] text-error font-headline border border-error/10 shadow-sm">
               <span class="material-symbols-outlined text-xs">logout</span> Exit
             </button>
           </div>
         </div>
 
-        <div class="p-6 flex items-start justify-between">
-          <div>
-            <h3 class="text-lg font-black text-on-surface font-headline leading-tight">Control Panel</h3>
-            <p class="text-[10px] text-on-surface-variant uppercase tracking-[0.2em]">ADMIN // ${user.username}</p>
-          </div>
-          
-          <!-- ELITE: Pulse Monitor Indicator -->
-          <div id="pulse-monitor" class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 glass-panel shadow-lg transition-all">
-            <span id="pulse-dot" class="w-2 h-2 rounded-full bg-outline"></span>
-            <span id="pulse-text" class="text-[9px] font-bold uppercase tracking-widest text-on-surface-variant">Link Offline</span>
-          </div>
+        <div class="p-6 flex flex-col gap-1">
+          <h3 class="text-lg font-black text-on-surface font-headline leading-tight">Mission Control</h3>
+          <p class="text-[10px] text-on-surface-variant uppercase tracking-[0.2em]">OPERATOR // ${user.username}</p>
         </div>
 
         <!-- NEW: Preview Engine -->
-        <div class="px-6 mb-8 py-4 bg-primary/5 border-y border-white/5">
+        <div class="px-6 mb-8 py-4 bg-primary/5 border-y border-primary/10">
           <h4 class="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
             <span class="material-symbols-outlined text-sm">visibility</span>
             Preview Engine
@@ -170,11 +162,11 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
           </div>
           <div id="event-list-sidebar" class="space-y-1">
             ${(events || []).map(ev => `
-              <button data-event-id="${ev.id}" class="event-select w-full flex items-center gap-3 py-3 px-3 rounded-xl text-left transition-all ${selectedEventId === ev.id ? 'bg-gradient-to-r from-primary/20 to-transparent border-l-4 border-primary text-white' : 'text-slate-500 hover:text-slate-300 hover:bg-white/5'}">
-                <span class="w-2 h-2 rounded-full flex-shrink-0 ${ev.status === 'active' ? 'bg-secondary animate-pulse' : ev.status === 'completed' ? 'bg-primary' : 'bg-outline'}"></span>
+              <button data-event-id="${ev.id}" class="event-select w-full flex items-center gap-3 py-3 px-3 rounded-xl text-left transition-all ${selectedEventId === ev.id ? 'bg-gradient-to-r from-primary to-primary/80 border-l-4 border-accent text-white shadow-lg shadow-primary/20' : 'text-on-surface-variant hover:text-on-surface hover:bg-primary/5'}">
+                <span class="w-2 h-2 rounded-full flex-shrink-0 ${ev.status === 'active' ? (selectedEventId === ev.id ? 'bg-white animate-pulse' : 'bg-accent animate-pulse') : ev.status === 'completed' ? (selectedEventId === ev.id ? 'bg-white/80' : 'bg-primary') : 'bg-outline'}"></span>
                 <div class="min-w-0">
-                  <div class="font-headline font-medium text-sm truncate">${ev.name}</div>
-                  <div class="text-[10px] text-on-surface-variant capitalize">${ev.status} ${ev.registration_open ? '• Reg Open' : ''}</div>
+                  <div class="font-headline font-bold text-sm truncate">${ev.name}</div>
+                  <div class="text-[10px] ${selectedEventId === ev.id ? 'text-white/60' : 'text-on-surface-variant'} font-bold uppercase tracking-tight">${ev.status} ${ev.registration_open ? '• Reg Open' : ''}</div>
                 </div>
               </button>
             `).join('')}
@@ -186,31 +178,31 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
 
         <!-- Tabs (only when event is selected) -->
         <nav id="nav-tabs" class="flex-1 px-2 space-y-1 ${!selectedEventId ? 'opacity-30 pointer-events-none' : ''}">
-          <button data-tab="event-detail" class="admin-tab w-full flex items-center gap-3 bg-gradient-to-r from-primary/20 to-transparent border-l-4 border-primary text-white py-3 px-4 rounded-r-lg text-left">
+          <button data-tab="event-detail" class="admin-tab w-full flex items-center gap-3 bg-gradient-to-r from-primary to-primary/80 border-l-4 border-secondary text-white py-3 px-4 rounded-r-lg text-left shadow-lg shadow-primary/20">
             <span class="material-symbols-outlined">tune</span>
             <span class="font-headline font-medium text-sm">Event Settings</span>
           </button>
-          <button data-tab="rounds" class="admin-tab w-full flex items-center gap-3 text-slate-500 py-3 px-4 hover:text-slate-300 hover:bg-white/5 rounded-lg text-left transition-all">
+          <button data-tab="rounds" class="admin-tab w-full flex items-center gap-3 text-on-surface-variant py-3 px-4 hover:text-on-surface hover:bg-primary/5 rounded-lg text-left transition-all">
             <span class="material-symbols-outlined">view_timeline</span>
             <span class="font-headline font-medium text-sm">Rounds</span>
           </button>
-          <button data-tab="teams" class="admin-tab w-full flex items-center gap-3 text-slate-500 py-3 px-4 hover:text-slate-300 hover:bg-white/5 rounded-lg text-left transition-all">
+          <button data-tab="teams" class="admin-tab w-full flex items-center gap-3 text-on-surface-variant py-3 px-4 hover:text-on-surface hover:bg-primary/5 rounded-lg text-left transition-all">
             <span class="material-symbols-outlined">groups</span>
             <span class="font-headline font-medium text-sm">Teams</span>
           </button>
-          <button data-tab="scores" class="admin-tab w-full flex items-center gap-3 text-slate-500 py-3 px-4 hover:text-slate-300 hover:bg-white/5 rounded-lg text-left transition-all">
+          <button data-tab="scores" class="admin-tab w-full flex items-center gap-3 text-on-surface-variant py-3 px-4 hover:text-on-surface hover:bg-primary/5 rounded-lg text-left transition-all">
             <span class="material-symbols-outlined">scoreboard</span>
             <span class="font-headline font-medium text-sm">Scores</span>
           </button>
-          <button data-tab="assets" class="admin-tab w-full flex items-center gap-3 text-slate-500 py-3 px-4 hover:text-slate-300 hover:bg-white/5 rounded-lg text-left transition-all">
+          <button data-tab="assets" class="admin-tab w-full flex items-center gap-3 text-on-surface-variant py-3 px-4 hover:text-on-surface hover:bg-primary/5 rounded-lg text-left transition-all">
             <span class="material-symbols-outlined">category</span>
             <span class="font-headline font-medium text-sm">Round Assets</span>
           </button>
-          <button data-tab="export" class="admin-tab w-full flex items-center gap-3 text-slate-500 py-3 px-4 hover:text-slate-300 hover:bg-white/5 rounded-lg text-left transition-all">
+          <button data-tab="export" class="admin-tab w-full flex items-center gap-3 text-on-surface-variant py-3 px-4 hover:text-on-surface hover:bg-primary/5 rounded-lg text-left transition-all">
             <span class="material-symbols-outlined">download</span>
             <span class="font-headline font-medium text-sm">Export / Import</span>
           </button>
-          <button data-tab="reg-page" class="admin-tab w-full flex items-center gap-3 text-slate-500 py-3 px-4 hover:text-slate-300 hover:bg-white/5 rounded-lg text-left transition-all">
+          <button data-tab="reg-page" class="admin-tab w-full flex items-center gap-3 text-on-surface-variant py-3 px-4 hover:text-on-surface hover:bg-primary/5 rounded-lg text-left transition-all">
             <span class="material-symbols-outlined">how_to_reg</span>
             <span class="font-headline font-medium text-sm">Registration Page</span>
           </button>
@@ -224,7 +216,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
       </aside>
 
       <!-- Sidebar Backdrop (Mobile Only) -->
-      <div id="admin-sidebar-backdrop" class="lg:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden transition-opacity duration-300"></div>
+      <div id="admin-sidebar-backdrop" class="lg:hidden fixed inset-0 bg-surface/60 backdrop-blur-md z-40 hidden transition-opacity duration-300"></div>
 
       <!-- Main Content -->
       <main class="flex-1 p-4 lg:p-10 overflow-y-auto relative">
@@ -232,14 +224,39 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
         <div id="admin-content" class="max-w-6xl mx-auto relative z-10 w-full"></div>
         
         <!-- Global Notification Sender -->
-        <div class="fixed bottom-4 right-4 z-[60] flex flex-col items-end gap-3 pointer-events-none">
-          <div id="broadcast-popup" class="hidden bg-surface-container-high border border-white/10 w-[280px] p-4 rounded-2xl shadow-2xl transition-all pointer-events-auto shadow-primary/20">
-            <h4 class="text-[10px] font-headline font-bold text-primary uppercase tracking-widest mb-3 flex items-center gap-2"><span class="material-symbols-outlined text-sm">wifi_tethering</span> Mission Broadcast</h4>
-            <textarea id="broadcast-msg" class="w-full h-24 bg-secondary/5 text-on-surface text-xs border border-primary/10 rounded-xl p-3 resize-none focus:ring-1 focus:ring-primary mb-2 placeholder:text-slate-400" placeholder="Push a tactical update to all team terminals..."></textarea>
-            <button id="send-broadcast" class="w-full py-2.5 bg-primary text-on-primary-fixed rounded-xl font-headline font-black text-[10px] uppercase tracking-widest hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2">Execute Push</button>
+        <div class="fixed bottom-12 right-4 z-[1001] flex flex-col items-end gap-3 pointer-events-none">
+          <!-- LIVE PULSE: Moved to back side of broadcast message button -->
+          <div id="pulse-monitor" class="flex items-center gap-2 px-3 py-1 rounded-full bg-surface-container-high border border-outline-variant shadow-sm pointer-events-auto opacity-70 hover:opacity-100 transition-all">
+            <span id="pulse-dot" class="w-1.5 h-1.5 rounded-full bg-outline"></span>
+            <span id="pulse-text" class="text-[8px] font-bold uppercase tracking-widest text-on-surface-variant">Syncing...</span>
           </div>
-          <button id="broadcast-toggle" class="w-12 h-12 bg-gradient-to-br from-primary to-secondary rounded-full shadow-lg flex items-center justify-center text-on-primary-fixed hover:scale-110 active:scale-95 transition-all pointer-events-auto border border-white/10">
-            <span class="material-symbols-outlined text-xl">campaign</span>
+
+          <div id="broadcast-popup" class="hidden glass-panel border border-primary/20 w-[300px] p-6 rounded-[2.5rem] shadow-[0_20px_50px_rgba(20,83,45,0.15)] transition-all pointer-events-auto ring-1 ring-white/20 scale-in-bottom origin-bottom-right">
+            <div class="flex items-center justify-between mb-4">
+              <h4 class="text-[10px] font-headline font-black text-primary uppercase tracking-[0.3em] flex items-center gap-2">
+                <div class="relative">
+                  <span class="material-symbols-outlined text-sm relative z-10 text-primary">wifi_tethering</span> 
+                  <span class="absolute inset-0 material-symbols-outlined text-sm text-primary animate-ping-slow">wifi_tethering</span>
+                </div>
+                Strategic Update
+              </h4>
+              <div class="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[8px] font-black uppercase tracking-widest animate-pulse">Live Uplink</div>
+            </div>
+            
+            <div class="relative group">
+              <textarea id="broadcast-msg" class="w-full h-28 bg-surface-container-lowest/50 backdrop-blur-sm text-on-surface text-xs border border-outline/30 rounded-2xl p-4 resize-none transition-all focus:ring-2 focus:ring-primary/20 focus:border-primary/40 placeholder:text-on-surface-variant/30 font-medium" placeholder="Initialize global broadcast transmission..."></textarea>
+              <div class="absolute bottom-3 right-3 text-[9px] text-on-surface-variant/20 font-mono tracking-tighter opacity-0 group-focus-within:opacity-100 transition-opacity">UTF-8 // SECURE</div>
+            </div>
+
+            <button id="send-broadcast" class="w-full mt-4 py-4 bg-gradient-to-r from-primary to-secondary text-on-primary font-headline font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-3 group">
+              <span class="material-symbols-outlined text-sm group-hover:rotate-12 transition-transform">send</span>
+              Execute Push
+            </button>
+          </div>
+
+          <button id="broadcast-toggle" class="w-16 h-16 bg-gradient-to-tr from-primary to-secondary rounded-full shadow-[0_8px_30px_rgba(20,83,45,0.3)] flex items-center justify-center text-on-primary hover:scale-110 active:scale-95 transition-all pointer-events-auto border border-white/20 z-10 relative group">
+            <div class="absolute inset-0 bg-primary rounded-full animate-ping opacity-20 group-hover:opacity-40 transition-opacity"></div>
+            <span class="material-symbols-outlined text-2xl relative z-10">campaign</span>
           </button>
         </div>
       </main>
@@ -252,11 +269,11 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
     })() : ''}
 
     <!-- Create Event Modal -->
-    <div id="create-event-modal" class="hidden fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-6">
-      <div class="glass-panel p-8 rounded-3xl max-w-lg w-full border border-white/10 space-y-6">
+    <div id="create-event-modal" class="hidden fixed inset-0 bg-surface/80 backdrop-blur-md z-50 flex items-center justify-center p-6">
+      <div class="glass-panel p-8 rounded-3xl max-w-lg w-full border border-primary/10 space-y-6">
         <div class="flex justify-between items-center">
           <h2 class="text-2xl font-headline font-bold text-on-surface">Create New Event</h2>
-          <button id="close-create-modal" class="w-8 h-8 rounded-lg bg-surface-container-highest flex items-center justify-center text-on-surface-variant hover:text-white transition-colors">
+          <button id="close-create-modal" class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors">
             <span class="material-symbols-outlined text-sm">close</span>
           </button>
         </div>
@@ -268,7 +285,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
           </div>
           <div class="space-y-2">
             <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Organizer</label>
-            <input id="new-event-organizer" class="w-full bg-secondary/5 border border-primary/10 rounded-xl py-3 px-4 text-on-surface focus:ring-1 focus:ring-secondary/40 placeholder:text-slate-400" placeholder="e.g. CS Department, IEEE Chapter" />
+            <input id="new-event-organizer" class="w-full bg-primary/5 border border-primary/10 rounded-xl py-3 px-4 text-on-surface focus:ring-1 focus:ring-primary/40" value="Thanush Gowda P" />
           </div>
           <div class="space-y-2">
             <label class="text-xs font-bold uppercase tracking-widest text-on-surface-variant">Description</label>
@@ -466,9 +483,9 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
       tabs.forEach(t => {
-        t.className = 'admin-tab w-full flex items-center gap-3 text-slate-500 py-3 px-4 hover:text-slate-300 hover:bg-white/5 rounded-lg text-left transition-all';
+        t.className = 'admin-tab w-full flex items-center gap-3 text-on-surface-variant py-3 px-4 hover:text-on-surface hover:bg-primary/5 rounded-lg text-left transition-all';
       });
-      tab.className = 'admin-tab w-full flex items-center gap-3 bg-gradient-to-r from-primary/20 to-transparent border-l-4 border-primary text-white py-3 px-4 rounded-r-lg text-left';
+      tab.className = 'admin-tab w-full flex items-center gap-3 bg-gradient-to-r from-primary to-primary/80 border-l-4 border-accent text-white py-3 px-4 rounded-r-lg text-left shadow-lg shadow-primary/20';
       renderTabContent(tab.dataset.tab);
     });
   });
@@ -530,15 +547,15 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
         socketService.emit('admin:announcement', { message: msg });
         
         broadcastInput.value = '';
-        broadcastBtn.disabled = false;
         
         const prevClass = broadcastBtn.className;
-        broadcastBtn.className = 'w-full py-2 bg-secondary text-surface rounded-xl font-headline font-bold text-xs uppercase tracking-widest transition-all text-center';
-        broadcastBtn.innerHTML = 'Sent!';
+        broadcastBtn.className = 'w-full mt-4 py-4 bg-secondary text-on-secondary font-headline font-black text-[10px] uppercase tracking-[0.2em] rounded-2xl transition-all shadow-lg shadow-secondary/20 flex items-center justify-center gap-3';
+        broadcastBtn.innerHTML = '<span class="material-symbols-outlined text-sm">check_circle</span> Push Initialized!';
         
         setTimeout(() => {
           broadcastBtn.className = prevClass;
-          broadcastBtn.innerHTML = 'Send Now';
+          broadcastBtn.innerHTML = '<span class="material-symbols-outlined text-sm group-hover:rotate-12 transition-transform">send</span> Execute Push';
+          broadcastBtn.disabled = false;
           broadcastPopup.classList.add('hidden');
         }, 2000);
 
@@ -578,7 +595,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
             <h3 class="text-sm font-headline font-bold text-on-surface-variant/60 tracking-widest uppercase mb-4">or select an event</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
               ${eventList.map(ev => `
-                <button data-pick-event="${ev.id}" class="pick-event bg-surface-container-low p-5 rounded-2xl text-left hover:bg-surface-container-high transition-all group border border-primary/5">
+                <button data-pick-event="${ev.id}" class="pick-event bg-primary/5 p-5 rounded-2xl text-left hover:bg-primary/10 hover:border-primary/20 transition-all group border border-primary/10">
                   <div class="flex items-center gap-3 mb-2">
                     <span class="w-2.5 h-2.5 rounded-full ${ev.status === 'active' ? 'bg-secondary animate-pulse' : ev.status === 'completed' ? 'bg-primary' : 'bg-outline'}"></span>
                     <h4 class="font-headline font-bold text-on-surface group-hover:text-primary transition-colors">${ev.name}</h4>
@@ -711,21 +728,28 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
         const { data: subs } = await supabase.from('submissions').select('*').eq('round_id', roundId);
         const { data: sc } = await supabase.from('scores').select('*').eq('round_id', roundId);
 
-        // Fetch Context Data
+        // Fetch Context Data with sequential re-indexing to fix gaps/duplicates
         let context = {};
         if (round.round_type === 'quiz') {
           const { data: qs } = await supabase.from('questions').select('*').eq('round_id', roundId).order('order_index');
-          context.questions = qs || [];
+          context.questions = (qs || []).map((q, i) => ({ ...q, order_index: i + 1 }));
         } else if (round.round_type === 'logo') {
           const { data: logos } = await supabase.from('logo_assets').select('*').eq('round_id', roundId).order('order_index');
-          context.logos = logos || [];
+          context.logos = (logos || []).map((l, i) => ({ ...l, order_index: i + 1 }));
         } else if (round.round_type === 'prompt') {
           const { data: prompts } = await supabase.from('prompt_images').select('*').eq('round_id', roundId).order('order_index');
-          context.prompts = prompts || [];
+          context.prompts = (prompts || []).map((p, i) => ({ ...p, order_index: i + 1 }));
         } else if (round.round_type === 'debate') {
           const { data: topic } = await supabase.from('debate_topics').select('*').eq('round_id', roundId).maybeSingle();
           context.debate = topic || {};
         }
+
+        // Focused Evaluation Rules
+        const rules = {
+          prompt: "For prompt rounds, you are provided with a 'master_prompt' for each image. Compare the team's' submission to this master prompt. Award higher marks for similar technical keywords, lighting descriptions, and visual elements.",
+          quiz: "Check for exact matches against the master key.",
+          logo: "Verify the team's' brand identification against the correct_answer."
+        };
 
         const exportData = {
           event: { name: event.name, id: event.id },
@@ -734,7 +758,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
           scoring_weights: {
             round_max_score: round.max_score || 100,
             asset_points: [
-              ...(context.questions?.map(q => ({ label: `Q${q.order_index}`, id: q.id, points: q.points || 1 })) || []),
+              ...(context.questions?.map(q => ({ label: `Question ${q.order_index}`, id: q.id, points: q.points || 1 })) || []),
               ...(context.logos?.map(l => ({ label: `Logo ${l.order_index}`, id: l.id, points: l.points || 1 })) || []),
               ...(context.prompts?.map(p => ({ label: `Prompt ${p.order_index}`, id: p.id, points: p.points || 1, master_prompt: p.seed_description })) || []),
               ...(context.debate?.id ? [{ label: 'Debate Topic', id: context.debate.id, points: context.debate.points || 10 }] : [])
@@ -744,9 +768,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
             role: "You are an expert evaluator",
             task: `Evaluate ${round.title}`,
             evaluation_rules: {
-              prompt_round: "For prompt rounds, you are provided with a 'master_prompt' for each image. Compare the team's' submission to this master prompt. Award higher marks for similar technical keywords, lighting descriptions, and visual elements.",
-              quiz_round: "Check for exact matches against the master key.",
-              logo_round: "Verify the team's brand identification against the correct_answer."
+              active_rule: rules[round.round_type] || "Compare submission against correct answer/context provided."
             },
             scoring_schema: { 
               total: round.max_score || 100,
@@ -815,7 +837,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
           scoresArr.slice(0, 10).forEach(s => {
             tableHtml += `
               <tr>
-                <td class="p-3 text-white font-headline">${s.team_name || 'Unknown'} <span class="text-[10px] text-on-surface-variant opacity-50">(${s.team_id})</span></td>
+                <td class="p-3 text-on-surface font-headline">${s.team_name || 'Unknown'} <span class="text-[10px] text-on-surface-variant opacity-50">(${s.team_id})</span></td>
                 <td class="p-3 text-primary font-bold text-center">${s.total || s.score || 0}</td>
                 <td class="p-3 text-[10px] text-on-surface-variant italic truncate max-w-xs">${s.reasoning || 'No reasoning provided'}</td>
               </tr>
@@ -1172,12 +1194,12 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
              <div class="text-[9px] text-primary font-black uppercase tracking-widest leading-none mb-1">Teams In Arena</div>
              <div class="text-2xl font-headline font-bold text-on-surface">${teams.length}</div>
            </div>
-           <div class="bg-secondary/5 px-6 py-3 rounded-2xl border border-secondary/10 text-center">
-             <div class="text-[9px] text-secondary font-black uppercase tracking-widest leading-none mb-1">Total Payload</div>
+           <div class="bg-primary/5 px-6 py-3 rounded-2xl border border-primary/10 text-center">
+             <div class="text-[9px] text-primary font-black uppercase tracking-widest leading-none mb-1">Total Payload</div>
              <div class="text-2xl font-headline font-bold text-on-surface">${rounds.length} Rounds</div>
            </div>
-           <div class="bg-tertiary/5 px-6 py-3 rounded-2xl border border-tertiary/10 text-center">
-             <div class="text-[9px] text-tertiary font-black uppercase tracking-widest leading-none mb-1">Active Sector</div>
+           <div class="bg-primary/5 px-6 py-3 rounded-2xl border border-primary/10 text-center">
+             <div class="text-[9px] text-primary font-black uppercase tracking-widest leading-none mb-1">Active Sector</div>
              <div class="text-2xl font-headline font-bold text-on-surface">${activeRoundNum || '—'}</div>
            </div>
         </div>
@@ -1192,35 +1214,42 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
           <h3 class="text-xl font-headline font-bold text-on-surface uppercase tracking-tight">Deploy New Round</h3>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 items-end">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 items-end">
           <div class="space-y-2">
             <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-1">Tactical Objective</label>
-            <input id="round-title" class="w-full bg-secondary/5 border border-primary/20 rounded-2xl py-4 px-5 text-on-surface font-headline placeholder:text-slate-400 focus:ring-2 focus:ring-primary/20 transition-all font-bold" placeholder="e.g. Logic Blast" />
+            <input id="round-title" class="w-full bg-primary/5 border border-primary/20 rounded-2xl py-4 px-5 text-on-surface font-headline placeholder:text-on-surface-variant/40 focus:ring-2 focus:ring-primary/20 transition-all font-bold" placeholder="e.g. Logic Blast" />
           </div>
           <div class="space-y-2">
             <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-1">Protocol Type</label>
-            <select id="round-type" class="w-full bg-secondary/5 border border-primary/20 rounded-2xl py-4 px-5 text-on-surface font-headline appearance-none cursor-pointer focus:ring-2 focus:ring-primary/20 transition-all">
-              <optgroup label="Questionnaire" class="bg-white text-secondary">
+            <select id="round-type" class="w-full bg-primary/5 border border-primary/20 rounded-2xl py-4 px-5 text-on-surface font-headline appearance-none cursor-pointer focus:ring-2 focus:ring-primary/20 transition-all">
+              <optgroup label="Questionnaire" class="bg-white text-on-surface">
                 <option value="quiz">Quiz System (MCQ)</option>
               </optgroup>
-              <optgroup label="Visual Intelligence" class="bg-white text-secondary">
+              <optgroup label="Visual Intelligence" class="bg-white text-on-surface">
                 <option value="logo">Logo Mastery</option>
                 <option value="prompt">Generative Prompt</option>
               </optgroup>
-              <optgroup label="Development & Creative" class="bg-white text-secondary">
+              <optgroup label="Development & Creative" class="bg-white text-on-surface">
                 <option value="webdev">Terminal Web Dev</option>
                 <option value="video">Cinematic Engine</option>
               </optgroup>
-              <optgroup label="Verbal Combat" class="bg-white text-secondary">
+              <optgroup label="Verbal Combat" class="bg-white text-on-surface">
                 <option value="debate">Tech Debate</option>
               </optgroup>
             </select>
           </div>
+          <div class="space-y-2">
+            <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant ml-1 text-center block">Limit (Min:Sec)</label>
+            <div class="flex gap-2">
+              <input id="round-duration-min" type="number" min="0" class="w-2/3 bg-primary/5 border border-primary/10 rounded-2xl py-4 px-3 text-on-surface font-headline text-center font-bold" value="40" placeholder="Min" />
+              <input id="round-duration-sec" type="number" min="0" max="59" class="w-1/3 bg-primary/5 border border-primary/10 rounded-2xl py-4 px-3 text-on-surface font-headline text-center font-bold" value="0" placeholder="Sec" />
+            </div>
+          </div>
           <div class="space-y-2 text-center">
             <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block mb-1">Max Yield</label>
-            <input id="round-max-score" type="number" class="w-full bg-secondary/5 border border-primary/10 rounded-2xl py-4 px-5 text-on-surface font-headline text-center placeholder:text-slate-400 font-bold" value="100" />
+            <input id="round-max-score" type="number" class="w-full bg-primary/5 border border-primary/10 rounded-2xl py-4 px-5 text-on-surface font-headline text-center font-bold" value="100" />
           </div>
-          <button id="add-round" class="w-full h-[62px] rounded-2xl kinetic-gradient text-on-primary-fixed font-headline font-bold text-sm tracking-widest uppercase hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg">
+          <button id="add-round" class="w-full h-[62px] rounded-2xl bg-primary text-white font-headline font-bold text-sm tracking-widest uppercase hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 shadow-lg">
             <span class="material-symbols-outlined">rocket_launch</span> Deploy Round
           </button>
         </div>
@@ -1250,16 +1279,56 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
                   </div>
                 </div>
                 
-                <div class="grid grid-cols-2 gap-3">
-                  <button class="round-action flex items-center justify-center gap-2 py-3 rounded-xl ${r.status === 'active' ? 'bg-primary/10 text-primary' : 'bg-secondary/10 text-secondary'} font-headline font-bold text-[9px] uppercase tracking-widest hover:scale-[1.02] transition-all" data-id="${r.id}" data-action="toggle-status">
-                    <span class="material-symbols-outlined text-xs">${r.status === 'active' ? 'done_all' : 'play_arrow'}</span>
-                    ${r.status === 'active' ? 'Complete' : 'Activate'}
-                  </button>
+                <div class="space-y-3">
+                  <!-- PRIMARY ACTIONS -->
+                  <div class="grid ${r.status === 'active' || r.status === 'paused' || r.status === 'completed' ? 'grid-cols-2' : 'grid-cols-1'} gap-2">
+                    ${r.status === 'pending' || !r.status ? `
+                       <button class="round-ctrl flex items-center justify-center gap-2 py-3 rounded-xl kinetic-gradient text-on-primary-fixed font-headline font-bold text-[9px] uppercase tracking-widest hover:scale-[1.02] transition-all" 
+                               data-round-id="${r.id}" data-round-action="start">
+                         <span class="material-symbols-outlined text-xs">play_arrow</span> Activate
+                       </button>
+                    ` : r.status === 'active' ? `
+                       <button class="round-ctrl flex items-center justify-center gap-2 py-3 rounded-xl bg-secondary/10 text-secondary font-headline font-bold text-[9px] uppercase tracking-widest hover:bg-secondary/20 transition-all border border-secondary/20" 
+                               data-round-id="${r.id}" data-round-action="pause">
+                         <span class="material-symbols-outlined text-xs">pause</span> Pause
+                       </button>
+                       <button class="round-ctrl flex items-center justify-center gap-2 py-3 rounded-xl bg-primary/10 text-primary font-headline font-bold text-[9px] uppercase tracking-widest hover:bg-primary/20 transition-all border border-primary/20" 
+                               data-round-id="${r.id}" data-round-action="complete">
+                         <span class="material-symbols-outlined text-xs">done_all</span> Complete
+                       </button>
+                    ` : r.status === 'paused' ? `
+                       <button class="round-ctrl flex items-center justify-center gap-2 py-3 rounded-xl bg-secondary/10 text-secondary font-headline font-bold text-[9px] uppercase tracking-widest hover:bg-secondary/20 transition-all border border-secondary/20" 
+                               data-round-id="${r.id}" data-round-action="resume">
+                         <span class="material-symbols-outlined text-xs">play_arrow</span> Resume
+                       </button>
+                       <button class="round-ctrl flex items-center justify-center gap-2 py-3 rounded-xl bg-primary/10 text-primary font-headline font-bold text-[9px] uppercase tracking-widest hover:bg-primary/20 transition-all border border-primary/20" 
+                               data-round-id="${r.id}" data-round-action="complete">
+                         <span class="material-symbols-outlined text-xs">done_all</span> Complete
+                       </button>
+                    ` : r.status === 'completed' ? `
+                       <button class="round-ctrl flex items-center justify-center gap-2 py-3 rounded-xl kinetic-gradient text-on-primary-fixed font-headline font-bold text-[9px] uppercase tracking-widest hover:scale-[1.02] transition-all" 
+                               data-round-id="${r.id}" data-round-action="manage-intel">
+                         <span class="material-symbols-outlined text-xs">analytics</span> Audit
+                       </button>
+                       <button class="round-ctrl flex items-center justify-center gap-2 py-3 rounded-xl bg-error/10 text-error font-headline font-bold text-[9px] uppercase tracking-widest hover:bg-error/20 transition-all border border-error/20" 
+                               data-round-id="${r.id}" data-round-action="restart">
+                         <span class="material-symbols-outlined text-xs">restart_alt</span> Restart
+                       </button>
+                    ` : ''}
+                  </div>
+
+                  <!-- SECONDARY UTILS -->
                   <div class="flex gap-2">
-                    <button class="round-action flex-1 flex items-center justify-center rounded-xl border border-primary/10 text-on-surface-variant hover:bg-secondary/5 transition-colors" data-id="${r.id}" data-action="configure">
+                    <button class="round-ctrl flex-1 flex items-center justify-center py-2.5 rounded-xl border border-primary/10 text-on-surface-variant hover:bg-secondary/5 transition-colors" 
+                            data-round-id="${r.id}" data-round-action="preview">
+                      <span class="material-symbols-outlined text-[16px]">visibility</span>
+                    </button>
+                    <button class="edit-round flex-1 flex items-center justify-center py-2.5 rounded-xl border border-primary/10 text-on-surface-variant hover:bg-secondary/5 transition-colors" 
+                            data-edit-round="${r.id}">
                       <span class="material-symbols-outlined text-[16px]">tune</span>
                     </button>
-                    <button class="round-action flex-1 flex items-center justify-center rounded-xl bg-error/5 text-error/40 hover:bg-error/10 hover:text-error transition-colors" data-id="${r.id}" data-action="delete">
+                    <button class="del-round flex-1 flex items-center justify-center py-2.5 rounded-xl bg-error/5 text-error/40 hover:bg-error/10 hover:text-error transition-colors" 
+                            data-del-round="${r.id}">
                       <span class="material-symbols-outlined text-[16px]">delete</span>
                     </button>
                   </div>
@@ -1291,22 +1360,31 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
                 <input id="edit-round-title" class="w-full bg-surface-container-lowest border border-primary/5 rounded-xl py-3 px-4 text-on-surface focus:ring-1 focus:ring-secondary/40 font-headline" />
               </div>
             </div>
-            <div class="grid grid-cols-3 gap-4">
-              <div class="col-span-2">
+            <div class="grid grid-cols-2 gap-4">
+              <div class="col-span-1">
                 <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block mb-1">Type</label>
                 <select id="edit-round-type" class="w-full bg-surface-container-lowest border border-primary/5 rounded-xl py-3 px-4 text-on-surface">
                   ${roundTypes.map(t => `<option value="${t.value}">${t.label}</option>`).join('')}
                 </select>
               </div>
-              <div>
-                <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block mb-1">Duration (min)</label>
-                <input id="edit-round-duration" type="number" min="1" class="w-full bg-surface-container-lowest border border-primary/5 rounded-xl py-3 px-4 text-on-surface" />
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block mb-1">Duration (Min)</label>
+                  <input id="edit-round-duration-min" type="number" min="0" placeholder="Min" class="w-full bg-surface-container-lowest border border-primary/5 rounded-xl py-3 px-3 text-on-surface text-center font-headline" />
+                </div>
+                <div>
+                  <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block mb-1">Duration (Sec)</label>
+                  <input id="edit-round-duration-sec" type="number" min="0" max="59" placeholder="Sec" class="w-full bg-surface-container-lowest border border-primary/5 rounded-xl py-3 px-3 text-on-surface text-center font-headline" />
+                </div>
               </div>
             </div>
             <div>
               <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block mb-1">Max Round Score (Marks)</label>
               <input id="edit-round-max-score" type="number" min="1" class="w-full bg-surface-container-lowest border border-primary/5 rounded-xl py-3 px-4 text-secondary font-headline font-black text-xl" />
             </div>
+          </div>
+          <div class="flex gap-3 pt-2">
+            <button id="save-edit-round" class="flex-1 py-4 rounded-2xl kinetic-gradient text-on-primary-fixed font-headline font-bold text-sm tracking-widest uppercase hover:scale-[1.02] active:scale-[0.98] transition-all">Save Protocol Changes</button>
           </div>
         </div>
       </div>
@@ -1315,6 +1393,10 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
     // Add round
     document.getElementById('add-round')?.addEventListener('click', async () => {
       const title = document.getElementById('round-title').value.trim();
+      const min = parseInt(document.getElementById('round-duration-min').value) || 0;
+      const sec = parseInt(document.getElementById('round-duration-sec').value) || 0;
+      const duration = min + (sec / 60);
+
       if (!title) return alert('Round title is required');
 
       const { error } = await supabase.from('rounds').insert({
@@ -1322,7 +1404,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
         round_number: rounds.length + 1,
         round_type: document.getElementById('round-type').value,
         title,
-        duration_minutes: 40,
+        duration_minutes: duration,
         max_score: parseInt(document.getElementById('round-max-score').value) || 100
       });
 
@@ -1341,7 +1423,13 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
         document.getElementById('edit-round-number').value = round.round_number;
         document.getElementById('edit-round-title').value = round.title;
         document.getElementById('edit-round-type').value = round.round_type;
-        document.getElementById('edit-round-duration').value = round.duration_minutes;
+        
+        // Split fractional minutes into min and sec
+        const totalDuration = round.duration_minutes || 0;
+        const mins = Math.floor(totalDuration);
+        const secs = Math.round((totalDuration % 1) * 60);
+        document.getElementById('edit-round-duration-min').value = mins;
+        document.getElementById('edit-round-duration-sec').value = secs;
         document.getElementById('edit-round-max-score').value = round.max_score || 100;
         document.getElementById('edit-round-modal').classList.remove('hidden');
       });
@@ -1360,7 +1448,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
         round_number: parseInt(document.getElementById('edit-round-number').value),
         title,
         round_type: document.getElementById('edit-round-type').value,
-        duration_minutes: parseInt(document.getElementById('edit-round-duration').value) || 40,
+        duration_minutes: parseFloat(document.getElementById('edit-round-duration-min').value || 0) + (parseFloat(document.getElementById('edit-round-duration-sec').value || 0) / 60),
         max_score: parseInt(document.getElementById('edit-round-max-score').value) || 100
       }).eq('id', roundId);
 
@@ -2087,13 +2175,13 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
                       const pointsValue = asset.points || 1;
 
                       return `
-                        <div class="p-3 bg-black/40 border ${isCorrect ? 'border-secondary/30' : 'border-white/5'} rounded-2xl space-y-2 group/asset hover:border-primary/30 transition-all">
+                        <div class="p-3 bg-primary/5 border ${isCorrect ? 'border-secondary/30' : 'border-primary/10'} rounded-2xl space-y-2 group/asset hover:border-primary/30 transition-all">
                           <div class="flex justify-between items-start text-[10px] text-on-surface-variant">
                             <div>
                                <span class="font-bold uppercase tracking-tighter block">${label}:</span>
                                <span class="text-[8px] bg-secondary/10 text-secondary px-1.5 py-0.5 rounded border border-secondary/20 mt-1 inline-block uppercase font-black">${pointsValue} Marks</span>
                             </div>
-                            <span class="text-white font-headline font-bold text-xs">${displayAns}</span>
+                            <span class="text-primary font-headline font-bold text-xs">${displayAns}</span>
                           </div>
                           ${rawMaster !== undefined && rawMaster !== null ? `
                             <div class="flex items-center gap-2 pt-2 border-t border-white/5">
@@ -2118,10 +2206,10 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
                   ` : ''}
                   
                   ${answers?.imageUrl ? `
-                    <div class="max-w-md rounded-2xl overflow-hidden border border-white/10 bg-black/40 group relative cursor-pointer" onclick="window.open('${answers.imageUrl}', '_blank')">
+                    <div class="max-w-md rounded-2xl overflow-hidden border border-primary/10 bg-primary/5 group relative cursor-pointer" onclick="window.open('${answers.imageUrl}', '_blank')">
                       <img src="${answers.imageUrl}" class="w-full h-auto object-contain max-h-64" />
-                      <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <span class="material-symbols-outlined text-white text-3xl">zoom_in</span>
+                      <div class="absolute inset-0 bg-surface/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                        <span class="material-symbols-outlined text-primary text-3xl">zoom_in</span>
                       </div>
                     </div>
                   ` : ''}
@@ -2147,13 +2235,13 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
                       </div>
                     </div>
                     <div class="flex items-center gap-4">
-                      <span class="text-[10px] text-on-surface-variant font-mono bg-black/20 px-3 py-1 rounded-full border border-white/5">
+                      <span class="text-[10px] text-on-surface-variant font-mono bg-primary/5 px-3 py-1 rounded-full border border-primary/10">
                         ${new Date(s.submission_time).toLocaleTimeString()}
                       </span>
                       <span class="material-symbols-outlined text-on-surface-variant group-open:rotate-180 transition-transform duration-300">expand_more</span>
                     </div>
                   </summary>
-                  <div class="p-6 border-t border-white/5 bg-black/20">
+                  <div class="p-6 border-t border-primary/10 bg-primary/5">
                     ${formattedContent}
                   </div>
                 </details>
@@ -2346,29 +2434,29 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              <button data-pdf-set="A" class="dl-pdf bg-surface-container-low p-4 rounded-xl border border-white/5 hover:border-primary/50 transition-all text-left">
+              <button data-pdf-set="A" class="dl-pdf bg-primary/5 p-4 rounded-xl border border-primary/10 hover:border-primary/50 transition-all text-left">
                 <span class="material-symbols-outlined text-primary mb-2">picture_as_pdf</span>
-                <div class="text-xs font-bold text-white uppercase font-headline tracking-tighter">Download Set A</div>
+                <div class="text-xs font-bold text-on-surface uppercase font-headline tracking-tighter">Download Set A</div>
                 <div class="text-[10px] text-on-surface-variant">Backup Sheet</div>
               </button>
-              <button data-pdf-set="B" class="dl-pdf bg-surface-container-low p-4 rounded-xl border border-white/5 hover:border-primary/50 transition-all text-left">
+              <button data-pdf-set="B" class="dl-pdf bg-primary/5 p-4 rounded-xl border border-primary/10 hover:border-primary/50 transition-all text-left">
                  <span class="material-symbols-outlined text-primary mb-2">picture_as_pdf</span>
-                <div class="text-xs font-bold text-white uppercase font-headline tracking-tighter">Download Set B</div>
+                <div class="text-xs font-bold text-on-surface uppercase font-headline tracking-tighter">Download Set B</div>
                  <div class="text-[10px] text-on-surface-variant">Backup Sheet</div>
               </button>
-              <button data-pdf-set="C" class="dl-pdf bg-surface-container-low p-4 rounded-xl border border-white/5 hover:border-primary/50 transition-all text-left">
+              <button data-pdf-set="C" class="dl-pdf bg-primary/5 p-4 rounded-xl border border-primary/10 hover:border-primary/50 transition-all text-left">
                  <span class="material-symbols-outlined text-primary mb-2">picture_as_pdf</span>
-                <div class="text-xs font-bold text-white uppercase font-headline tracking-tighter">Download Set C</div>
+                <div class="text-xs font-bold text-on-surface uppercase font-headline tracking-tighter">Download Set C</div>
                  <div class="text-[10px] text-on-surface-variant">Backup Sheet</div>
               </button>
-              <button data-pdf-set="D" class="dl-pdf bg-surface-container-low p-4 rounded-xl border border-white/5 hover:border-primary/50 transition-all text-left">
+              <button data-pdf-set="D" class="dl-pdf bg-primary/5 p-4 rounded-xl border border-primary/10 hover:border-primary/50 transition-all text-left">
                  <span class="material-symbols-outlined text-primary mb-2">picture_as_pdf</span>
-                <div class="text-xs font-bold text-white uppercase font-headline tracking-tighter">Download Set D</div>
+                <div class="text-xs font-bold text-on-surface uppercase font-headline tracking-tighter">Download Set D</div>
                  <div class="text-[10px] text-on-surface-variant">Backup Sheet</div>
               </button>
-              <button data-pdf-set="E" class="dl-pdf bg-surface-container-low p-4 rounded-xl border border-white/5 hover:border-primary/50 transition-all text-left">
+              <button data-pdf-set="E" class="dl-pdf bg-primary/5 p-4 rounded-xl border border-primary/10 hover:border-primary/50 transition-all text-left">
                  <span class="material-symbols-outlined text-primary mb-2">picture_as_pdf</span>
-                <div class="text-xs font-bold text-white uppercase font-headline tracking-tighter">Download Set E</div>
+                <div class="text-xs font-bold text-on-surface uppercase font-headline tracking-tighter">Download Set E</div>
                  <div class="text-[10px] text-on-surface-variant">Backup Sheet</div>
               </button>
               <button data-pdf-set="KEY" class="dl-pdf bg-secondary/10 p-4 rounded-xl border border-secondary/20 hover:bg-secondary/20 transition-all text-left">
@@ -2442,19 +2530,22 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
                     <input type="file" id="d-file" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer z-10" />
                     ${assets[0]?.image_url ? `
                       <img src="${assets[0].image_url}" class="absolute inset-0 w-full h-full object-cover rounded-xl opacity-40 group-hover:opacity-60 transition-opacity" />
-                      <div class="relative z-20 text-on-surface font-bold text-xs uppercase tracking-widest bg-white/80 backdrop-blur-md px-3 py-1 rounded-full">Change Image</div>
+                      <div class="relative z-20 text-on-surface font-bold text-xs uppercase tracking-widest bg-surface/80 backdrop-blur-md px-4 py-2 rounded-full border border-primary/10 shadow-lg">Change Image</div>
                     ` : `
-                      <span class="material-symbols-outlined text-on-surface-variant/40 mb-2">image</span>
-                      <span class="text-[10px] text-on-surface-variant uppercase font-bold">Click to Upload</span>
+                      <span class="material-symbols-outlined text-primary/40 mb-2">image</span>
+                      <span class="text-[10px] text-primary uppercase font-bold">Click to Upload</span>
                     `}
                   </div>
                 </div>
               </div>
 
-              <div class="flex gap-4">
                 <div class="space-y-2">
                   <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block">Max Prep Time (s)</label>
                   <input id="d-duration" type="number" value="${assets[0]?.duration_seconds || 60}" class="w-32 bg-secondary/5 border border-primary/20 rounded-xl py-3 px-4 text-on-surface font-headline text-center" />
+                </div>
+                <div class="space-y-2">
+                  <label class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant block">Reward (Marks)</label>
+                  <input id="d-points" type="number" value="${assets[0]?.points || 10}" class="w-32 bg-secondary/5 border border-primary/20 rounded-xl py-3 px-4 text-secondary font-headline font-black text-center" />
                 </div>
                 <div class="flex-1 flex items-end">
                   <button id="save-debate-config" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-tertiary to-primary text-on-primary-fixed font-headline font-bold text-sm tracking-widest uppercase hover:scale-[1.02] active:scale-[0.98] transition-transform">Save Debate Configuration</button>
@@ -2502,9 +2593,9 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
           <!-- LOGO LIST -->
           <div class="space-y-3 mb-8">
             ${assets.length === 0 ? '<p class="text-on-surface-variant text-center py-4">No logos added yet.</p>' : assets.map((l, i) => `
-              <div class="bg-surface-container-low p-4 rounded-xl group hover:border-primary/30 transition-colors flex items-center justify-between border border-transparent">
+              <div class="bg-primary/5 p-4 rounded-xl group hover:border-primary/30 transition-colors flex items-center justify-between border border-primary/10">
                 <div class="flex items-center gap-4">
-                  ${l.image_url ? `<img src="${l.image_url}" class="w-12 h-12 rounded-lg object-contain bg-white/5 p-1 border border-white/5 group-hover:border-primary/50 transition-all"/>` : `<div class="w-12 h-12 rounded-lg bg-surface-container-highest flex items-center justify-center"><span class="material-symbols-outlined text-on-surface-variant/40">image_not_supported</span></div>`}
+                  ${l.image_url ? `<img src="${l.image_url}" class="w-12 h-12 rounded-lg object-contain bg-surface p-1 border border-primary/10 group-hover:border-primary/50 transition-all"/>` : `<div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center"><span class="material-symbols-outlined text-primary/40">image_not_supported</span></div>`}
                   <div>
                     <div class="flex items-center gap-2">
                       <span class="text-[10px] text-primary font-black uppercase tracking-widest font-headline">${l.correct_answer}</span>
@@ -2625,20 +2716,33 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
           btn.innerHTML = 'Shuffling...';
           btn.disabled = true;
 
-          await supabase.from('question_sets').delete().eq('round_id', selectedRound.id);
-          
-          const setLabels = ['A', 'B', 'C', 'D', 'E'];
-          const qIds = assets.map(q => q.id);
-          
-          const setRecords = setLabels.map(label => {
-            const shuffled = [...qIds].sort(() => Math.random() - 0.5);
-            return { round_id: selectedRound.id, set_label: label, question_order: shuffled };
-          });
+          try {
+            // Must delete assignments first due to FK constraint
+            // Corrected to delete by round_id
+            await supabase.from('team_set_assignments').delete().eq('round_id', selectedRound.id);
+            
+            const { error: delError } = await supabase.from('question_sets').delete().eq('round_id', selectedRound.id);
+            if (delError) throw delError;
+            
+            const setLabels = ['A', 'B', 'C', 'D', 'E'];
+            const qIds = assets.map(q => q.id);
+            
+            const setRecords = setLabels.map(label => {
+              const shuffled = [...qIds].sort(() => Math.random() - 0.5);
+              return { round_id: selectedRound.id, set_label: label, question_order: shuffled };
+            });
 
-          const { error } = await supabase.from('question_sets').insert(setRecords);
-          if (error) Notifier.toast('Set Error: ' + error.message, 'error');
-          else Notifier.toast('5 Sets (A-E) generated successfully!', 'success');
-          renderTabContent('assets');
+            const { error: insError } = await supabase.from('question_sets').insert(setRecords);
+            if (insError) throw insError;
+
+            Notifier.toast('5 Sets (A-E) generated successfully!', 'success');
+            renderTabContent('assets');
+          } catch (err) {
+            console.error('Generation Error:', err);
+            Notifier.toast('Generation Failed: ' + (err.message || 'Check database policies'), 'error');
+            btn.innerHTML = 'Generate 5 Shuffled Sets';
+            btn.disabled = false;
+          }
         },
         { confirmText: 'Generate & Shuffle', icon: 'shuffle' }
       );
@@ -2720,7 +2824,8 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
               });
               doc.save(`ANSWER_KEY_${selectedRound.title.replace(/\s/g,'_')}.pdf`);
            } else {
-              const { data: setInfo } = await supabase.from('question_sets').select('*').eq('round_id', selectedRound.id).eq('set_label', setLabel).single();
+              const { data: setList } = await supabase.from('question_sets').select('*').eq('round_id', selectedRound.id).eq('set_label', setLabel);
+              const setInfo = setList?.[0];
               if (!setInfo) {
                 Notifier.toast(`Set ${setLabel} not found. Please generate sets first.`, 'error');
                 throw new Error('Set not found');
@@ -2883,6 +2988,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
       const topic = document.getElementById('d-topic').value.trim();
       const desc = document.getElementById('d-desc').value.trim();
       const duration = parseInt(document.getElementById('d-duration').value) || 60;
+      const points = parseInt(document.getElementById('d-points').value) || 10;
       if (!topic) return Notifier.toast('Debate topic is required', 'warning');
       Notifier.toast('Saving topic configuration...', 'info');
 
@@ -2892,19 +2998,31 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
         btn.innerHTML = `<span class="material-symbols-outlined animate-spin text-sm">refresh</span> Saving...`;
         btn.disabled = true;
 
-        let url = await uploadAsset('d-file');
-        const updateData = { topic, description: desc, duration_seconds: duration };
+        let url = await uploadAsset('d-file').catch(e => {
+           console.error("Asset upload failed:", e);
+           return null;
+        });
+        
+        const updateData = { topic, description: desc, duration_seconds: duration, points };
         if (url) updateData.image_url = url;
 
-        const { data: existing } = await supabase.from('debate_topics').select('id').eq('round_id', selectedRound.id).maybeSingle();
+        const { data: existing, error: fetchError } = await supabase.from('debate_topics').select('id').eq('round_id', selectedRound.id).maybeSingle();
+        if (fetchError) throw fetchError;
+
+        let result;
         if (existing) {
-          await supabase.from('debate_topics').update(updateData).eq('id', existing.id);
+          result = await supabase.from('debate_topics').update(updateData).eq('id', existing.id);
         } else {
-          await supabase.from('debate_topics').insert({ round_id: selectedRound.id, ...updateData });
+          result = await supabase.from('debate_topics').insert({ round_id: selectedRound.id, ...updateData });
         }
+
+        if (result.error) throw result.error;
+
         Notifier.toast('Debate configuration saved!', 'success');
         renderTabContent('assets');
       } catch (err) {
+        console.error('Debate Save Error:', err);
+        Notifier.toast('Save failed: ' + (err.message || 'Unknown error'), 'error');
         btn.innerHTML = originalText;
         btn.disabled = false;
       }
@@ -3090,20 +3208,38 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
       btn.innerHTML = '<span class="material-symbols-outlined animate-spin text-sm">progress_activity</span>';
       const path = `reg-banners/${event.id}-${Date.now()}-${file.name}`;
       const { data, error } = await supabase.storage.from('assets').upload(path, file, { upsert: true });
-      if (error) { alert('Upload error: ' + error.message); btn.innerHTML = '<span class="material-symbols-outlined text-sm">upload</span> Upload Banner'; return; }
+      if (error) { Notifier.toast('Upload error: ' + error.message, 'error'); btn.innerHTML = '<span class="material-symbols-outlined text-sm">upload</span> Upload Banner'; return; }
       const { data: urlData } = supabase.storage.from('assets').getPublicUrl(path);
       bannerUrl = urlData.publicUrl;
-      btn.innerHTML = '<span class="material-symbols-outlined text-sm">check_circle</span> Uploaded!';
+      
+      // AUTO-SAVE to database immediately after upload
+      const freshConfig = { ...cfg, banner_url: bannerUrl };
+      await supabase.from('events').update({ registration_config: freshConfig }).eq('id', event.id);
+      
+      btn.innerHTML = '<span class="material-symbols-outlined text-sm">check_circle</span> Saved!';
+      Notifier.toast('Banner updated and auto-saved!', 'success');
+
       // Show preview
       const previewArea = document.getElementById('reg-banner-preview-area') || document.getElementById('reg-banner-preview');
       if (previewArea) {
-        previewArea.outerHTML = `<div class="relative rounded-xl overflow-hidden h-24 bg-surface-container-lowest"><img id="reg-banner-preview" src="${bannerUrl}" class="w-full h-full object-cover" /><button id="reg-banner-remove" class="absolute top-2 right-2 w-6 h-6 bg-error/80 text-white rounded-full text-xs flex items-center justify-center hover:bg-error">×</button></div>`;
+        previewArea.outerHTML = `<div class="relative rounded-xl overflow-hidden h-24 bg-surface-container-lowest border border-primary/10 shadow-sm"><img id="reg-banner-preview" src="${bannerUrl}" class="w-full h-full object-cover" /><button id="reg-banner-remove" class="absolute top-2 right-2 w-6 h-6 bg-error/90 text-white rounded-full text-xs flex items-center justify-center hover:bg-error shadow-lg">×</button></div>`;
       }
     });
-    el.querySelector('#reg-banner-remove')?.addEventListener('click', () => {
-      bannerUrl = null;
-      const img = document.getElementById('reg-banner-preview')?.parentElement;
-      if (img) img.outerHTML = `<div id="reg-banner-preview-area" class="h-24 rounded-xl bg-surface-container-lowest flex items-center justify-center text-on-surface-variant/30 text-xs italic">No banner uploaded</div>`;
+
+    el.addEventListener('click', async (e) => {
+      if (e.target.id === 'reg-banner-remove' || e.target.closest('#reg-banner-remove')) {
+        bannerUrl = null;
+        
+        // AUTO-SAVE removal
+        const freshConfig = { ...cfg, banner_url: null };
+        await supabase.from('events').update({ registration_config: freshConfig }).eq('id', event.id);
+        Notifier.toast('Banner removed', 'info');
+
+        const previewBlock = document.getElementById('reg-banner-preview')?.parentElement || document.getElementById('reg-banner-preview-area');
+        if (previewBlock) {
+          previewBlock.outerHTML = `<div id="reg-banner-preview-area" class="h-24 rounded-xl bg-secondary/5 border border-primary/10 flex items-center justify-center text-on-surface-variant/30 text-xs italic">No banner uploaded</div>`;
+        }
+      }
     });
 
     // ---- Add field ----
@@ -3188,5 +3324,54 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
       }
     });
   }
+
+  // ========================================
+  // PREVIEW MODAL
+  // ========================================
+  function renderPreviewModal(type, team, round) {
+    const modal = document.createElement('div');
+    modal.id = 'preview-choice-modal';
+    modal.className = 'fixed inset-0 bg-surface/80 backdrop-blur-md z-[100] flex items-center justify-center p-6';
+    modal.innerHTML = `
+      <div class="glass-panel p-8 rounded-[40px] max-w-md w-full border border-primary/10 scale-in relative overflow-hidden">
+        <div class="absolute -top-20 -right-20 w-40 h-40 bg-primary/10 blur-[60px] rounded-full"></div>
+        
+        <div class="text-center space-y-6 relative z-10">
+          <div class="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center text-primary mx-auto mb-4 glow-accent">
+            <span class="material-symbols-outlined text-4xl">visibility</span>
+          </div>
+          
+          <div>
+            <h3 class="text-2xl font-headline font-bold text-on-surface uppercase tracking-tight">Enter Preview Mode</h3>
+            <p class="text-on-surface-variant text-sm mt-2 leading-relaxed">You are about to preview <span class="text-primary font-bold">${round.title}</span> as team: <span class="text-secondary font-bold">${team.team_name}</span>.</p>
+          </div>
+
+          <div class="bg-primary/5 rounded-2xl p-4 border border-primary/10 text-left space-y-2">
+            <div class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary">
+              <span class="material-symbols-outlined text-sm">shield</span> Safe Environment
+            </div>
+            <p class="text-[11px] text-on-surface-variant leading-relaxed">No data will be saved to the database. You can safely interact with the round engine as a participant.</p>
+          </div>
+
+          <div class="flex flex-col gap-3">
+             <button id="launch-preview" class="w-full py-4 rounded-2xl kinetic-gradient text-on-primary-fixed font-headline font-bold text-sm tracking-widest uppercase hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3">
+               Launch Preview Engine <span class="material-symbols-outlined text-sm">rocket_launch</span>
+             </button>
+             <button id="close-preview-modal" class="w-full py-4 rounded-2xl bg-white/5 text-on-surface-variant font-headline font-bold text-xs uppercase tracking-widest hover:bg-white/10 transition-all">Cancel</button>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+
+    const close = () => modal.remove();
+    document.getElementById('close-preview-modal').addEventListener('click', close);
+    document.getElementById('launch-preview').addEventListener('click', () => {
+      const url = `/#/round/${round.round_type}?mode=preview&roundId=${round.id}&teamId=${team.id}`;
+      window.open(url, '_blank');
+      close();
+    });
+  }
 }
+
 
