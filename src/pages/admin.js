@@ -1281,7 +1281,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
                 
                 <div class="space-y-3">
                   <!-- PRIMARY ACTIONS -->
-                  <div class="grid ${r.status === 'active' || r.status === 'paused' || r.status === 'completed' ? 'grid-cols-2' : 'grid-cols-1'} gap-2">
+                  <div class="grid ${r.status === 'active' || r.status === 'paused' ? 'grid-cols-2' : 'grid-cols-1'} gap-2">
                     ${r.status === 'pending' || !r.status ? `
                        <button class="round-ctrl flex items-center justify-center gap-2 py-3 rounded-xl kinetic-gradient text-on-primary-fixed font-headline font-bold text-[9px] uppercase tracking-widest hover:scale-[1.02] transition-all" 
                                data-round-id="${r.id}" data-round-action="start">
@@ -1306,10 +1306,6 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
                          <span class="material-symbols-outlined text-xs">done_all</span> Complete
                        </button>
                     ` : r.status === 'completed' ? `
-                       <button class="round-ctrl flex items-center justify-center gap-2 py-3 rounded-xl kinetic-gradient text-on-primary-fixed font-headline font-bold text-[9px] uppercase tracking-widest hover:scale-[1.02] transition-all" 
-                               data-round-id="${r.id}" data-round-action="manage-intel">
-                         <span class="material-symbols-outlined text-xs">analytics</span> Audit
-                       </button>
                        <button class="round-ctrl flex items-center justify-center gap-2 py-3 rounded-xl bg-error/10 text-error font-headline font-bold text-[9px] uppercase tracking-widest hover:bg-error/20 transition-all border border-error/20" 
                                data-round-id="${r.id}" data-round-action="restart">
                          <span class="material-symbols-outlined text-xs">restart_alt</span> Restart
@@ -2089,7 +2085,7 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
                       </td>
                     `;
                   }).join('')}
-                  <td class="px-5 py-3 text-center font-headline font-bold text-primary">${total}</td>
+                  <td class="team-total-score px-5 py-3 text-center font-headline font-bold text-primary">${total}</td>
                   <td class="px-5 py-3 text-center">
                     <button class="review-submission-btn w-8 h-8 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center hover:bg-secondary/20 transition-all" 
                             data-review-team="${t.id}">
@@ -2266,28 +2262,56 @@ export async function renderAdmin(container, params = {}, search = {}, mockUser 
         const roundId = e.target.dataset.roundId;
         const rawValue = e.target.value.trim();
         
-        if (rawValue === '') return;
-        
-        const score = parseFloat(rawValue);
-        if (isNaN(score)) return Notifier.toast('Enter a valid numerical score', 'error');
-
         input.classList.add('animate-pulse', 'text-primary');
-        
-        const round = rounds.find(r => r.id === roundId);
-        
-        const { error } = await supabase.from('scores').upsert({
-          team_id: teamId, 
-          round_id: roundId, 
-          score, 
-          max_score: round?.max_score || 100, 
-          evaluated_at: new Date().toISOString()
-        }, { onConflict: 'team_id,round_id' });
+
+        let error = null;
+        if (rawValue === '') {
+          // Empty input, delete the score
+          const res = await supabase.from('scores')
+            .delete()
+            .eq('team_id', teamId)
+            .eq('round_id', roundId);
+          error = res.error;
+        } else {
+          const score = parseFloat(rawValue);
+          if (isNaN(score)) {
+            input.classList.remove('animate-pulse', 'text-primary');
+            return Notifier.toast('Enter a valid numerical score', 'error');
+          }
+          const round = rounds.find(r => r.id === roundId);
+          const res = await supabase.from('scores').upsert({
+            team_id: teamId, 
+            round_id: roundId, 
+            score, 
+            max_score: round?.max_score || 100, 
+            evaluated_at: new Date().toISOString()
+          }, { onConflict: 'team_id,round_id' });
+          error = res.error;
+        }
         
         if (error) {
           Notifier.toast('Error saving score: ' + error.message, 'error');
           input.classList.remove('animate-pulse', 'text-primary');
         } else {
-          renderTabContent('scores');
+          // Local DOM update instead of full re-render
+          input.classList.remove('animate-pulse', 'text-primary');
+          if (rawValue === '') {
+            input.classList.add('opacity-40');
+          } else {
+            input.classList.remove('opacity-40');
+          }
+          
+          const row = input.closest('tr');
+          if (row) {
+            let sum = 0;
+            row.querySelectorAll('.inline-score-input').forEach(inp => {
+              const val = parseFloat(inp.value.trim());
+              if (!isNaN(val)) sum += val;
+            });
+            const totalCell = row.querySelector('.team-total-score');
+            if (totalCell) totalCell.innerText = sum;
+          }
+          
           Notifier.toast('Score saved', 'success');
         }
       });
