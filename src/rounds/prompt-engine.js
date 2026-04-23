@@ -166,7 +166,7 @@ export async function renderPromptRound(container, params, search = {}) {
     const words = textarea.value.trim().split(/\s+/).filter(w => w).length;
     wordCount.textContent = words;
   }
-  textarea.addEventListener('input', updateWordCount);
+  textarea?.addEventListener('input', updateWordCount);
   updateWordCount();
 
   // Auto-save every 5 seconds
@@ -181,7 +181,7 @@ export async function renderPromptRound(container, params, search = {}) {
   }
 
   // Submit
-  document.getElementById('submit-prompt').addEventListener('click', async () => {
+  document.getElementById('submit-prompt')?.addEventListener('click', async () => {
     const { Notifier } = await import('../services/notifier.js');
     if (!textarea.value.trim()) return Notifier.toast('Please write a prompt.', 'error');
     
