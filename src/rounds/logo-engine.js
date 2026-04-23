@@ -9,6 +9,7 @@ import { timeSync } from '../services/timeSync.js';
 import { socketService } from '../services/socket.js';
 import { Notifier } from '../services/notifier.js';
 import { pauseFooterClock, resumeFooterClock } from '../components/footer.js';
+import { ActivityBroadcast } from '../services/activity-broadcast.js';
 
 export async function renderLogoRound(container, params, search = {}, mockUser = null) {
   // Eco-Mode: Pause background processing
@@ -143,37 +144,41 @@ export async function renderLogoRound(container, params, search = {}, mockUser =
       showConfirm: true,
       confirmText: "Finalize & Submit",
       onConfirm: async () => {
-        isFinal = true;
-        
-        // Calculate synchronized time taken safely
-        const competitionStart = round.started_at ? new Date(round.started_at).getTime() : Date.now();
-        let time_taken_ms = Math.max(0, timeSync.getSyncedTime() - competitionStart);
-        if (isNaN(time_taken_ms) || !isFinite(time_taken_ms)) time_taken_ms = 0;
+        try {
+          isFinal = true;
+          
+          // Calculate synchronized time taken safely
+          const competitionStart = round.started_at ? new Date(round.started_at).getTime() : Date.now();
+          let time_taken_ms = Math.max(0, timeSync.getSyncedTime() - competitionStart);
+          if (isNaN(time_taken_ms) || !isFinite(time_taken_ms)) time_taken_ms = 0;
 
-        await supabase.from('submissions').upsert({
-          team_id: user.id, 
-          round_id: round.id, 
-          answers, 
-          is_final: true, 
-          submission_time: new Date().toISOString(),
-          time_taken_ms
-        }, { onConflict: 'team_id,round_id' });
-        
-        // Also update scores with time_taken_ms (if auto-evaluated or later)
-        // Note: Logo rounds are usually human-evaluated later, but we store the speed truth now.
-        await supabase.from('scores').upsert({
-          team_id: user.id,
-          round_id: round.id,
-          score: 0,
-          max_score: 100,
-          time_taken_ms
-        }, { onConflict: 'team_id,round_id' });
-        
-        stopAntiCheat();
-        ActivityBroadcast.push('activity', `Team "${user.team_name}" just identified all brands in Round ${round.round_number}!`);
-        Notifier.toast('Submission successful!', 'success');
-        resumeFooterClock();
-        renderPhase();
+          await supabase.from('submissions').upsert({
+            team_id: user.id, 
+            round_id: round.id, 
+            answers, 
+            is_final: true, 
+            submission_time: new Date().toISOString(),
+            time_taken_ms
+          }, { onConflict: 'team_id,round_id' });
+          
+          // Also update scores with time_taken_ms (if auto-evaluated or later)
+          // Note: Logo rounds are usually human-evaluated later, but we store the speed truth now.
+          await supabase.from('scores').upsert({
+            team_id: user.id,
+            round_id: round.id,
+            score: 0,
+            max_score: 100,
+            time_taken_ms
+          }, { onConflict: 'team_id,round_id' });
+          
+          stopAntiCheat();
+          ActivityBroadcast.push('activity', `Team "${user.team_name}" just identified all brands in Round ${round.round_number}!`);
+          Notifier.toast('Submission successful!', 'success');
+          resumeFooterClock();
+          renderPhase();
+        } catch (err) {
+          Notifier.toast('Submission error: ' + err.message, 'error');
+        }
       }
     });
   }
