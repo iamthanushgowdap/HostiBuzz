@@ -227,36 +227,11 @@ export async function renderLogoRound(container, params, search = {}, mockUser =
       return;
     }
 
-    // SLIDESHOW CALIBRATION: Sync based on absolute server start (Instant Launch)
-    const syncStart = new Date(round.started_at).getTime();
-    const now = timeSync.getSyncedTime();
-    const elapsedSec = (now - syncStart) / 1000;
-    const slideIndex = Math.floor(elapsedSec / SECONDS_PER_LOGO);
-
-    if (slideIndex >= logos.length) {
-      // Review Phase
-      if (lastRenderedPhase !== 'review') {
-        dynamicContent.innerHTML = renderList(false);
-        attachInputListeners();
-        lastRenderedPhase = 'review';
-      }
-    } else {
-      // Slideshow Phase
-      if (lastRenderedPhase !== 'slideshow' || lastSlideIndex !== slideIndex) {
-        dynamicContent.innerHTML = renderSlide(slideIndex);
-        attachInputListeners();
-        
-        // Auto-focus the new slide's input!
-        const input = document.getElementById('current-slide-input');
-        if (input) input.focus();
-
-        lastRenderedPhase = 'slideshow';
-        lastSlideIndex = slideIndex;
-      }
-      // Only update slide timer
-      const timeRem = Math.ceil(SECONDS_PER_LOGO - (elapsedSec % SECONDS_PER_LOGO));
-      const secEl = document.getElementById('slide-sec');
-      if (secEl) secEl.textContent = timeRem;
+    // Default directly to the full grid (Review Phase) instead of a slideshow
+    if (lastRenderedPhase !== 'review') {
+      dynamicContent.innerHTML = renderList(false);
+      attachInputListeners();
+      lastRenderedPhase = 'review';
     }
   }
 
@@ -311,8 +286,8 @@ export async function renderLogoRound(container, params, search = {}, mockUser =
       <div class="glass-panel p-5 mb-8 rounded-[1.5rem] bg-primary/10 border border-primary/20 flex flex-col sm:flex-row items-center justify-center gap-4 text-primary slide-in-top">
         <span class="material-symbols-outlined text-2xl animate-pulse font-black">fact_check</span>
         <div class="text-center sm:text-left">
-          <h3 class="font-headline font-black text-sm uppercase tracking-[0.2em] mb-1">Tactical Review Active</h3>
-          <p class="text-[10px] text-white/50 uppercase tracking-widest font-black leading-none">Sync remaining identifications before pulse timeout</p>
+          <h3 class="font-headline font-black text-sm uppercase tracking-[0.2em] mb-1">Tactical Identification Active</h3>
+          <p class="text-[10px] text-white/50 uppercase tracking-widest font-black leading-none">Sync identifications for all visual nodes before pulse timeout</p>
         </div>
       </div>
     `;
