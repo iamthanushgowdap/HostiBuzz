@@ -60,10 +60,10 @@ function showNotification(message) {
   notif.innerHTML = `
     <span class="material-symbols-outlined text-primary mt-0.5">campaign</span>
     <div class="flex-1">
-      <h4 class="text-xs font-headline font-bold text-white uppercase tracking-widest mb-1 text-primary">Admin Announcement</h4>
-      <p class="text-sm font-body text-white leading-relaxed font-semibold">${message}</p>
+      <h4 class="text-xs font-headline font-bold text-primary uppercase tracking-widest mb-1">Admin Announcement</h4>
+      <p class="text-sm font-body text-on-surface leading-relaxed font-semibold">${message}</p>
     </div>
-    <button class="text-on-surface-variant hover:text-white transition-colors" onclick="this.parentElement.remove()">
+    <button class="text-on-surface-variant hover:text-primary transition-colors" onclick="this.parentElement.remove()">
       <span class="material-symbols-outlined text-sm">close</span>
     </button>
   `;
