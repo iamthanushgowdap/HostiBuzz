@@ -164,8 +164,9 @@ export async function renderVideoRound(container, params, search = {}) {
     }
 
     try {
-      const competitionStart = new Date(round.started_at).getTime();
-      const time_taken_ms = Math.max(0, timeSync.getSyncedTime() - competitionStart);
+      const competitionStart = round.started_at ? new Date(round.started_at).getTime() : Date.now();
+      let time_taken_ms = Math.max(0, timeSync.getSyncedTime() - competitionStart);
+      if (isNaN(time_taken_ms) || !isFinite(time_taken_ms)) time_taken_ms = 0;
 
       const { error } = await supabase.from('submissions').upsert({
         team_id: user.id, 

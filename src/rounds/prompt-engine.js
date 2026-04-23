@@ -197,9 +197,10 @@ export async function renderPromptRound(container, params, search = {}) {
       showConfirm: true,
       confirmText: "Submit Prompt",
       onConfirm: async () => {
-        // Calculate synchronized time taken based on Instant Launch
-        const competitionStart = new Date(round.started_at).getTime();
-        const time_taken_ms = Math.max(0, timeSync.getSyncedTime() - competitionStart);
+        // Calculate synchronized time taken safely
+        const competitionStart = round.started_at ? new Date(round.started_at).getTime() : Date.now();
+        let time_taken_ms = Math.max(0, timeSync.getSyncedTime() - competitionStart);
+        if (isNaN(time_taken_ms) || !isFinite(time_taken_ms)) time_taken_ms = 0;
 
         await supabase.from('submissions').upsert({
           team_id: user.id, 
@@ -262,9 +263,10 @@ export async function renderPromptRound(container, params, search = {}) {
         onComplete: async () => {
           clearInterval(syncInterval);
           if (!existing?.is_final) {
-            // Calculate synchronized time taken based on Instant Launch
-            const competitionStart = new Date(round.started_at).getTime();
-            const time_taken_ms = Math.max(0, timeSync.getSyncedTime() - competitionStart);
+            // Calculate synchronized time taken safely
+            const competitionStart = round.started_at ? new Date(round.started_at).getTime() : Date.now();
+            let time_taken_ms = Math.max(0, timeSync.getSyncedTime() - competitionStart);
+            if (isNaN(time_taken_ms) || !isFinite(time_taken_ms)) time_taken_ms = 0;
 
             await supabase.from('submissions').upsert({ 
               team_id: user.id, 
@@ -322,8 +324,9 @@ export async function renderPromptRound(container, params, search = {}) {
         },
         onComplete: async () => {
           if (!existing?.is_final) {
-            const competitionStart = new Date(startedAt).getTime();
-            const time_taken_ms = Math.max(0, timeSync.getSyncedTime() - competitionStart);
+            const competitionStart = startedAt ? new Date(startedAt).getTime() : Date.now();
+            let time_taken_ms = Math.max(0, timeSync.getSyncedTime() - competitionStart);
+            if (isNaN(time_taken_ms) || !isFinite(time_taken_ms)) time_taken_ms = 0;
             await supabase.from('submissions').upsert({ 
               team_id: user.id, round_id: round.id, is_final: true, submission_time: new Date().toISOString(), time_taken_ms
             }, { onConflict: 'team_id,round_id' });

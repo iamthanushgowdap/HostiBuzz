@@ -145,9 +145,10 @@ export async function renderLogoRound(container, params, search = {}, mockUser =
       onConfirm: async () => {
         isFinal = true;
         
-        // Calculate synchronized time taken based on Instant Launch
-        const competitionStart = new Date(round.started_at).getTime();
-        const time_taken_ms = Math.max(0, timeSync.getSyncedTime() - competitionStart);
+        // Calculate synchronized time taken safely
+        const competitionStart = round.started_at ? new Date(round.started_at).getTime() : Date.now();
+        let time_taken_ms = Math.max(0, timeSync.getSyncedTime() - competitionStart);
+        if (isNaN(time_taken_ms) || !isFinite(time_taken_ms)) time_taken_ms = 0;
 
         await supabase.from('submissions').upsert({
           team_id: user.id, 
@@ -417,8 +418,9 @@ export async function renderLogoRound(container, params, search = {}, mockUser =
         },
         onComplete: async () => {
           isFinal = true;
-          const competitionStart = new Date(startedAt).getTime();
-          const time_taken_ms = Math.max(0, timeSync.getSyncedTime() - competitionStart);
+          const competitionStart = startedAt ? new Date(startedAt).getTime() : Date.now();
+          let time_taken_ms = Math.max(0, timeSync.getSyncedTime() - competitionStart);
+          if (isNaN(time_taken_ms) || !isFinite(time_taken_ms)) time_taken_ms = 0;
           await supabase.from('submissions').upsert({
             team_id: user.id, round_id: round.id, answers: currentAnswers, is_final: true, submission_time: new Date().toISOString(), time_taken_ms
           }, { onConflict: 'team_id,round_id' });
