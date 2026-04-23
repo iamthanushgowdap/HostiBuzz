@@ -160,6 +160,13 @@ export async function renderLogoRound(container, params, search = {}, mockUser =
         
         // Also update scores with time_taken_ms (if auto-evaluated or later)
         // Note: Logo rounds are usually human-evaluated later, but we store the speed truth now.
+        await supabase.from('scores').upsert({
+          team_id: user.id,
+          round_id: round.id,
+          score: 0,
+          max_score: 100,
+          time_taken_ms
+        }, { onConflict: 'team_id,round_id' });
         
         stopAntiCheat();
         ActivityBroadcast.push('activity', `Team "${user.team_name}" just identified all brands in Round ${round.round_number}!`);
@@ -414,6 +421,10 @@ export async function renderLogoRound(container, params, search = {}, mockUser =
           const time_taken_ms = Math.max(0, timeSync.getSyncedTime() - competitionStart);
           await supabase.from('submissions').upsert({
             team_id: user.id, round_id: round.id, answers: currentAnswers, is_final: true, submission_time: new Date().toISOString(), time_taken_ms
+          }, { onConflict: 'team_id,round_id' });
+          
+          await supabase.from('scores').upsert({
+            team_id: user.id, round_id: round.id, score: 0, max_score: 100, time_taken_ms
           }, { onConflict: 'team_id,round_id' });
           renderLogoRound(container, params, search);
         }

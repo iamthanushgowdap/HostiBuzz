@@ -210,6 +210,15 @@ export async function renderPromptRound(container, params, search = {}) {
           time_taken_ms
         }, { onConflict: 'team_id,round_id' });
         
+        // Push zero-score record so leaderboard picks up completion time immediately
+        await supabase.from('scores').upsert({
+          team_id: user.id,
+          round_id: round.id,
+          score: 0,
+          max_score: 100,
+          time_taken_ms
+        }, { onConflict: 'team_id,round_id' });
+        
         stopAntiCheat();
         ActivityBroadcast.push('activity', `Team "${user.team_name}" just submitted their AI Prompt for Round ${round.round_number}!`);
         Notifier.toast('Prompt submitted!', 'success');
@@ -266,6 +275,14 @@ export async function renderPromptRound(container, params, search = {}) {
               time_taken_ms
             }, { onConflict: 'team_id,round_id' });
             
+            await supabase.from('scores').upsert({
+              team_id: user.id,
+              round_id: round.id,
+              score: 0,
+              max_score: 100,
+              time_taken_ms
+            }, { onConflict: 'team_id,round_id' });
+            
             stopAntiCheat();
             
             // Broadcast auto-submission
@@ -309,6 +326,10 @@ export async function renderPromptRound(container, params, search = {}) {
             const time_taken_ms = Math.max(0, timeSync.getSyncedTime() - competitionStart);
             await supabase.from('submissions').upsert({ 
               team_id: user.id, round_id: round.id, is_final: true, submission_time: new Date().toISOString(), time_taken_ms
+            }, { onConflict: 'team_id,round_id' });
+            
+            await supabase.from('scores').upsert({
+              team_id: user.id, round_id: round.id, score: 0, max_score: 100, time_taken_ms
             }, { onConflict: 'team_id,round_id' });
             Notifier.toast('Time is up! Prompt finalized.', 'warning');
             renderPromptRound(container, params, search);
