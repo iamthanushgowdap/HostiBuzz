@@ -19,22 +19,28 @@ class SocketService {
   init() {
     if (this.socket) return;
 
-    // ELITE FIX: Enterprise Protocol Detection
-    const isSecure = window.location.protocol === "https:";
+    const socketUrl = import.meta.env.VITE_SOCKET_URL;
+    const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+
+    // Skip socket entirely if no URL is configured and we are not on localhost.
+    // This prevents the app from hanging on Vercel where no socket server runs.
+    if (!socketUrl && !isLocalhost) {
+      console.info('SocketService: No VITE_SOCKET_URL configured. Running in Supabase-only mode.');
+      this.disabled = true;
+      return;
+    }
+
     const host = window.location.hostname || 'localhost';
-    
-    // Choose WSS for Production, HTTP for Local
-    const socketUrl = import.meta.env.VITE_SOCKET_URL || 
-                      (isSecure ? `wss://${host}` : `http://${host}:5000`);
-    
-    console.log(`🔌 Initializing Socket on: ${socketUrl} [Secure: ${isSecure}]`);
+    const resolvedUrl = socketUrl || `http://${host}:5000`;
+
+    console.log(`🔌 Initializing Socket on: ${resolvedUrl}`);
     this.updateStatus('connecting');
 
-    this.socket = io(socketUrl, {
+    this.socket = io(resolvedUrl, {
       reconnection: true,
-      reconnectionAttempts: Infinity,
-      reconnectionDelay: 1000,
-      transports: ["websocket"] // Enforce WebSocket for performance
+      reconnectionAttempts: 5,
+      reconnectionDelay: 2000,
+      transports: ['websocket']
     });
 
     this.socket.on('connect', () => {
@@ -125,7 +131,7 @@ class SocketService {
   }
 
   emit(event, data) {
-    if (!this.socket) return;
+    if (!this.socket || this.disabled) return;
     const user = getState('user');
     const targetEventId = data.eventId || this.currentEventId || user?.event_id;
     const payload = { ...data, eventId: targetEventId };
@@ -140,6 +146,7 @@ class SocketService {
   }
 
   on(event, callback) {
+    if (this.disabled) return () => {};
     if (!this.listeners.has(event)) this.listeners.set(event, []);
     this.listeners.get(event).push(callback);
     return () => this.off(event, callback);
