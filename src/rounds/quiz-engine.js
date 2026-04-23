@@ -172,68 +172,80 @@ export async function renderQuizRound(container, params, search = {}, mockUser =
     if (isLocked) return;
     isLocked = true;
     
-    let score = 0;
-    let wrongItems = [];
-    
-    questions.forEach((q) => {
-      const rawOpts = q.options;
-      const opts = typeof rawOpts === 'string' && rawOpts.startsWith('[') ? JSON.parse(rawOpts) : (Array.isArray(rawOpts) ? rawOpts : []);
+    try {
+      let score = 0;
+      let wrongItems = [];
+      const answersObj = finalAnswers || {};
       
-      const givenIdx = finalAnswers[q.id];
-      const correctIdx = q.correct_answer;
+      questions.forEach((q) => {
+        const rawOpts = q.options;
+        const opts = typeof rawOpts === 'string' && rawOpts.startsWith('[') ? JSON.parse(rawOpts) : (Array.isArray(rawOpts) ? rawOpts : []);
+        
+        const givenIdx = answersObj[q.id];
+        const correctIdx = q.correct_answer;
 
-      if (givenIdx === correctIdx && (givenIdx !== undefined && givenIdx !== null)) {
-        score++;
-      } else {
-        wrongItems.push({
-          question: q.question_text,
-          given: (givenIdx !== undefined && givenIdx !== null && opts[givenIdx] !== undefined) ? opts[givenIdx] : 'No Answer',
-          correct: (correctIdx !== undefined && correctIdx !== null && opts[correctIdx] !== undefined) ? opts[correctIdx] : 'Unknown'
-        });
-      }
-    });
+        if (givenIdx === correctIdx && (givenIdx !== undefined && givenIdx !== null)) {
+          score++;
+        } else {
+          wrongItems.push({
+            question: q.question_text,
+            given: (givenIdx !== undefined && givenIdx !== null && opts[givenIdx] !== undefined) ? opts[givenIdx] : 'No Answer',
+            correct: (correctIdx !== undefined && correctIdx !== null && opts[correctIdx] !== undefined) ? opts[correctIdx] : 'Unknown'
+          });
+        }
+      });
 
-    const maxScore = questions.length;
-    const richNotes = JSON.stringify({
-      type: 'quiz',
-      items: wrongItems,
-      summary: wrongItems.length === 0 ? "Perfect Score: All questions answered correctly!" : null
-    });
+      const maxScore = questions.length;
+      const richNotes = JSON.stringify({
+        type: 'quiz',
+        items: wrongItems,
+        summary: wrongItems.length === 0 ? "Perfect Score: All questions answered correctly!" : null
+      });
 
-    // Calculate synchronized time taken based on Instant Launch (no offset)
-    const competitionStart = new Date(round.started_at).getTime();
-    const time_taken_ms = Math.max(0, timeSync.getSyncedTime() - competitionStart);
+      // Calculate synchronized time taken safely
+      const competitionStart = round.started_at ? new Date(round.started_at).getTime() : Date.now();
+      let time_taken_ms = Math.max(0, timeSync.getSyncedTime() - competitionStart);
+      if (isNaN(time_taken_ms) || !isFinite(time_taken_ms)) time_taken_ms = 0;
 
-    // Save final state
-    await supabase.from('submissions').upsert({
-      team_id: user.id, 
-      round_id: round.id, 
-      answers: finalAnswers, 
-      is_final: true, 
-      submission_time: new Date().toISOString(),
-      time_taken_ms
-    }, { onConflict: 'team_id,round_id' });
+      // Save final state
+      const { error: subErr } = await supabase.from('submissions').upsert({
+        team_id: user.id, 
+        round_id: round.id, 
+        answers: answersObj, 
+        is_final: true, 
+        submission_time: new Date().toISOString(),
+        time_taken_ms
+      }, { onConflict: 'team_id,round_id' });
+      if (subErr) throw subErr;
 
-    // Save score
-    await supabase.from('scores').upsert({
-      team_id: user.id, 
-      round_id: round.id, 
-      score, 
-      max_score: maxScore, 
-      auto_evaluated: true, 
-      evaluator_notes: richNotes, 
-      evaluated_at: new Date().toISOString(),
-      time_taken_ms
-    }, { onConflict: 'team_id,round_id' });
+      // Save score
+      const { error: scoreErr } = await supabase.from('scores').upsert({
+        team_id: user.id, 
+        round_id: round.id, 
+        score, 
+        max_score: maxScore, 
+        auto_evaluated: true, 
+        evaluator_notes: richNotes, 
+        evaluated_at: new Date().toISOString(),
+        time_taken_ms
+      }, { onConflict: 'team_id,round_id' });
+      if (scoreErr) throw scoreErr;
 
-    stopAntiCheat();
-    
-    // Broadcast submission to ticker
-    ActivityBroadcast.push('activity', `Team "${user.team_name}" just submitted for ${round.title}!`);
-    
-    Notifier.toast(`Quiz submitted! Result: ${score}/${maxScore}`, 'success');
-    resumeFooterClock();
-    navigate('/dashboard');
+      stopAntiCheat();
+      
+      // Broadcast submission to ticker
+      ActivityBroadcast.push('activity', `Team "${user.team_name}" just submitted for ${round.title}!`);
+      
+      const { Notifier } = await import('../services/notifier.js');
+      Notifier.toast(`Quiz submitted! Result: ${score}/${maxScore}`, 'success');
+      resumeFooterClock();
+      navigate('/dashboard');
+    } catch (err) {
+      isLocked = false;
+      console.error('Quiz Evaluation Error:', err);
+      const { Notifier } = await import('../services/notifier.js');
+      Notifier.toast('Submission error: ' + err.message, 'error');
+    }
   }
 
   // Event Delegation for All Interactions
